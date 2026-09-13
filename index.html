@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       [1] 상단 내비게이션 바 (Header & Navigation)
+       ============================================================ -->
+  <header class="navbar">
+    <div class="nav-container">
+      
+      <!-- 브랜드 로고 및 연구실 명칭 (스크립트에서 동적 주입) -->
+      <a href="index.html" class="brand-logo">
+        <div class="logo-mark"></div>
+        <div class="logo-text">
+          <span class="logo-title"></span>
+          <span class="logo-desc"></span>
+        </div>
+      </a>
+
+      <!-- 메인 메뉴 네비게이션 -->
+      <nav class="main-menu">
+        <div class="nav-item"><a href="index.html" class="main-link">Home</a><div class="sub-links"><a href="index.html">Home</a></div></div>
+        <div class="nav-item"><a href="director.html" class="main-link">Director</a><div class="sub-links"><a href="director.html">Director</a></div></div>
+        <div class="nav-item"><a href="members-current.html" class="main-link">Members</a><div class="sub-links"><a href="members-current.html">Current</a><a href="members-alumni.html">Alumni</a></div></div>
+        <div class="nav-item"><a href="publications.html" class="main-link">Publications</a><div class="sub-links"><a href="publications.html">Publications</a><a href="patents.html">Patents</a></div></div>
+        <div class="nav-item"><a href="lab-life.html" class="main-link">Lab Life</a><div class="sub-links"><a href="lab-life.html">Lab Life</a></div></div>
+        <div class="nav-item"><a href="notice.html" class="main-link">Board</a><div class="sub-links"><a href="notice.html">Notice</a><a href="news.html">News</a></div></div>
+      </nav>
+
+    </div>
+    <div class="sub-menu-bg"></div>
+  </header>
+
+  <!-- ============================================================
+       [2] 히어로 대문 배너 영역 (관리자 페이지에서 동적 연동)
+       ============================================================ -->
+  <section class="hero-section" id="home">
+    <div class="hero-bg-wrap">
+      <div class="animated-gradient-bg"></div>
+    </div>
+    <div class="hero-container">
+      <div class="hero-content-block">
+        <span class="hero-badge" id="homeHeroBadge"></span>
+        <h1 class="hero-title" id="homeHeroTitle"></h1>
+        <p class="hero-desc" id="homeHeroDesc"></p>
+        <div class="hero-actions">
+          <a href="director.html" class="btn btn-primary">Director</a>
+          <a href="members-current.html" class="btn btn-secondary">Members</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       [3] 메인 본문 컨텐츠 영역 (연구 분야, 게시판, 연구 실적)
+       ============================================================ -->
+  <main class="main-body-wrap">
+
+    <!-- 1. 주요 연구 분야 (Research Areas - 관리자 동적 연동 영역) -->
+    <section class="section-container" id="research-areas">
+      <div class="section-header-clean">
+        <h2 class="section-title-main">Research Areas</h2>
+      </div>
+
+      <!-- 자바스크립트가 관리자 등록 데이터 개수에 맞춰 카드를 동적으로 채우는 그리드 -->
+      <div class="modern-research-grid" id="homeResearchGrid">
+        <div class="empty-state-card"><p>등록된 연구 분야가 없습니다.</p></div>
+      </div>
+    </section>
+
+    <!-- 2. 게시판 (Board - Notice & News) -->
+    <section class="section-container" id="board">
+      <div class="section-header-flex">
+        <h2 class="section-title-main">Board</h2>
+        <div class="board-more-links">
+          <a href="notice.html" class="link-more">Notice &rarr;</a>
+          <a href="news.html" class="link-more">News &rarr;</a>
+        </div>
+      </div>
+
+      <!-- 자바스크립트가 데이터를 연동하여 카드를 동적으로 채우는 영역 -->
+      <div class="notice-grid" id="homeBoardContainer"></div>
+    </section>
+
+    <!-- 3. 연구실적 (Publications) -->
+    <section class="section-container" id="publications">
+      <div class="section-header-flex">
+        <h2 class="section-title-main">Publications</h2>
+        <div class="board-more-links">
+          <a href="publications.html" class="link-more">Publications &rarr;</a>
+          <a href="patents.html" class="link-more">Patents &rarr;</a>
+        </div>
+      </div>
+
+      <!-- 자바스크립트가 데이터를 연동하여 리스트를 동적으로 채우는 영역 -->
+      <div class="pub-list-wrap" id="homePubContainer"></div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       [4] 하단 푸터 영역 (정보 일괄 동기화 및 관리자 링크)
+       ============================================================ -->
+  <footer class="custom-lab-footer">
+    <div class="footer-wrap">
+      <div class="footer-grid">
+        
+        <!-- 브랜드 정보 및 연락처 -->
+        <div class="footer-col footer-col-brand">
+          <div class="footer-brand-header">
+            <div class="logo-mark"></div>
+            <div>
+              <h4 class="footer-brand-title"></h4>
+              <p class="footer-brand-sub"></p>
+            </div>
+          </div>
+
+          <!-- 현재 노출 중인 이메일 -->
+          <span>E-MAIL. sooya1105@naver.com</span>
+
+          <div class="footer-contact-chips">
+            <span style="display: none;">TEL. +82-2-000-0000</span>
+            <p class="footer-address" style="display: none;">
+              (서울특별시 특별구 연구로 123, 00관 0호)
+            </p>
+          </div>
+        </div>
+
+        <!-- 빠른 메뉴 바로가기 -->
+        <div class="footer-col footer-col-nav">
+          <div class="footer-nav-group">
+            <h5 class="footer-group-title">Navigation</h5>
+            <ul class="footer-links-list">
+              <li><a href="index.html">Home</a></li>
+              <li><a href="director.html">Director</a></li>
+              <li><a href="members-current.html">Members</a></li>
+            </ul>
+          </div>
+          <div class="footer-nav-group">
+            <h5 class="footer-group-title" style="visibility: hidden;">More</h5>
+            <ul class="footer-links-list">
+              <li><a href="publications.html">Publications</a></li>
+              <li><a href="lab-life.html">Lab Life</a></li>
+              <li><a href="notice.html">Board</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 연구 분야 태그 클라우드 -->
+        <div class="footer-col footer-col-tags">
+          <h5 class="footer-group-title">Research Focus</h5>
+          <div class="footer-tag-cloud"></div>
+        </div>
+
+      </div>
+
+      <!-- 하단 저작권 및 관리자 링크 (새 창 열기 적용 완료) -->
+      <div class="footer-bottom-bar">
+        <p class="copyright-text"></p>
+        <a href="admin.html" class="footer-admin-link" target="_blank" rel="noopener noreferrer">Admin Console &rarr;</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 공통 자바스크립트 엔진 연결 -->
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================ -->
+  <!-- [1] 상단 네비게이션 헤더 영역                                  -->
+  <!-- ============================================================ -->
+  <header class="navbar subpage-nav">
+    <div class="nav-container">
+      
+      <!-- 브랜드 로고 및 연구실 명칭 (스크립트에서 동적 주입) -->
+      <a href="index.html" class="brand-logo">
+        <div class="logo-mark"></div>
+        <div class="logo-text">
+          <span class="logo-title"></span>
+          <span class="logo-desc"></span>
+        </div>
+      </a>
+
+      <!-- 메인 메뉴 네비게이션 -->
+      <nav class="main-menu">
+        <div class="nav-item"><a href="index.html" class="main-link">Home</a><div class="sub-links"><a href="index.html">Home</a></div></div>
+        <div class="nav-item"><a href="director.html" class="main-link">Director</a><div class="sub-links"><a href="director.html">Director</a></div></div>
+        <div class="nav-item"><a href="members-current.html" class="main-link">Members</a><div class="sub-links"><a href="members-current.html">Current</a><a href="members-alumni.html">Alumni</a></div></div>
+        <div class="nav-item"><a href="publications.html" class="main-link">Publications</a><div class="sub-links"><a href="publications.html">Publications</a><a href="patents.html">Patents</a></div></div>
+        <div class="nav-item"><a href="lab-life.html" class="main-link">Lab Life</a><div class="sub-links"><a href="lab-life.html">Lab Life</a></div></div>
+        <div class="nav-item"><a href="notice.html" class="main-link">Board</a><div class="sub-links"><a href="notice.html">Notice</a><a href="news.html">News</a></div></div>
+      </nav>
+
+    </div>
+    <div class="sub-menu-bg"></div>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- [2] 메인 본문 컨텐츠 영역 (Publications 리스트 및 검색 툴바)   -->
+  <!-- ============================================================ -->
+  <main class="page-body">
+    
+    <!-- 페이지 대제목 배너 -->
+    <div class="subpage-header">
+      <h1 class="subpage-title">Publications</h1>
+    </div>
+
+    <!-- 서브 스티키 탭 메뉴 (Publications / Patents 이동) -->
+    <nav class="sticky-subbar" id="stickySubbar">
+      <div class="sticky-subbar-inner">
+        <div class="subbar-left">
+          <span class="subbar-category-tag">RESEARCH</span>
+          <span class="subbar-divider-arrow">&rsaquo;</span>
+          <div class="subbar-menu-tabs">
+            <a href="publications.html" class="subbar-tab-link active">Publications</a>
+            <span class="subbar-tab-sep">|</span>
+            <a href="patents.html" class="subbar-tab-link">Patents</a>
+          </div>
+        </div>
+        <button type="button" class="subbar-top-btn" id="scrollTopBtn" title="최상단으로 이동">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+          <span>TOP</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- 본문 컨테이너 (검색바 및 논문 리스트) -->
+    <div class="section-container">
+      
+      <!-- 검색 툴바 영역 -->
+      <div class="toolbar-box">
+        <div class="search-bar-combo" id="customSearchCombo">
+          
+          <!-- 커스텀 셀렉트 드롭다운 -->
+          <div class="custom-select-wrap" id="customSelectWrap">
+            <button type="button" class="custom-select-toggle" id="customSelectToggle">
+              <span id="customSelectedLabel">제목</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="custom-select-options" id="customSelectOptions" style="display: none;">
+              <li data-value="all">전체</li>
+              <li data-value="title" class="selected">제목</li>
+              <li data-value="author">저자명</li>
+              <li data-value="journal">저널명</li>
+            </ul>
+          </div>
+
+          <input type="hidden" id="searchSelectValue" value="title" />
+          <input type="text" id="pubSearchInput" class="search-input" placeholder="논문 검색어를 입력하세요." />
+          
+          <button type="button" id="pubSearchBtn" class="search-btn" aria-label="검색">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 자바스크립트가 논문 목록을 동적으로 채우는 영역 -->
+      <div class="pub-list-wrap" id="pubListContainer">
+        <div class="empty-state-card">
+          <p>등록된 논문이 없습니다.</p>
+        </div>
+      </div>
+
+      <!-- 페이지네이션 영역 -->
+      <div class="pagination-wrap" id="pubPagination"></div>
+
+    </div>
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- [3] 하단 푸터 영역 (전체 페이지 통일 표준 버전)                -->
+  <!-- ============================================================ -->
+  <footer class="custom-lab-footer">
+    <div class="footer-wrap">
+      <div class="footer-grid">
+        
+        <!-- 브랜드 정보 및 연락처 -->
+        <div class="footer-col footer-col-brand">
+          <div class="footer-brand-header">
+            <div class="logo-mark"></div>
+            <div>
+              <h4 class="footer-brand-title"></h4>
+              <p class="footer-brand-sub"></p>
+            </div>
+          </div>
+
+          <!-- 현재 노출 중인 이메일 -->
+          <span>E-MAIL. sooya1105@naver.com</span>
+
+          <div class="footer-contact-chips">
+            <!-- [안내] 전화번호를 나중에 띄우려면 style="display: none;" 을 지워주세요 -->
+            <span style="display: none;">TEL. +82-</span>
+          
+            <!-- [안내] 주소를 나중에 띄우려면 style="display: none;" 을 지워주세요 -->
+            <p class="footer-address" style="display: none;">
+              (서울특별시 특별구 연구로 123, 00관 0호)
+            </p>
+          </div>
+        </div>
+
+        <!-- 빠른 메뉴 바로가기 -->
+        <div class="footer-col footer-col-nav">
+          <div class="footer-nav-group">
+            <h5 class="footer-group-title">Navigation</h5>
+            <ul class="footer-links-list">
+              <li><a href="index.html">Home</a></li>
+              <li><a href="director.html">Director</a></li>
+              <li><a href="members-current.html">Members</a></li>
+            </ul>
+          </div>
+          <div class="footer-nav-group">
+            <h5 class="footer-group-title" style="visibility: hidden;">More</h5>
+            <ul class="footer-links-list">
+              <li><a href="publications.html">Publications</a></li>
+              <li><a href="lab-life.html">Lab Life</a></li>
+              <li><a href="notice.html">Board</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 연구 분야 태그 클라우드 -->
+        <div class="footer-col footer-col-tags">
+          <h5 class="footer-group-title">Research Focus</h5>
+          <div class="footer-tag-cloud"></div>
+        </div>
+
+      </div>
+
+      <!-- 하단 저작권 및 관리자 링크 (새 창 열기 적용 완료) -->
+      <div class="footer-bottom-bar">
+        <p class="copyright-text"></p>
+        <a href="admin.html" class="footer-admin-link" target="_blank" rel="noopener noreferrer">Admin Console &rarr;</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 공통 자바스크립트 엔진 연결 -->
+  <script src="script.js"></script>
+</body>
+</html>

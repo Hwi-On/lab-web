@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       [1] 상단 내비게이션 바 (Header & Navigation)
+       ============================================================ -->
+  <header class="navbar subpage-nav">
+    <div class="nav-container">
+      
+      <!-- 브랜드 로고 및 연구실 명칭 (스크립트에서 동적 주입) -->
+      <a href="index.html" class="brand-logo">
+        <div class="logo-mark"></div>
+        <div class="logo-text">
+          <span class="logo-title"></span>
+          <span class="logo-desc"></span>
+        </div>
+      </a>
+
+      <!-- 메인 메뉴 네비게이션 -->
+      <nav class="main-menu">
+        <div class="nav-item"><a href="index.html" class="main-link">Home</a><div class="sub-links"><a href="index.html">Home</a></div></div>
+        <div class="nav-item"><a href="director.html" class="main-link">Director</a><div class="sub-links"><a href="director.html">Director</a></div></div>
+        <div class="nav-item"><a href="members-current.html" class="main-link">Members</a><div class="sub-links"><a href="members-current.html">Current</a><a href="members-alumni.html">Alumni</a></div></div>
+        <div class="nav-item"><a href="publications.html" class="main-link">Publications</a><div class="sub-links"><a href="publications.html">Publications</a><a href="patents.html">Patents</a></div></div>
+        <div class="nav-item"><a href="lab-life.html" class="main-link">Lab Life</a><div class="sub-links"><a href="lab-life.html">Lab Life</a></div></div>
+        <div class="nav-item"><a href="notice.html" class="main-link">Board</a><div class="sub-links"><a href="notice.html">Notice</a><a href="news.html">News</a></div></div>
+      </nav>
+
+    </div>
+    <div class="sub-menu-bg"></div>
+  </header>
+
+  <!-- ============================================================
+       [2] 메인 본문 컨텐츠 영역 (게시물 상세 내용 및 갤러리)
+       ============================================================ -->
+  <main class="page-body">
+    
+    <!-- 서브페이지 대제목 배너 (자바스크립트가 카테고리에 맞춰 자동 변경) -->
+    <div class="subpage-header">
+      <h1 class="subpage-title" id="viewPageCategory">Board Details</h1>
+    </div>
+
+    <!-- 상세 내용 컨테이너 -->
+    <div class="section-container">
+      <div class="board-view-container">
+        
+        <!-- 게시물 상단 타이틀 및 메타 정보 박스 -->
+        <div class="view-header-box">
+          <span class="view-category-badge" id="viewBadge">NOTICE</span>
+          <h2 class="view-title" id="viewTitle">로딩 중...</h2>
+          <div class="view-meta-info">
+            <span><strong>작성일:</strong> <span id="viewDate">-</span></span>
+            <span><strong>조회수:</strong> <span id="viewViews">1</span></span>
+          </div>
+        </div>
+
+        <!-- 이미지 갤러리 영역 (#viewImagesGallery) -->
+        <div class="view-images-gallery" id="viewImagesGallery" style="display: none;"></div>
+
+        <!-- 본문 내용 영역 (#viewContent) -->
+        <div class="view-content-box" id="viewContent">
+          내용을 불러오는 중입니다...
+        </div>
+
+        <!-- 하단 액션 버튼 (목록으로 돌아가기) -->
+        <div class="view-footer-actions">
+          <button type="button" class="btn btn-secondary" onclick="history.back()">&lsaquo; 목록으로</button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       [3] 하단 푸터 영역 (Footer & Admin Console Link)
+       ============================================================ -->
+  <footer class="custom-lab-footer">
+    <div class="footer-wrap">
+      <div class="footer-grid">
+        
+        <!-- 브랜드 정보 및 연락처 -->
+        <div class="footer-col footer-col-brand">
+          <div class="footer-brand-header">
+            <div class="logo-mark"></div>
+            <div>
+              <h4 class="footer-brand-title"></h4>
+              <p class="footer-brand-sub"></p>
+            </div>
+          </div>
+
+          <p class="footer-address" style="display: none;">주소</p>
+
+          <div class="footer-contact-chips">
+            <span style="display: none;">TEL. +82-64-000-0000</span>
+            <span>E-MAIL. sooya1105@naver.com</span>
+          </div>
+        </div>
+
+        <!-- 빠른 메뉴 바로가기 -->
+        <div class="footer-col footer-col-nav">
+          <div class="footer-nav-group">
+            <h5 class="footer-group-title">Navigation</h5>
+            <ul class="footer-links-list">
+              <li><a href="index.html">Home</a></li>
+              <li><a href="director.html">Director</a></li>
+              <li><a href="members-current.html">Members</a></li>
+            </ul>
+          </div>
+          <div class="footer-nav-group">
+            <h5 class="footer-group-title" style="visibility: hidden;">More</h5>
+            <ul class="footer-links-list">
+              <li><a href="publications.html">Publications</a></li>
+              <li><a href="lab-life.html">Lab Life</a></li>
+              <li><a href="notice.html">Board</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 연구 분야 태그 클라우드 -->
+        <div class="footer-col footer-col-tags">
+          <h5 class="footer-group-title">Research Focus</h5>
+          <div class="footer-tag-cloud"></div>
+        </div>
+
+      </div>
+
+      <!-- 하단 저작권 및 관리자 링크 (새 창 열기 적용 완료) -->
+      <div class="footer-bottom-bar">
+        <p class="copyright-text"></p>
+        <a href="admin.html" class="footer-admin-link" target="_blank" rel="noopener noreferrer">Admin Console &rarr;</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
