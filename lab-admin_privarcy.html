@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <!-- 상단 네비게이션 -->
+  <!-- 관리자 페이지 전용 깔끔한 헤더 -->
   <header class="navbar subpage-nav">
     <div class="nav-container">
       <a href="index.html" class="brand-logo">
@@ -18,50 +18,43 @@
           <span class="logo-desc"></span>
         </div>
       </a>
-      <nav class="main-menu">
-        <div class="nav-item"><a href="index.html" class="main-link">Home</a></div>
-        <div class="nav-item"><a href="director.html" class="main-link">Director</a></div>
-        <div class="nav-item"><a href="members-current.html" class="main-link">Members</a></div>
-        <div class="nav-item"><a href="publications.html" class="main-link">Publications</a></div>
-        <div class="nav-item"><a href="lab-life.html" class="main-link">Lab Life</a></div>
-        <div class="nav-item"><a href="notice.html" class="main-link">Board</a></div>
-      </nav>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <a href="index.html" class="btn-primary" style="padding: 6px 14px; font-size: 0.85rem; text-decoration: none;">Homepage &rarr;</a>
-        <button id="adminLogoutBtn" class="btn-primary" style="display: none; background: #ef4444; padding: 6px 14px; font-size: 0.85rem;">Logout</button>
+      <!-- 불필요한 메인 메뉴 대신 관리자용 액션 버튼들 배치 -->
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="index.html" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none; border-radius: 6px;">홈페이지로 가기 &rarr;</a>
+        <button id="adminLogoutBtn" class="btn-primary" style="display: none; background: #ef4444; border: none; padding: 8px 16px; font-size: 0.85rem; border-radius: 6px; cursor: pointer; color: #ffffff; font-weight: 700;">로그아웃</button>
       </div>
     </div>
   </header>
 
   <main class="page-body" style="padding-top: 60px; padding-bottom: 80px;">
     <div class="subpage-header">
-      <h1 class="subpage-title">Admin</h1>
+      <h1 class="subpage-title">Admin Management</h1>
     </div>
 
-    <!-- 1. 로그인 인증 박스 (중복 제거 및 이메일/비밀번호 정돈 버전) -->
-    <div id="adminAuthBox" style="max-width: 480px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+    <!-- 1. 관리자 로그인 인증 박스 -->
+    <div id="adminAuthBox" style="max-width: 480px; margin: 40px auto; background: #fff; padding: 36px; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
       <form id="adminLoginForm" class="admin-login-form">
-        <div class="form-group" style="text-align: center;">
-          <h3 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 4px;">관리자 인증</h3>
-          <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 20px;">연구실 콘텐츠를 관리하려면 관리자 계정 정보를 입력하세요.</p>
+        <div class="form-group" style="text-align: center; margin-bottom: 20px;">
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">관리자 인증</h3>
+          <p style="font-size: 0.84rem; color: #64748b; margin-bottom: 20px;">연구실 콘텐츠를 관리하려면 계정 정보를 입력하세요.</p>
           
-          <div style="text-align: left; margin-bottom: 12px;">
-            <label style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">관리자 이메일</label>
-            <input type="email" id="adminEmailInput" placeholder="labadmin@privarcy.com" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;" />
+          <div style="text-align: left; margin-bottom: 14px;">
+            <label style="font-size: 0.8rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">관리자 이메일</label>
+            <input type="email" id="adminEmailInput" placeholder="이메일을 입력하세요" required style="width: 100%; height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none; background: #fff; color: #111827;" />
           </div>
 
-          <div style="text-align: left; margin-bottom: 20px;">
-            <label style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">비밀번호</label>
-            <input type="password" id="adminPasswordInput" placeholder="비밀번호 입력" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;" />
+          <div style="text-align: left; margin-bottom: 6px;">
+            <label style="font-size: 0.8rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">비밀번호</label>
+            <input type="password" id="adminPasswordInput" placeholder="비밀번호 입력" required style="width: 100%; height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none; background: #fff; color: #111827;" />
           </div>
         </div>
-        <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 600; border-radius: 6px; cursor: pointer;">관리자 로그인</button>
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 6px; cursor: pointer; border: none;">관리자 로그인</button>
       </form>
     </div>
 
     <!-- 2. 관리자 대시보드 패널 (로그인 성공 시 노출) -->
-    <div id="adminPanelBox" style="display: none; max-width: 1100px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-      <div class="admin-tabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;">
+    <div id="adminPanelBox" style="display: none; max-width: 1200px; margin: 0 auto; background: #fff; padding: 36px; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+      <div class="admin-nav-tabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;">
         <button type="button" class="admin-tab-btn active" data-tab="tabHome">Home 제어</button>
         <button type="button" class="admin-tab-btn" data-tab="tabDirector">Director</button>
         <button type="button" class="admin-tab-btn" data-tab="tabMembers">Members</button>
@@ -71,17 +64,60 @@
         <button type="button" class="admin-tab-btn" data-tab="tabNews">News</button>
       </div>
 
-      <!-- 각 탭 콘텐츠 영역들 (기존 구조 유지) -->
+      <!-- 탭 컨텐츠 영역들 -->
       <div id="tabHome" class="admin-tab-content active">
-        <h3 style="margin-bottom: 15px; font-size: 1.1rem; font-weight: 700;">Home 히어로 배너 관리</h3>
-        <form id="formAdminHomeHero">
-          <div style="margin-bottom: 12px;"><label style="font-size:0.85rem; font-weight:600;">상단 뱃지 텍스트</label><input type="text" id="admHomeBadge" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:4px;" /></div>
-          <div style="margin-bottom: 12px;"><label style="font-size:0.85rem; font-weight:600;">메인 대제목</label><input type="text" id="admHomeTitle" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:4px;" /></div>
-          <div style="margin-bottom: 15px;"><label style="font-size:0.85rem; font-weight:600;">서브 소개 문구</label><textarea id="admHomeDesc" rows="3" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:4px;"></textarea></div>
-          <button type="submit" class="btn-primary" style="padding: 8px 16px;">히어로 배너 저장</button>
-        </form>
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">Home 히어로 배너 관리</h3>
+          <form id="formAdminHomeHero">
+            <div class="form-group"><label>상단 뱃지 텍스트</label><input type="text" id="admHomeBadge" /></div>
+            <div class="form-group"><label>메인 대제목</label><input type="text" id="admHomeTitle" /></div>
+            <div class="form-group"><label>서브 소개 문구</label><textarea id="admHomeDesc" class="admin-textarea" rows="3"></textarea></div>
+            <button type="submit" class="btn-primary" style="padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700;">히어로 배너 저장</button>
+          </form>
+        </div>
       </div>
-      <!-- (나머지 탭들도 기존 작동 구조 그대로 유지) -->
+
+      <div id="tabDirector" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">Director 프로필 및 CV 관리</h3>
+          <!-- Director 폼 내용 -->
+        </div>
+      </div>
+
+      <div id="tabMembers" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">Current & Alumni 멤버 관리</h3>
+          <!-- Members 폼 내용 -->
+        </div>
+      </div>
+
+      <div id="tabPubs" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">Publications & Patents 관리</h3>
+          <!-- Publications 폼 내용 -->
+        </div>
+      </div>
+
+      <div id="tabLabLife" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">Lab Life 활동 관리</h3>
+          <!-- Lab Life 폼 내용 -->
+        </div>
+      </div>
+
+      <div id="tabNotices" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">Notice 공지사항 관리</h3>
+          <!-- Notices 폼 내용 -->
+        </div>
+      </div>
+
+      <div id="tabNews" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">News 소식 관리</h3>
+          <!-- News 폼 내용 -->
+        </div>
+      </div>
     </div>
   </main>
 
