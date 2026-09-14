@@ -53,23 +53,23 @@
     </nav>
 
     <div class="section-container">
-      <!-- Publications와 완전히 동일한 고품격 검색바 디자인 적용 -->
+      <!-- 검색바 영역 -->
       <div class="pub-search-box">
-        <div class="custom-select-wrapper">
-          <div class="custom-select-toggle" id="customSelectToggle">
+        <div class="custom-select-wrap">
+          <button type="button" class="custom-select-toggle" id="customSelectToggle">
             <span id="customSelectedLabel">전체</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <ul class="custom-select-options" id="customSelectOptions">
+          </button>
+          <ul class="custom-select-options" id="customSelectOptions" style="display: none;">
             <li data-value="all" class="selected">전체</li>
             <li data-value="title">제목</li>
             <li data-value="author">내용</li>
           </ul>
           <input type="hidden" id="searchSelectValue" value="all">
         </div>
-        <div class="pub-search-input-wrap">
-          <input type="text" id="noticeSearchInput" placeholder="공지사항 검색어를 입력하세요..." />
-          <button type="button" id="noticeSearchBtn" class="pub-search-btn" title="검색">
+        <div class="search-bar-combo" style="max-width: 380px !important;">
+          <input type="text" id="noticeSearchInput" class="search-input" placeholder="공지사항 검색어를 입력하세요..." />
+          <button type="button" id="noticeSearchBtn" class="search-btn" title="검색">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </button>
         </div>

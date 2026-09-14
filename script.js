@@ -22,7 +22,9 @@ let closeTimer = null;
 
 function openMenu() {
   clearTimeout(closeTimer);
-  if (navbar) navbar.classList.add('menu-open');
+  if (navbar && !window.location.pathname.includes('admin') && !window.location.pathname.includes('lab-admin')) {
+    navbar.classList.add('menu-open');
+  }
 }
 
 function closeMenu() {
@@ -56,14 +58,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const navContainer = document.querySelector('.nav-container');
     
     if (navContainer && !document.querySelector('.mobile-menu-toggle')) {
-      const toggleBtn = document.createElement('button');
-      toggleBtn.className = 'mobile-menu-toggle';
-      toggleBtn.innerHTML = '<span></span><span></span><span></span>';
-      navContainer.appendChild(toggleBtn);
+      const toggleBtn = document.querySelector('.mobile-menu-toggle') || document.createElement('button');
+      if (!toggleBtn.className) {
+        toggleBtn.className = 'mobile-menu-toggle';
+        toggleBtn.innerHTML = '<span></span><span></span><span></span>';
+        navContainer.appendChild(toggleBtn);
+      }
 
-      const backdrop = document.createElement('div');
-      backdrop.className = 'mobile-backdrop';
-      document.body.appendChild(backdrop);
+      const backdrop = document.querySelector('.mobile-backdrop') || document.createElement('div');
+      if (!backdrop.className) {
+        backdrop.className = 'mobile-backdrop';
+        document.body.appendChild(backdrop);
+      }
 
       toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -222,6 +228,8 @@ class UnifiedAdminApp {
     this.panelBox = document.getElementById('adminPanelBox');
     this.loginForm = document.getElementById('adminLoginForm');
     this.logoutBtn = document.getElementById('adminLogoutBtn');
+    this.logoutLinkMobile = document.getElementById('adminLogoutLinkMobile');
+    this.logoutMobileItem = document.getElementById('adminMobileLogoutItem');
 
     if (!this.authBox) return;
 
@@ -244,7 +252,7 @@ class UnifiedAdminApp {
         e.preventDefault();
         const emailInput = document.getElementById('adminEmailInput');
         const pwdInput = document.getElementById('adminPasswordInput');
-        const email = emailInput ? emailInput.value.trim() : "labadmin@privarcy.com";
+        const email = emailInput ? emailInput.value.trim() : "";
         const pwd = pwdInput ? pwdInput.value.trim() : "";
         
         const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -255,26 +263,31 @@ class UnifiedAdminApp {
         if (!error && data) {
           this.showAdminPanel();
         } else {
-          alert('관리자 로그인 실패: 이메일 또는 비밀번호를 확인해주세요.');
+          alert('관리자 로그인 실패: 이메일 또는 비밀번호를 다시 확인해주세요.');
         }
       });
     }
 
     const handleLogout = async () => {
       await supabaseClient.auth.signOut();
-      sessionStorage.removeItem('lab_admin_authenticated');
       this.showLoginForm();
       alert('로그아웃 되었습니다.');
     };
 
     if (this.logoutBtn) this.logoutBtn.addEventListener('click', handleLogout);
+    if (this.logoutLinkMobile) {
+      this.logoutLinkMobile.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleLogout();
+      });
+    }
   }
 
   showAdminPanel() {
-    sessionStorage.setItem('lab_admin_authenticated', 'true');
     if (this.authBox) this.authBox.style.display = 'none';
     if (this.panelBox) this.panelBox.style.display = 'block';
     if (this.logoutBtn) this.logoutBtn.style.display = 'inline-block';
+    if (this.logoutMobileItem) this.logoutMobileItem.style.display = 'block';
     this.renderAll();
   }
 
@@ -282,6 +295,7 @@ class UnifiedAdminApp {
     if (this.authBox) this.authBox.style.display = 'block';
     if (this.panelBox) this.panelBox.style.display = 'none';
     if (this.logoutBtn) this.logoutBtn.style.display = 'none';
+    if (this.logoutMobileItem) this.logoutMobileItem.style.display = 'none';
   }
 
   initTabs() {
@@ -1530,7 +1544,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 3. Lab Life (검색 연동 완료)
+  // 3. Lab Life
   new DedicatedGenericViewer({
     tableName: 'lab_life',
     containerId: 'lablifeListContainer', paginationId: 'lablifePagination',
@@ -1545,7 +1559,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 4. Notice (검색 연동 완료)
+  // 4. Notice
   new DedicatedGenericViewer({
     tableName: 'notices',
     containerId: 'noticeTableBody', paginationId: 'noticePagination',
@@ -1559,7 +1573,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 5. News (검색 연동 완료)
+  // 5. News
   new DedicatedGenericViewer({
     tableName: 'news',
     containerId: 'newsListContainer', paginationId: 'newsPagination',
