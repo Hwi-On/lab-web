@@ -53,59 +53,37 @@ if (subLinks.length > 0) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.location.pathname.includes('admin') || window.location.pathname.includes('lab-admin')) {
-    const navbarEl = document.querySelector('.navbar');
-    const navContainer = document.querySelector('.nav-container');
-    
-    if (navContainer && !document.querySelector('.mobile-menu-toggle')) {
-      const toggleBtn = document.querySelector('.mobile-menu-toggle') || document.createElement('button');
-      if (!toggleBtn.className) {
-        toggleBtn.className = 'mobile-menu-toggle';
-        toggleBtn.innerHTML = '<span></span><span></span><span></span>';
-        navContainer.appendChild(toggleBtn);
-      }
+  const navContainer = document.querySelector('.nav-container');
+  if (navContainer && !document.querySelector('.mobile-menu-toggle')) {
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'mobile-menu-toggle';
+    toggleBtn.innerHTML = '<span></span><span></span><span></span>';
+    navContainer.appendChild(toggleBtn);
 
-      const backdrop = document.querySelector('.mobile-backdrop') || document.createElement('div');
-      if (!backdrop.className) {
-        backdrop.className = 'mobile-backdrop';
-        document.body.appendChild(backdrop);
-      }
+    const backdrop = document.createElement('div');
+    backdrop.className = 'mobile-backdrop';
+    document.body.appendChild(backdrop);
 
-      toggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (navbarEl) navbarEl.classList.toggle('mobile-open');
-        backdrop.classList.toggle('active');
-      });
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (navbar) navbar.classList.toggle('mobile-open');
+      backdrop.classList.toggle('active');
+    });
 
-      backdrop.addEventListener('click', () => {
-        if (navbarEl) navbarEl.classList.remove('mobile-open');
-        backdrop.classList.remove('active');
-      });
-    }
-  } else {
-    const navContainer = document.querySelector('.nav-container');
-    if (navContainer && !document.querySelector('.mobile-menu-toggle')) {
-      const toggleBtn = document.createElement('button');
-      toggleBtn.className = 'mobile-menu-toggle';
-      toggleBtn.innerHTML = '<span></span><span></span><span></span>';
-      navContainer.appendChild(toggleBtn);
-
-      const backdrop = document.createElement('div');
-      backdrop.className = 'mobile-backdrop';
-      document.body.appendChild(backdrop);
-
-      toggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (navbar) navbar.classList.toggle('mobile-open');
-        backdrop.classList.toggle('active');
-      });
-
-      backdrop.addEventListener('click', () => {
-        if (navbar) navbar.classList.remove('mobile-open');
-        backdrop.classList.remove('active');
-      });
-    }
+    backdrop.addEventListener('click', () => {
+      if (navbar) navbar.classList.remove('mobile-open');
+      backdrop.classList.remove('active');
+    });
   }
+
+  const mobileMenuLinks = document.querySelectorAll('.main-menu a, .admin-mobile-menu a');
+  mobileMenuLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (navbar) navbar.classList.remove('mobile-open');
+      const backdrop = document.querySelector('.mobile-backdrop');
+      if (backdrop) backdrop.classList.remove('active');
+    });
+  });
 
   const customToggle = document.getElementById('customSelectToggle');
   const customOptions = document.getElementById('customSelectOptions');
@@ -228,8 +206,16 @@ class UnifiedAdminApp {
     this.panelBox = document.getElementById('adminPanelBox');
     this.loginForm = document.getElementById('adminLoginForm');
     this.logoutBtn = document.getElementById('adminLogoutBtn');
-    this.logoutLinkMobile = document.getElementById('adminLogoutLinkMobile');
-    this.logoutMobileItem = document.getElementById('adminMobileLogoutItem');
+
+    this.editResId = null;
+    this.editEduId = null;
+    this.editExpId = null;
+    this.editNoticeId = null;
+    this.editNewsId = null;
+    this.editCurrentId = null;
+    this.editAlumniId = null;
+    this.editPubId = null;
+    this.editLabLifeId = null;
 
     if (!this.authBox) return;
 
@@ -270,24 +256,19 @@ class UnifiedAdminApp {
 
     const handleLogout = async () => {
       await supabaseClient.auth.signOut();
+      sessionStorage.removeItem('lab_admin_authenticated');
       this.showLoginForm();
       alert('로그아웃 되었습니다.');
     };
 
     if (this.logoutBtn) this.logoutBtn.addEventListener('click', handleLogout);
-    if (this.logoutLinkMobile) {
-      this.logoutLinkMobile.addEventListener('click', (e) => {
-        e.preventDefault();
-        handleLogout();
-      });
-    }
   }
 
   showAdminPanel() {
+    sessionStorage.setItem('lab_admin_authenticated', 'true');
     if (this.authBox) this.authBox.style.display = 'none';
     if (this.panelBox) this.panelBox.style.display = 'block';
     if (this.logoutBtn) this.logoutBtn.style.display = 'inline-block';
-    if (this.logoutMobileItem) this.logoutMobileItem.style.display = 'block';
     this.renderAll();
   }
 
@@ -295,7 +276,6 @@ class UnifiedAdminApp {
     if (this.authBox) this.authBox.style.display = 'block';
     if (this.panelBox) this.panelBox.style.display = 'none';
     if (this.logoutBtn) this.logoutBtn.style.display = 'none';
-    if (this.logoutMobileItem) this.logoutMobileItem.style.display = 'none';
   }
 
   initTabs() {
@@ -1448,13 +1428,23 @@ class DedicatedGenericViewer {
     this.container.innerHTML = '';
     const emptyMsg = this.tableName === 'publications' ? (this.targetType === 'patent' ? '등록된 특허가 없습니다.' : '등록된 논문이 없습니다.') : '등록된 게시물이 없습니다.';
     
+    const isTbody = this.container.tagName === 'TBODY';
+
     if (this.baseList.length === 0) { 
-      this.container.innerHTML = `<div class="empty-state-card" style="grid-column:1/-1;"><p>${emptyMsg}</p></div>`; 
+      if (isTbody) {
+        this.container.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 40px; color: #475569;">${emptyMsg}</td></tr>`;
+      } else {
+        this.container.innerHTML = `<div class="empty-state-card" style="grid-column:1/-1;"><p>${emptyMsg}</p></div>`; 
+      }
       if (this.paginationContainer) this.paginationContainer.innerHTML = ''; 
       return; 
     }
     if (this.filteredList.length === 0) { 
-      this.container.innerHTML = '<div class="empty-state-card" style="grid-column:1/-1;"><p>검색 조건과 일치하는 항목이 없습니다.</p></div>'; 
+      if (isTbody) {
+        this.container.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 40px; color: #475569;">검색 조건과 일치하는 항목이 없습니다.</td></tr>`;
+      } else {
+        this.container.innerHTML = '<div class="empty-state-card" style="grid-column:1/-1;"><p>검색 조건과 일치하는 항목이 없습니다.</p></div>'; 
+      }
       if (this.paginationContainer) this.paginationContainer.innerHTML = ''; 
       return; 
     }
