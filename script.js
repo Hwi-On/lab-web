@@ -1404,7 +1404,7 @@ class DedicatedGenericViewer {
 
   filterData() {
     const keyword = this.searchInput ? this.searchInput.value.trim().toLowerCase() : '';
-    const filterType = this.selectEl ? this.selectEl.value : 'all';
+    const filterType = this.selectEl ? this.selectEl.value : 'title';
 
     if (!keyword) {
       this.filteredList = [...this.baseList];
