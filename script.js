@@ -1033,7 +1033,7 @@ class UnifiedAdminApp {
   async renderNews() {
     const tbody = document.getElementById('tableBodyNews');
     if (!tbody) return;
-    const { data: list } = await supabaseClient.from('news').select('*').order('id', { ascending: false });
+    const { data: list } = await supabaseClient.from('news').select('*').order('id', { ascending: true });
     tbody.innerHTML = '';
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">등록된 뉴스가 없습니다.</td></tr>';
@@ -1257,7 +1257,7 @@ async function syncPublicPagesInternal() {
           if (!eduList || eduList.length === 0) {
             wrap.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 학력 정보가 없습니다.</p></div>';
           } else {
-            eduList.slice().reverse().forEach(item => {
+            eduList.forEach(item => {
               const row = document.createElement('div'); row.className = 'edu-row';
               row.innerHTML = `<div class="edu-period"><span class="edu-badge">${escapeHtml(item.period)}</span></div><div class="edu-details"><span class="edu-degree">${escapeHtml(item.degree)}</span><span class="edu-sep">/</span><span class="edu-institution">${escapeHtml(item.inst)}</span></div>`;
               wrap.appendChild(row);
@@ -1269,7 +1269,7 @@ async function syncPublicPagesInternal() {
           if (!expList || expList.length === 0) {
             wrap.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 경력 및 활동 정보가 없습니다.</p></div>';
           } else {
-            expList.slice().reverse().forEach(item => {
+            expList.forEach(item => {
               const row = document.createElement('div'); row.className = 'edu-row';
               row.innerHTML = `<div class="edu-period"><span class="edu-badge">${escapeHtml(item.period)}</span></div><div class="edu-details"><span class="edu-degree" style="font-weight: 600 !important;">${escapeHtml(item.degree)}</span><span class="edu-sep">/</span><span class="edu-institution">${escapeHtml(item.inst)}</span></div>`;
               wrap.appendChild(row);
@@ -1412,7 +1412,7 @@ class DedicatedGenericViewer {
       safeList = safeList.filter(item => (item.type || 'paper') === this.targetType);
     }
 
-    this.baseList = safeList.sort((a, b) => parseCustomDate(b.year || b.date, b.id) - parseCustomDate(a.year || a.date, a.id));
+    this.baseList = safeList.sort((a, b) => parseCustomDate(a.year || a.date, a.id) - parseCustomDate(b.year || b.date, b.id));
     this.filteredList = [...this.baseList];
 
     this.initEvents();
