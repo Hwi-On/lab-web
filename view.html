@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title></title>
   <link rel="stylesheet" href="style.css" />
+  <!-- Supabase 통신 도구 장착 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -14,7 +16,6 @@
   <header class="navbar subpage-nav">
     <div class="nav-container">
       
-      <!-- 브랜드 로고 및 연구실 명칭 (스크립트에서 동적 주입) -->
       <a href="index.html" class="brand-logo">
         <div class="logo-mark"></div>
         <div class="logo-text">
@@ -23,7 +24,6 @@
         </div>
       </a>
 
-      <!-- 메인 메뉴 네비게이션 -->
       <nav class="main-menu">
         <div class="nav-item"><a href="index.html" class="main-link">Home</a><div class="sub-links"><a href="index.html">Home</a></div></div>
         <div class="nav-item"><a href="director.html" class="main-link">Director</a><div class="sub-links"><a href="director.html">Director</a></div></div>
@@ -42,16 +42,13 @@
        ============================================================ -->
   <main class="page-body">
     
-    <!-- 서브페이지 대제목 배너 (자바스크립트가 카테고리에 맞춰 자동 변경) -->
     <div class="subpage-header">
       <h1 class="subpage-title" id="viewPageCategory">Board Details</h1>
     </div>
 
-    <!-- 상세 내용 컨테이너 -->
     <div class="section-container">
       <div class="board-view-container">
         
-        <!-- 게시물 상단 타이틀 및 메타 정보 박스 -->
         <div class="view-header-box">
           <span class="view-category-badge" id="viewBadge">NOTICE</span>
           <h2 class="view-title" id="viewTitle">로딩 중...</h2>
@@ -61,15 +58,12 @@
           </div>
         </div>
 
-        <!-- 이미지 갤러리 영역 (#viewImagesGallery) -->
         <div class="view-images-gallery" id="viewImagesGallery" style="display: none;"></div>
 
-        <!-- 본문 내용 영역 (#viewContent) -->
         <div class="view-content-box" id="viewContent">
           내용을 불러오는 중입니다...
         </div>
 
-        <!-- 하단 액션 버튼 (목록으로 돌아가기) -->
         <div class="view-footer-actions">
           <button type="button" class="btn btn-secondary" onclick="history.back()">&lsaquo; 목록으로</button>
         </div>
@@ -79,13 +73,12 @@
   </main>
 
   <!-- ============================================================
-       [3] 하단 푸터 영역 (Footer & Admin Console Link)
+       [3] 하단 푸터 영역
        ============================================================ -->
   <footer class="custom-lab-footer">
     <div class="footer-wrap">
       <div class="footer-grid">
         
-        <!-- 브랜드 정보 및 연락처 -->
         <div class="footer-col footer-col-brand">
           <div class="footer-brand-header">
             <div class="logo-mark"></div>
@@ -94,16 +87,9 @@
               <p class="footer-brand-sub"></p>
             </div>
           </div>
-
-          <p class="footer-address" style="display: none;">주소</p>
-
-          <div class="footer-contact-chips">
-            <span style="display: none;">TEL. +82-64-000-0000</span>
-            <span>E-MAIL. sooya1105@naver.com</span>
-          </div>
+          <span>E-MAIL. sooya1105@naver.com</span>
         </div>
 
-        <!-- 빠른 메뉴 바로가기 -->
         <div class="footer-col footer-col-nav">
           <div class="footer-nav-group">
             <h5 class="footer-group-title">Navigation</h5>
@@ -123,14 +109,12 @@
           </div>
         </div>
 
-        <!-- 연구 분야 태그 클라우드 -->
         <div class="footer-col footer-col-tags">
           <h5 class="footer-group-title">Research Focus</h5>
           <div class="footer-tag-cloud"></div>
         </div>
 
       </div>
-      
     </div>
   </footer>
 

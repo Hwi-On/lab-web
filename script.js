@@ -1,30 +1,14 @@
 /**
  * ====================================================================
- * [PART 0] 로컬 스토리지 키 및 기본 설정 관리
+ * [PART 0] 기본 설정 및 Supabase 클라이언트 연결
  * ====================================================================
  */
 const ADMIN_PASSWORD = 'admin1234!';
 
-// ===== Supabase 연결 설정 =====
 const SUPABASE_URL = "https://qckjwpurukvqgwbqispo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_wLEpW0OXffcNvtEtVKTyng_ri4PQGRc";
 
-// Supabase 클라이언트(조종기) 생성
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const STORE_KEYS = {
-  HOME_HERO: 'lab_data_home_hero',
-  RESEARCH_AREAS: 'lab_data_research_areas',
-  DIRECTOR: 'lab_data_director',
-  EDUCATION: 'lab_data_education',
-  EXPERIENCE: 'lab_data_experience',
-  CURRENT: 'lab_data_current',
-  ALUMNI: 'lab_data_alumni',
-  PUB: 'lab_publications_data',
-  LABLIFE: 'lab_data_lablife',
-  NOTICE: 'lab_data_notice',
-  NEWS: 'lab_data_news'
-};
 
 /**
  * ====================================================================
@@ -69,8 +53,7 @@ if (subLinks.length > 0) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. 관리자 페이지용 햄버거 메뉴 제어
-  if (window.location.pathname.includes('admin')) {
+  if (window.location.pathname.includes('admin') || window.location.pathname.includes('lab-admin')) {
     const navbarEl = document.querySelector('.navbar');
     const navContainer = document.querySelector('.nav-container');
     
@@ -104,9 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
     }
-  }
-  // 2. 일반 방문자 페이지용 햄버거 메뉴 제어
-  else {
+  } else {
     const navContainer = document.querySelector('.nav-container');
     if (navContainer && !document.querySelector('.mobile-menu-toggle')) {
       const toggleBtn = document.createElement('button');
@@ -120,12 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        navbar.classList.toggle('mobile-open');
+        if (navbar) navbar.classList.toggle('mobile-open');
         backdrop.classList.toggle('active');
       });
 
       backdrop.addEventListener('click', () => {
-        navbar.classList.remove('mobile-open');
+        if (navbar) navbar.classList.remove('mobile-open');
         backdrop.classList.remove('active');
       });
     }
@@ -140,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // [검색바 커스텀 셀렉트 드롭다운 토글 및 선택 제어]
   const customToggle = document.getElementById('customSelectToggle');
   const customOptions = document.getElementById('customSelectOptions');
   const customLabel = document.getElementById('customSelectedLabel');
@@ -173,72 +153,13 @@ document.addEventListener('DOMContentLoaded', () => {
       customOptions.style.display = 'none';
     });
   }
-
-  // Current 탭 커스텀 롤 셀렉트(div/ul/li) 이벤트 바인딩 (존재할 경우)
-  const roleToggle = document.getElementById('admCurRoleToggle');
-  const roleOptions = document.getElementById('admCurRoleOptions');
-  const roleLabel = document.getElementById('admCurRoleLabel');
-  const roleHiddenInput = document.getElementById('admCurRole');
-  if (roleToggle && roleOptions) {
-    roleToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      roleOptions.style.display = roleOptions.style.display === 'block' ? 'none' : 'block';
-    });
-    roleOptions.querySelectorAll('li').forEach(li => {
-      li.addEventListener('click', () => {
-        const val = li.getAttribute('data-value');
-        if (roleLabel) roleLabel.textContent = li.textContent;
-        if (roleHiddenInput) roleHiddenInput.value = val;
-        roleOptions.style.display = 'none';
-      });
-    });
-    document.addEventListener('click', () => {
-      if (roleOptions) roleOptions.style.display = 'none';
-    });
-  }
 });
 
 /**
  * ====================================================================
- * [PART 2] 데이터 저장/조회 및 파일 변환 유틸리티 함수
+ * [PART 2] 파일 변환 및 유틸리티 함수
  * ====================================================================
  */
-const DEFAULT_HOME_HERO = {
-  badge: "RESEARCH FIELD / AFFILIATION",
-  title: "Pioneering Future Discoveries<br>&amp; Translational Research",
-  desc: "연구실의 핵심 연구 비전 및 목표를 소개하는 메인 소개 문구가 작성될 공간입니다."
-};
-
-const DEFAULT_RESEARCH_AREAS = [
-  { id: 1, tag: "DOMAIN 01", heading: "주요 연구 분야 01", detail: "연구 분야에 대한 핵심 메커니즘 개요가 기재될 공간입니다." },
-  { id: 2, tag: "DOMAIN 02", heading: "주요 연구 분야 02", detail: "세부 프로젝트 및 분석 플랫폼 등에 대한 설명이 기재될 공간입니다." },
-  { id: 3, tag: "DOMAIN 03", heading: "주요 연구 분야 03", detail: "전임상 평가 모델 및 중개 치료 기술 개발과 관련된 연구 내용입니다." }
-];
-
-const DEFAULT_DIRECTOR = {
-  nameKo: "교수님 성함",
-  nameEn: "Professor Name, Ph.D.",
-  position: "Principal Investigator",
-  email: "professor@univ.ac.kr",
-  tel: "",
-  office: "",
-  greeting: "",
-  image: ""
-};
-
-function getStored(key, defaultVal) {
-  const data = localStorage.getItem(key);
-  if (!data) {
-    localStorage.setItem(key, JSON.stringify(defaultVal));
-    return defaultVal;
-  }
-  return JSON.parse(data);
-}
-
-function setStored(key, val) {
-  localStorage.setItem(key, JSON.stringify(val));
-}
-
 function convertFileToBase64(fileInputId) {
   return new Promise((resolve) => {
     const fileInput = document.getElementById(fileInputId);
@@ -274,7 +195,7 @@ function convertFilesToMultipleBase64(fileInputId) {
 }
 
 function escapeHtml(str) {
-  return String(str).replace(/[&<>'"]/g, 
+  return String(str || '').replace(/[&<>'"]/g, 
     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
   );
 }
@@ -312,7 +233,7 @@ function parseCustomDate(dateStr, fallbackId) {
 
 /**
  * ====================================================================
- * [PART 3] 통합 관리자(Admin) 제어 클래스
+ * [PART 3] Supabase 연동형 통합 관리자(Admin) 클래스
  * ====================================================================
  */
 class UnifiedAdminApp {
@@ -351,7 +272,6 @@ class UnifiedAdminApp {
       this.panelBox.style.display = 'block';
       if (this.logoutBtn) this.logoutBtn.style.display = 'inline-block';
       if (loginBtnDesktop) loginBtnDesktop.style.display = 'none';
-      
       if (authAuthLinkMobile) authAuthLinkMobile.style.display = 'none';
       if (logoutLinkMobile) logoutLinkMobile.style.display = 'block';
     } else {
@@ -388,9 +308,7 @@ class UnifiedAdminApp {
       location.reload();
     };
 
-    if (this.logoutBtn) {
-      this.logoutBtn.addEventListener('click', handleLogout);
-    }
+    if (this.logoutBtn) this.logoutBtn.addEventListener('click', handleLogout);
     if (logoutLinkMobile) {
       logoutLinkMobile.addEventListener('click', (e) => {
         e.preventDefault();
@@ -417,54 +335,50 @@ class UnifiedAdminApp {
   }
 
   initForms() {
+    // 1. Home Hero
     const heroForm = document.getElementById('formAdminHomeHero');
     if (heroForm) {
-      heroForm.addEventListener('submit', (e) => {
+      heroForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const heroData = {
+        const payload = {
           badge: document.getElementById('admHomeBadge').value.trim(),
           title: document.getElementById('admHomeTitle').value.trim(),
           desc: document.getElementById('admHomeDesc').value.trim()
         };
-        setStored(STORE_KEYS.HOME_HERO, heroData);
+        const { error } = await supabaseClient.from('home_hero').upsert({ id: 1, ...payload });
+        if (error) { alert('저장 실패: ' + error.message); return; }
         alert('홈 화면 히어로 배너 정보가 저장되었습니다.');
       });
     }
 
+    // 2. Research Areas
     const resForm = document.getElementById('formAdminResearchItem');
     const btnCancelRes = document.getElementById('btnCancelRes');
     const researchFormTitle = document.getElementById('researchFormTitle');
-
     if (resForm) {
-      resForm.addEventListener('submit', (e) => {
+      resForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const list = getStored(STORE_KEYS.RESEARCH_AREAS, DEFAULT_RESEARCH_AREAS);
+        const payload = {
+          tag: document.getElementById('admResTag').value.trim(),
+          heading: document.getElementById('admResHeading').value.trim(),
+          detail: document.getElementById('admResDetail').value.trim()
+        };
 
         if (this.editResId) {
-          const idx = list.findIndex(item => item.id === this.editResId);
-          if (idx !== -1) {
-            list[idx].tag = document.getElementById('admResTag').value.trim();
-            list[idx].heading = document.getElementById('admResHeading').value.trim();
-            list[idx].detail = document.getElementById('admResDetail').value.trim();
-          }
+          const { error } = await supabaseClient.from('home_research_areas').update(payload).eq('id', this.editResId);
+          if (error) { alert('수정 실패: ' + error.message); return; }
           this.editResId = null;
           resForm.querySelector('button[type="submit"]').textContent = '연구 분야 추가하기';
           if (researchFormTitle) researchFormTitle.textContent = '+ 주요 연구 분야 (Research Areas) 추가';
           if (btnCancelRes) btnCancelRes.style.display = 'none';
           alert('연구 분야 항목이 수정되었습니다.');
         } else {
-          list.push({
-            id: Date.now(),
-            tag: document.getElementById('admResTag').value.trim(),
-            heading: document.getElementById('admResHeading').value.trim(),
-            detail: document.getElementById('admResDetail').value.trim()
-          });
+          const { error } = await supabaseClient.from('home_research_areas').insert([payload]);
+          if (error) { alert('등록 실패: ' + error.message); return; }
           alert('연구 분야 항목이 추가되었습니다.');
         }
-
-        setStored(STORE_KEYS.RESEARCH_AREAS, list);
         resForm.reset();
-        this.renderResearchAreas();
+        await this.renderResearchAreas();
       });
 
       if (btnCancelRes) {
@@ -478,56 +392,54 @@ class UnifiedAdminApp {
       }
     }
 
+    // 3. Director Info
     const dirForm = document.getElementById('formAdminDirector');
     if (dirForm) {
       dirForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgBase64 = await convertFileToBase64('admDirImg');
-        const oldData = getStored(STORE_KEYS.DIRECTOR, DEFAULT_DIRECTOR);
-        const dirData = {
-          nameKo: document.getElementById('admDirNameKo').value.trim(),
-          nameEn: document.getElementById('admDirNameEn').value.trim(),
+        const payload = {
+          name_ko: document.getElementById('admDirNameKo').value.trim(),
+          name_en: document.getElementById('admDirNameEn').value.trim(),
           position: document.getElementById('admDirPosition').value.trim(),
           email: document.getElementById('admDirEmail').value.trim(),
           tel: document.getElementById('admDirTel').value.trim(),
           office: document.getElementById('admDirOffice').value.trim(),
-          greeting: document.getElementById('admDirGreeting').value.trim(),
-          image: imgBase64 || oldData.image || ''
+          greeting: document.getElementById('admDirGreeting').value.trim()
         };
-        setStored(STORE_KEYS.DIRECTOR, dirData);
+        if (imgBase64) payload.image = imgBase64;
+
+        const { error } = await supabaseClient.from('director_info').upsert({ id: 1, ...payload });
+        if (error) { alert('저장 실패: ' + error.message); return; }
         alert('Director 기본 정보가 저장되었습니다.');
       });
     }
 
+    // 4. Education
     const eduForm = document.getElementById('formAdminEdu');
     const btnCancelEdu = document.getElementById('btnCancelEdu');
     if (eduForm) {
-      eduForm.addEventListener('submit', (e) => {
+      eduForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const list = getStored(STORE_KEYS.EDUCATION, []);
+        const payload = {
+          period: document.getElementById('admEduPeriod').value.trim(),
+          degree: document.getElementById('admEduDegree').value.trim(),
+          inst: document.getElementById('admEduInst').value.trim()
+        };
         if (this.editEduId) {
-          const idx = list.findIndex(item => item.id === this.editEduId);
-          if (idx !== -1) {
-            list[idx].period = document.getElementById('admEduPeriod').value.trim();
-            list[idx].degree = document.getElementById('admEduDegree').value.trim();
-            list[idx].inst = document.getElementById('admEduInst').value.trim();
-          }
+          const { error } = await supabaseClient.from('direcotr_education').update(payload).eq('id', this.editEduId);
+          if (error) { alert('수정 실패: ' + error.message); return; }
           this.editEduId = null;
           eduForm.querySelector('button[type="submit"]').textContent = '학력 추가하기';
           if (btnCancelEdu) btnCancelEdu.style.display = 'none';
           alert('학력 정보가 수정되었습니다.');
         } else {
-          list.push({
-            id: Date.now(),
-            period: document.getElementById('admEduPeriod').value.trim(),
-            degree: document.getElementById('admEduDegree').value.trim(),
-            inst: document.getElementById('admEduInst').value.trim()
-          });
+          const { error } = await supabaseClient.from('direcotr_education').insert([payload]);
+          if (error) { alert('등록 실패: ' + error.message); return; }
           alert('학력 정보가 추가되었습니다.');
         }
-        setStored(STORE_KEYS.EDUCATION, list);
         eduForm.reset();
-        this.renderEdu();
+        await this.renderEdu();
       });
       if (btnCancelEdu) {
         btnCancelEdu.addEventListener('click', () => {
@@ -539,37 +451,32 @@ class UnifiedAdminApp {
       }
     }
 
+    // 5. Experience
     const expForm = document.getElementById('formAdminExp');
     const btnCancelExp = document.getElementById('btnCancelExp');
     if (expForm) {
-      expForm.addEventListener('submit', (e) => {
+      expForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const list = getStored(STORE_KEYS.EXPERIENCE, []);
+        const payload = {
+          category: document.getElementById('admExpCategory').value,
+          period: document.getElementById('admExpPeriod').value.trim(),
+          degree: document.getElementById('admExpDegree').value.trim(),
+          inst: document.getElementById('admExpInst').value.trim()
+        };
         if (this.editExpId) {
-          const idx = list.findIndex(item => item.id === this.editExpId);
-          if (idx !== -1) {
-            list[idx].category = document.getElementById('admExpCategory').value;
-            list[idx].period = document.getElementById('admExpPeriod').value.trim();
-            list[idx].degree = document.getElementById('admExpDegree').value.trim();
-            list[idx].inst = document.getElementById('admExpInst').value.trim();
-          }
+          const { error } = await supabaseClient.from('director_experience').update(payload).eq('id', this.editExpId);
+          if (error) { alert('수정 실패: ' + error.message); return; }
           this.editExpId = null;
           expForm.querySelector('button[type="submit"]').textContent = '이력 추가하기';
           if (btnCancelExp) btnCancelExp.style.display = 'none';
           alert('이력 정보가 수정되었습니다.');
         } else {
-          list.push({
-            id: Date.now(),
-            category: document.getElementById('admExpCategory').value,
-            period: document.getElementById('admExpPeriod').value.trim(),
-            degree: document.getElementById('admExpDegree').value.trim(),
-            inst: document.getElementById('admExpInst').value.trim()
-          });
+          const { error } = await supabaseClient.from('director_experience').insert([payload]);
+          if (error) { alert('등록 실패: ' + error.message); return; }
           alert('이력 정보가 추가되었습니다.');
         }
-        setStored(STORE_KEYS.EXPERIENCE, list);
         expForm.reset();
-        this.renderExp();
+        await this.renderExp();
       });
       if (btnCancelExp) {
         btnCancelExp.addEventListener('click', () => {
@@ -581,251 +488,188 @@ class UnifiedAdminApp {
       }
     }
 
+    // 6. Current Members
     const curForm = document.getElementById('formAdminCurrent');
     if (curForm) {
       curForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgBase64 = await convertFileToBase64('admCurImg');
-        const list = getStored(STORE_KEYS.CURRENT, []);
         const roleHidden = document.getElementById('admCurRole');
         const roleVal = roleHidden ? roleHidden.value : 'Postdoctoral Researcher';
+        const payload = {
+          role: roleVal,
+          name: document.getElementById('admCurName').value.trim(),
+          tags: document.getElementById('admCurTags').value.trim(),
+          email: document.getElementById('admCurEmail').value.trim()
+        };
+        if (imgBase64) payload.image = imgBase64;
 
         if (this.editCurrentId) {
-          const idx = list.findIndex(item => item.id === this.editCurrentId);
-          if (idx !== -1) {
-            list[idx].role = roleVal;
-            list[idx].name = document.getElementById('admCurName').value.trim();
-            list[idx].topic = '';
-            list[idx].tags = document.getElementById('admCurTags').value.trim();
-            list[idx].email = document.getElementById('admCurEmail').value.trim();
-            if (imgBase64) list[idx].image = imgBase64;
-          }
+          const { error } = await supabaseClient.from('current_members').update(payload).eq('id', this.editCurrentId);
+          if (error) { alert('수정 실패: ' + error.message); return; }
           this.editCurrentId = null;
           curForm.querySelector('button[type="submit"]').textContent = '연구원 추가하기';
           alert('연구원 정보가 수정되었습니다.');
         } else {
-          list.unshift({
-            id: Date.now(),
-            role: roleVal,
-            name: document.getElementById('admCurName').value.trim(),
-            topic: '',
-            tags: document.getElementById('admCurTags').value.trim(),
-            email: document.getElementById('admCurEmail').value.trim(),
-            image: imgBase64
-          });
+          const { error } = await supabaseClient.from('current_members').insert([payload]);
+          if (error) { alert('등록 실패: ' + error.message); return; }
           alert('연구원이 추가되었습니다.');
         }
-        setStored(STORE_KEYS.CURRENT, list);
         curForm.reset();
-        const roleLabel = document.getElementById('admCurRoleLabel');
-        if (roleLabel) roleLabel.textContent = 'Postdoctoral Researcher (박사후 연구원)';
-        if (roleHidden) roleHidden.value = 'Postdoctoral Researcher';
-        this.renderCurrent();
+        await this.renderCurrent();
       });
     }
 
+    // 7. Alumni
     const alumForm = document.getElementById('formAdminAlumni');
     if (alumForm) {
       alumForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgBase64 = await convertFileToBase64('admAlumImg');
-        const list = getStored(STORE_KEYS.ALUMNI, []);
+        const payload = {
+          year: document.getElementById('admAlumYear').value.trim(),
+          name: document.getElementById('admAlumName').value.trim(),
+          degree: document.getElementById('admAlumDegree').value,
+          tags: document.getElementById('admAlumTags').value.trim(),
+          email: document.getElementById('admAlumEmail').value.trim()
+        };
+        if (imgBase64) payload.image = imgBase64;
+
         if (this.editAlumniId) {
-          const idx = list.findIndex(item => item.id === this.editAlumniId);
-          if (idx !== -1) {
-            list[idx].year = document.getElementById('admAlumYear').value.trim();
-            list[idx].name = document.getElementById('admAlumName').value.trim();
-            list[idx].degree = document.getElementById('admAlumDegree').value;
-            list[idx].topic = '';
-            list[idx].tags = document.getElementById('admAlumTags').value.trim();
-            list[idx].email = document.getElementById('admAlumEmail').value.trim();
-            if (imgBase64) list[idx].image = imgBase64;
-          }
+          const { error } = await supabaseClient.from('alumni_members').update(payload).eq('id', this.editAlumniId);
+          if (error) { alert('수정 실패: ' + error.message); return; }
           this.editAlumniId = null;
           alumForm.querySelector('button[type="submit"]').textContent = '졸업생 추가하기';
           alert('졸업생 정보가 수정되었습니다.');
         } else {
-          list.unshift({
-            id: Date.now(),
-            year: document.getElementById('admAlumYear').value.trim(),
-            name: document.getElementById('admAlumName').value.trim(),
-            degree: document.getElementById('admAlumDegree').value,
-            topic: '',
-            tags: document.getElementById('admAlumTags').value.trim(),
-            email: document.getElementById('admAlumEmail').value.trim(),
-            image: imgBase64
-          });
+          const { error } = await supabaseClient.from('alumni_members').insert([payload]);
+          if (error) { alert('등록 실패: ' + error.message); return; }
           alert('졸업생이 추가되었습니다.');
         }
-        setStored(STORE_KEYS.ALUMNI, list);
         alumForm.reset();
-        this.renderAlumni();
+        await this.renderAlumni();
       });
     }
 
+    // 8. Publications & Patents
     const pubForm = document.getElementById('formAdminPub');
     if (pubForm) {
-      pubForm.addEventListener('submit', (e) => {
+      pubForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const list = getStored(STORE_KEYS.PUB, []);
         const rawDate = document.getElementById('admPubYear').value.trim();
         const formattedDate = rawDate ? rawDate.replace(/-/g, '.') : new Date().toISOString().substring(0, 10).replace(/-/g, '.');
+        const payload = {
+          type: document.getElementById('admPubType').value,
+          title: document.getElementById('admPubTitle').value.trim(),
+          authors: document.getElementById('admPubAuthors').value.trim(),
+          journal: document.getElementById('admPubJournal').value.trim(),
+          year: formattedDate,
+          link: document.getElementById('admPubLink').value.trim() || '#'
+        };
 
         if (this.editPubId) {
-          const idx = list.findIndex(item => item.id === this.editPubId);
-          if (idx !== -1) {
-            list[idx].type = document.getElementById('admPubType').value;
-            list[idx].title = document.getElementById('admPubTitle').value.trim();
-            list[idx].authors = document.getElementById('admPubAuthors').value.trim();
-            list[idx].journal = document.getElementById('admPubJournal').value.trim();
-            list[idx].year = formattedDate;
-            list[idx].link = document.getElementById('admPubLink').value.trim() || '#';
-          }
+          const { error } = await supabaseClient.from('publications').update(payload).eq('id', this.editPubId);
+          if (error) { alert('수정 실패: ' + error.message); return; }
           this.editPubId = null;
           pubForm.querySelector('button[type="submit"]').textContent = '등록하기';
           alert('항목이 수정되었습니다.');
         } else {
-          list.unshift({
-            id: Date.now(),
-            type: document.getElementById('admPubType').value,
-            title: document.getElementById('admPubTitle').value.trim(),
-            authors: document.getElementById('admPubAuthors').value.trim(),
-            journal: document.getElementById('admPubJournal').value.trim(),
-            year: formattedDate,
-            link: document.getElementById('admPubLink').value.trim() || '#'
-          });
+          const { error } = await supabaseClient.from('publications').insert([payload]);
+          if (error) { alert('등록 실패: ' + error.message); return; }
           alert('항목이 등록되었습니다.');
         }
-        setStored(STORE_KEYS.PUB, list);
         pubForm.reset();
-        this.renderPub();
+        await this.renderPub();
       });
     }
 
+    // 9. Lab Life
     const lifeForm = document.getElementById('formAdminLabLife');
     if (lifeForm) {
       lifeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgsArray = await convertFilesToMultipleBase64('admLifeImgs');
-        const list = getStored(STORE_KEYS.LABLIFE, []);
+        const payload = {
+          date: document.getElementById('admLifeDate').value.replace(/-/g, '.'),
+          title: document.getElementById('admLifeTitle').value.trim(),
+          desc: document.getElementById('admLifeDesc').value.trim()
+        };
+        if (imgsArray.length > 0) payload.images = imgsArray;
+
         if (this.editLabLifeId) {
-          const idx = list.findIndex(item => item.id === this.editLabLifeId);
-          if (idx !== -1) {
-            list[idx].date = document.getElementById('admLifeDate').value.replace(/-/g, '.');
-            list[idx].title = document.getElementById('admLifeTitle').value.trim();
-            list[idx].desc = document.getElementById('admLifeDesc').value.trim();
-            if (imgsArray.length > 0) list[idx].images = imgsArray;
-          }
+          const { error } = await supabaseClient.from('lab_life').update(payload).eq('id', this.editLabLifeId);
+          if (error) { alert('수정 실패: ' + error.message); return; }
           this.editLabLifeId = null;
           lifeForm.querySelector('button[type="submit"]').textContent = '활동 등록하기';
           alert('Lab Life 활동이 수정되었습니다.');
         } else {
-          list.unshift({
-            id: Date.now(),
-            date: document.getElementById('admLifeDate').value.replace(/-/g, '.'),
-            title: document.getElementById('admLifeTitle').value.trim(),
-            desc: document.getElementById('admLifeDesc').value.trim(),
-            images: imgsArray,
-            views: 0
-          });
+          payload.views = 0;
+          const { error } = await supabaseClient.from('lab_life').insert([payload]);
+          if (error) { alert('등록 실패: ' + error.message); return; }
           alert('Lab Life 활동이 등록되었습니다.');
         }
-        setStored(STORE_KEYS.LABLIFE, list);
         lifeForm.reset();
-        this.renderLabLife();
+        await this.renderLabLife();
       });
     }
 
-    // [SUPABASE 연동] 공지사항 등록 및 수정 폼
+    // 10. Notices
     const notForm = document.getElementById('formAdminNotice');
     if (notForm) {
       notForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgsArray = await convertFilesToMultipleBase64('admNotImgs');
-        const dateVal = document.getElementById('admNotDate').value.replace(/-/g, '.');
-        const titleVal = document.getElementById('admNotTitle').value.trim();
-        const descVal = document.getElementById('admNotDesc').value.trim();
+        const payload = {
+          date: document.getElementById('admNotDate').value.replace(/-/g, '.'),
+          title: document.getElementById('admNotTitle').value.trim(),
+          desc: document.getElementById('admNotDesc').value.trim()
+        };
+        if (imgsArray.length > 0) payload.images = imgsArray;
 
         if (this.editNoticeId) {
-          const updateData = {
-            date: dateVal,
-            title: titleVal,
-            desc: descVal
-          };
-          if (imgsArray.length > 0) updateData.images = imgsArray;
-
-          const { error } = await supabaseClient
-            .from('notices')
-            .update(updateData)
-            .eq('id', this.editNoticeId);
-
-          if (error) {
-            alert('수정 실패: ' + error.message);
-            return;
-          }
-
+          const { error } = await supabaseClient.from('notices').update(payload).eq('id', this.editNoticeId);
+          if (error) { alert('수정 실패: ' + error.message); return; }
           this.editNoticeId = null;
           notForm.querySelector('button[type="submit"]').textContent = '공지 등록하기';
           alert('공지사항이 수정되었습니다.');
         } else {
-          const { error } = await supabaseClient
-            .from('notices')
-            .insert([
-              {
-                date: dateVal,
-                title: titleVal,
-                desc: descVal,
-                images: imgsArray,
-                views: 0
-              }
-            ]);
-
-          if (error) {
-            alert('등록 실패: ' + error.message);
-            return;
-          }
-
+          payload.views = 0;
+          const { error } = await supabaseClient.from('notices').insert([payload]);
+          if (error) { alert('등록 실패: ' + error.message); return; }
           alert('공지사항이 등록되었습니다.');
         }
-
         notForm.reset();
         await this.renderNotice();
       });
     }
 
+    // 11. News
     const newsForm = document.getElementById('formAdminNews');
     if (newsForm) {
       newsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgsArray = await convertFilesToMultipleBase64('admNewsImgs');
-        const list = getStored(STORE_KEYS.NEWS, []);
+        const payload = {
+          date: document.getElementById('admNewsDate').value.replace(/-/g, '.'),
+          title: document.getElementById('admNewsTitle').value.trim(),
+          desc: document.getElementById('admNewsDesc').value.trim()
+        };
+        if (imgsArray.length > 0) payload.images = imgsArray;
+
         if (this.editNewsId) {
-          const idx = list.findIndex(item => item.id === this.editNewsId);
-          if (idx !== -1) {
-            list[idx].category = 'NEWS';
-            list[idx].date = document.getElementById('admNewsDate').value.replace(/-/g, '.');
-            list[idx].title = document.getElementById('admNewsTitle').value.trim();
-            list[idx].desc = document.getElementById('admNewsDesc').value.trim();
-            if (imgsArray.length > 0) list[idx].images = imgsArray;
-          }
+          const { error } = await supabaseClient.from('news').update(payload).eq('id', this.editNewsId);
+          if (error) { alert('수정 실패: ' + error.message); return; }
           this.editNewsId = null;
           newsForm.querySelector('button[type="submit"]').textContent = '뉴스 게시하기';
           alert('뉴스가 수정되었습니다.');
         } else {
-          list.unshift({
-            id: Date.now(),
-            category: 'NEWS',
-            date: document.getElementById('admNewsDate').value.replace(/-/g, '.'),
-            title: document.getElementById('admNewsTitle').value.trim(),
-            desc: document.getElementById('admNewsDesc').value.trim(),
-            images: imgsArray,
-            views: 0
-          });
+          payload.views = 0;
+          const { error } = await supabaseClient.from('news').insert([payload]);
+          if (error) { alert('등록 실패: ' + error.message); return; }
           alert('뉴스가 등록되었습니다.');
         }
-        setStored(STORE_KEYS.NEWS, list);
         newsForm.reset();
-        this.renderNews();
+        await this.renderNews();
       });
     }
   }
@@ -844,27 +688,26 @@ class UnifiedAdminApp {
     this.renderNews();
   }
 
-  renderHomeHeroForm() {
-    const data = getStored(STORE_KEYS.HOME_HERO, DEFAULT_HOME_HERO);
+  async renderHomeHeroForm() {
+    const { data } = await supabaseClient.from('home_hero').select('*').eq('id', 1).single();
     if (!document.getElementById('admHomeBadge')) return;
-    document.getElementById('admHomeBadge').value = data.badge || '';
-    document.getElementById('admHomeTitle').value = data.title || '';
-    document.getElementById('admHomeDesc').value = data.desc || '';
+    if (data) {
+      document.getElementById('admHomeBadge').value = data.badge || '';
+      document.getElementById('admHomeTitle').value = data.title || '';
+      document.getElementById('admHomeDesc').value = data.desc || '';
+    }
   }
 
-  renderResearchAreas() {
-    const list = getStored(STORE_KEYS.RESEARCH_AREAS, DEFAULT_RESEARCH_AREAS);
+  async renderResearchAreas() {
     const tbody = document.getElementById('tableBodyResearch');
     if (!tbody) return;
+    const { data: list } = await supabaseClient.from('home_research_areas').select('*').order('id', { ascending: true });
     tbody.innerHTML = '';
-
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:#94a3b8;">등록된 연구 분야가 없습니다.</td></tr>';
       return;
     }
-
     list.forEach((item) => {
-      const actualIdx = list.findIndex(x => x.id === item.id);
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><span class="tag-chip">${escapeHtml(item.tag)}</span></td>
@@ -872,7 +715,7 @@ class UnifiedAdminApp {
         <td>${escapeHtml(item.detail)}</td>
         <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
           <button class="btn-edit-res" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
-          <button class="btn-delete-item" data-idx="${actualIdx}">삭제</button>
+          <button class="btn-delete-item" data-table="home_research_areas" data-id="${item.id}">삭제</button>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -886,7 +729,6 @@ class UnifiedAdminApp {
           document.getElementById('admResTag').value = item.tag;
           document.getElementById('admResHeading').value = item.heading;
           document.getElementById('admResDetail').value = item.detail;
-          
           document.querySelector('#formAdminResearchItem button[type="submit"]').textContent = '연구 분야 수정 완료';
           const resTitleEl = document.getElementById('researchFormTitle');
           if (resTitleEl) resTitleEl.textContent = '연구 분야 수정하기';
@@ -896,33 +738,33 @@ class UnifiedAdminApp {
         }
       });
     });
-
-    this.attachDelete(tbody, STORE_KEYS.RESEARCH_AREAS, () => this.renderResearchAreas());
+    this.attachSupabaseDelete(tbody, 'home_research_areas', () => this.renderResearchAreas());
   }
 
-  renderDirectorForm() {
-    const data = getStored(STORE_KEYS.DIRECTOR, DEFAULT_DIRECTOR);
+  async renderDirectorForm() {
+    const { data } = await supabaseClient.from('director_info').select('*').eq('id', 1).single();
     if (!document.getElementById('admDirNameKo')) return;
-    document.getElementById('admDirNameKo').value = data.nameKo || '';
-    document.getElementById('admDirNameEn').value = data.nameEn || '';
-    document.getElementById('admDirPosition').value = data.position || '';
-    document.getElementById('admDirEmail').value = data.email || '';
-    document.getElementById('admDirTel').value = data.tel || '';
-    document.getElementById('admDirOffice').value = data.office || '';
-    document.getElementById('admDirGreeting').value = data.greeting || '';
+    if (data) {
+      document.getElementById('admDirNameKo').value = data.name_ko || '';
+      document.getElementById('admDirNameEn').value = data.name_en || '';
+      document.getElementById('admDirPosition').value = data.position || '';
+      document.getElementById('admDirEmail').value = data.email || '';
+      document.getElementById('admDirTel').value = data.tel || '';
+      document.getElementById('admDirOffice').value = data.office || '';
+      document.getElementById('admDirGreeting').value = data.greeting || '';
+    }
   }
 
-  renderEdu() {
-    const list = getStored(STORE_KEYS.EDUCATION, []);
+  async renderEdu() {
     const tbody = document.getElementById('tableBodyEdu');
     if (!tbody) return;
+    const { data: list } = await supabaseClient.from('direcotr_education').select('*').order('id', { ascending: true });
     tbody.innerHTML = '';
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:#94a3b8;">등록된 학력이 없습니다.</td></tr>';
       return;
     }
-    list.slice().reverse().forEach((item, idx) => {
-      const actualIdx = list.length - 1 - idx;
+    list.forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${escapeHtml(item.period)}</td>
@@ -930,7 +772,7 @@ class UnifiedAdminApp {
         <td>${escapeHtml(item.inst)}</td>
         <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
           <button class="btn-edit-edu" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
-          <button class="btn-delete-item" data-idx="${actualIdx}">삭제</button>
+          <button class="btn-delete-item" data-table="direcotr_education" data-id="${item.id}">삭제</button>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -951,21 +793,19 @@ class UnifiedAdminApp {
         }
       });
     });
-
-    this.attachDelete(tbody, STORE_KEYS.EDUCATION, () => this.renderEdu());
+    this.attachSupabaseDelete(tbody, 'direcotr_education', () => this.renderEdu());
   }
 
-  renderExp() {
-    const list = getStored(STORE_KEYS.EXPERIENCE, []);
+  async renderExp() {
     const tbody = document.getElementById('tableBodyExp');
     if (!tbody) return;
+    const { data: list } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: true });
     tbody.innerHTML = '';
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#94a3b8;">등록된 경력 및 활동이 없습니다.</td></tr>';
       return;
     }
-    list.slice().reverse().forEach((item, idx) => {
-      const actualIdx = list.length - 1 - idx;
+    list.forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><span class="tag-chip">${escapeHtml(item.category || '경력 (Experience)')}</span></td>
@@ -974,7 +814,7 @@ class UnifiedAdminApp {
         <td>${escapeHtml(item.inst)}</td>
         <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
           <button class="btn-edit-exp" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
-          <button class="btn-delete-item" data-idx="${actualIdx}">삭제</button>
+          <button class="btn-delete-item" data-table="director_experience" data-id="${item.id}">삭제</button>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -996,20 +836,19 @@ class UnifiedAdminApp {
         }
       });
     });
-
-    this.attachDelete(tbody, STORE_KEYS.EXPERIENCE, () => this.renderExp());
+    this.attachSupabaseDelete(tbody, 'director_experience', () => this.renderExp());
   }
 
-  renderCurrent() {
-    const list = getStored(STORE_KEYS.CURRENT, []);
+  async renderCurrent() {
     const tbody = document.getElementById('tableBodyCurrent');
     if (!tbody) return;
+    const { data: list } = await supabaseClient.from('current_members').select('*').order('id', { ascending: false });
     tbody.innerHTML = '';
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">등록된 연구원이 없습니다.</td></tr>';
       return;
     }
-    list.forEach((item, idx) => {
+    list.forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><span class="profile-role-tag">${escapeHtml(item.role)}</span></td>
@@ -1017,7 +856,7 @@ class UnifiedAdminApp {
         <td>${escapeHtml(item.tags || '-')}</td>
         <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
           <button class="btn-edit-item" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
-          <button class="btn-delete-item" data-idx="${idx}">삭제</button>
+          <button class="btn-delete-item" data-table="current_members" data-id="${item.id}">삭제</button>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -1038,20 +877,19 @@ class UnifiedAdminApp {
         }
       });
     });
-
-    this.attachDelete(tbody, STORE_KEYS.CURRENT, () => this.renderCurrent());
+    this.attachSupabaseDelete(tbody, 'current_members', () => this.renderCurrent());
   }
 
-  renderAlumni() {
-    const list = getStored(STORE_KEYS.ALUMNI, []);
+  async renderAlumni() {
     const tbody = document.getElementById('tableBodyAlumni');
     if (!tbody) return;
+    const { data: list } = await supabaseClient.from('alumni_members').select('*').order('id', { ascending: false });
     tbody.innerHTML = '';
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">등록된 졸업생이 없습니다.</td></tr>';
       return;
     }
-    list.forEach((item, idx) => {
+    list.forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="text-align:center; font-weight:700;">${escapeHtml(item.year)}</td>
@@ -1059,7 +897,7 @@ class UnifiedAdminApp {
         <td>${escapeHtml(item.tags || '-')}</td>
         <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
           <button class="btn-edit-item" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
-          <button class="btn-delete-item" data-idx="${idx}">삭제</button>
+          <button class="btn-delete-item" data-table="alumni_members" data-id="${item.id}">삭제</button>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -1080,23 +918,21 @@ class UnifiedAdminApp {
         }
       });
     });
-
-    this.attachDelete(tbody, STORE_KEYS.ALUMNI, () => this.renderAlumni());
+    this.attachSupabaseDelete(tbody, 'alumni_members', () => this.renderAlumni());
   }
 
-  renderPub() {
-    const list = getStored(STORE_KEYS.PUB, []);
+  async renderPub() {
     const tbody = document.getElementById('tableBodyPub');
     if (!tbody) return;
+    const { data: list } = await supabaseClient.from('publications').select('*');
     tbody.innerHTML = '';
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">등록된 항목이 없습니다.</td></tr>';
       return;
     }
     const sortedList = list.slice().sort((a, b) => parseCustomDate(b.year, b.id) - parseCustomDate(a.year, a.id));
 
     sortedList.forEach((item) => {
-      const actualIdx = list.findIndex(x => x.id === item.id);
       const typeLabel = item.type === 'patent' ? 'Patent' : 'Paper';
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -1105,7 +941,7 @@ class UnifiedAdminApp {
         <td style="text-align:center;">${escapeHtml(item.year)}</td>
         <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
           <button class="btn-edit-item" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
-          <button class="btn-delete-item" data-idx="${actualIdx}">삭제</button>
+          <button class="btn-delete-item" data-table="publications" data-id="${item.id}">삭제</button>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -1127,27 +963,26 @@ class UnifiedAdminApp {
         }
       });
     });
-
-    this.attachDelete(tbody, STORE_KEYS.PUB, () => this.renderPub());
+    this.attachSupabaseDelete(tbody, 'publications', () => this.renderPub());
   }
 
-  renderLabLife() {
-    const list = getStored(STORE_KEYS.LABLIFE, []);
+  async renderLabLife() {
     const tbody = document.getElementById('tableBodyLabLife');
     if (!tbody) return;
+    const { data: list } = await supabaseClient.from('lab_life').select('*').order('id', { ascending: false });
     tbody.innerHTML = '';
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">등록된 활동이 없습니다.</td></tr>';
       return;
     }
-    list.forEach((item, idx) => {
+    list.forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="text-align:center;">${escapeHtml(item.date)}</td>
         <td><strong>${escapeHtml(item.title)}</strong></td>
         <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
           <button class="btn-edit-item" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
-          <button class="btn-delete-item" data-idx="${idx}">삭제</button>
+          <button class="btn-delete-item" data-table="lab_life" data-id="${item.id}">삭제</button>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -1166,31 +1001,18 @@ class UnifiedAdminApp {
         }
       });
     });
-
-    this.attachDelete(tbody, STORE_KEYS.LABLIFE, () => this.renderLabLife());
+    this.attachSupabaseDelete(tbody, 'lab_life', () => this.renderLabLife());
   }
 
-  // [SUPABASE 연동] 관리자 페이지 공지 목록 렌더링
   async renderNotice() {
     const tbody = document.getElementById('tableBodyNotice');
     if (!tbody) return;
-    
-    const { data: list, error } = await supabaseClient
-      .from('notices')
-      .select('*')
-      .order('id', { ascending: false });
-
-    if (error) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:red;">데이터 로드 실패</td></tr>';
-      return;
-    }
-
+    const { data: list } = await supabaseClient.from('notices').select('*').order('id', { ascending: false });
     tbody.innerHTML = '';
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">등록된 공지사항이 없습니다.</td></tr>';
       return;
     }
-
     list.forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -1198,12 +1020,11 @@ class UnifiedAdminApp {
         <td><strong>${escapeHtml(item.title)}</strong></td>
         <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
           <button class="btn-edit-item" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
-          <button class="btn-delete-item" data-id="${item.id}">삭제</button>
+          <button class="btn-delete-item" data-table="notices" data-id="${item.id}">삭제</button>
         </td>`;
       tbody.appendChild(tr);
     });
 
-    // 수정 버튼 이벤트 바인딩
     tbody.querySelectorAll('.btn-edit-item').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
@@ -1218,44 +1039,26 @@ class UnifiedAdminApp {
         }
       });
     });
-
-    // 삭제 버튼 이벤트 바인딩 (Supabase 연동)
-    tbody.querySelectorAll('.btn-delete-item').forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
-        const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
-        if (confirm('선택한 항목을 삭제하시겠습니까?')) {
-          const { error } = await supabaseClient
-            .from('notices')
-            .delete()
-            .eq('id', id);
-
-          if (error) {
-            alert('삭제 실패: ' + error.message);
-            return;
-          }
-          await this.renderNotice();
-        }
-      });
-    });
+    this.attachSupabaseDelete(tbody, 'notices', () => this.renderNotice());
   }
 
-  renderNews() {
-    const list = getStored(STORE_KEYS.NEWS, []);
+  async renderNews() {
     const tbody = document.getElementById('tableBodyNews');
     if (!tbody) return;
+    const { data: list } = await supabaseClient.from('news').select('*').order('id', { ascending: false });
     tbody.innerHTML = '';
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">등록된 뉴스가 없습니다.</td></tr>';
       return;
     }
-    list.forEach((item, idx) => {
+    list.forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="text-align:center;">${escapeHtml(item.date)}</td>
         <td><strong>${escapeHtml(item.title)}</strong></td>
         <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
           <button class="btn-edit-item" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
-          <button class="btn-delete-item" data-idx="${idx}">삭제</button>
+          <button class="btn-delete-item" data-table="news" data-id="${item.id}">삭제</button>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -1274,19 +1077,20 @@ class UnifiedAdminApp {
         }
       });
     });
-
-    this.attachDelete(tbody, STORE_KEYS.NEWS, () => this.renderNews());
+    this.attachSupabaseDelete(tbody, 'news', () => this.renderNews());
   }
 
-  attachDelete(tbody, storeKey, callback) {
+  attachSupabaseDelete(tbody, tableName, callback) {
     tbody.querySelectorAll('.btn-delete-item').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const idx = parseInt(e.currentTarget.getAttribute('data-idx'), 10);
+      btn.addEventListener('click', async (e) => {
+        const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
         if (confirm('선택한 항목을 삭제하시겠습니까?')) {
-          const list = getStored(storeKey, []);
-          list.splice(idx, 1);
-          setStored(storeKey, list);
-          callback();
+          const { error } = await supabaseClient.from(tableName).delete().eq('id', id);
+          if (error) {
+            alert('삭제 실패: ' + error.message);
+            return;
+          }
+          await callback();
         }
       });
     });
@@ -1295,7 +1099,7 @@ class UnifiedAdminApp {
 
 /**
  * ====================================================================
- * [PART 4] 일반 방문자용 공통 페이지 데이터 동기화 엔진 (안전 렌더링)
+ * [PART 4] 일반 방문자용 공통 페이지 데이터 동기화 엔진
  * ====================================================================
  */
 function syncPublicPages() {
@@ -1321,14 +1125,10 @@ function syncPublicPages() {
   });
 
   const shortNameEls = document.querySelectorAll('.logo-title, .footer-brand-title');
-  shortNameEls.forEach((el) => {
-    el.textContent = labConfig.shortName;
-  });
+  shortNameEls.forEach((el) => { el.textContent = labConfig.shortName; });
 
   const fullNameEls = document.querySelectorAll('.logo-desc, .footer-brand-sub');
-  fullNameEls.forEach((el) => {
-    el.textContent = labConfig.fullName;
-  });
+  fullNameEls.forEach((el) => { el.textContent = labConfig.fullName; });
 
   const tagClouds = document.querySelectorAll('.footer-tag-cloud');
   tagClouds.forEach((cloud) => {
@@ -1349,22 +1149,26 @@ function syncPublicPages() {
   syncPublicPagesInternal();
 }
 
-function syncPublicPagesInternal() {
+async function syncPublicPagesInternal() {
+  // 1. Home Hero
   const homeBadgeEl = document.getElementById('homeHeroBadge');
   if (homeBadgeEl) {
-    const heroData = getStored(STORE_KEYS.HOME_HERO, DEFAULT_HOME_HERO);
-    homeBadgeEl.textContent = heroData.badge;
-    const homeTitleEl = document.getElementById('homeHeroTitle');
-    if (homeTitleEl) homeTitleEl.innerHTML = heroData.title;
-    const homeDescEl = document.getElementById('homeHeroDesc');
-    if (homeDescEl) homeDescEl.textContent = heroData.desc;
+    const { data: heroData } = await supabaseClient.from('home_hero').select('*').eq('id', 1).single();
+    if (heroData) {
+      homeBadgeEl.textContent = heroData.badge;
+      const homeTitleEl = document.getElementById('homeHeroTitle');
+      if (homeTitleEl) homeTitleEl.innerHTML = heroData.title;
+      const homeDescEl = document.getElementById('homeHeroDesc');
+      if (homeDescEl) homeDescEl.textContent = heroData.desc;
+    }
   }
 
+  // 2. Home Research Areas Grid
   const homeResearchGrid = document.getElementById('homeResearchGrid');
   if (homeResearchGrid) {
-    const researchList = getStored(STORE_KEYS.RESEARCH_AREAS, DEFAULT_RESEARCH_AREAS);
+    const { data: researchList } = await supabaseClient.from('home_research_areas').select('*').order('id', { ascending: true });
     homeResearchGrid.innerHTML = '';
-    if (researchList.length === 0) {
+    if (!researchList || researchList.length === 0) {
       homeResearchGrid.innerHTML = '<div class="empty-state-card"><p>등록된 연구 분야가 없습니다.</p></div>';
     } else {
       researchList.forEach(item => {
@@ -1376,42 +1180,39 @@ function syncPublicPagesInternal() {
     }
   }
 
-  // 홈 화면 최신 게시물 연동 (Supabase notices 포함)
+  // 3. Home Board (Notices + News)
   const homeBoardBox = document.getElementById('homeBoardContainer');
   if (homeBoardBox) {
-    (async () => {
-      const { data: supabaseNotices } = await supabaseClient
-        .from('notices')
-        .select('*')
-        .order('id', { ascending: false });
+    const { data: supabaseNotices } = await supabaseClient.from('notices').select('*').order('id', { ascending: false });
+    const { data: supabaseNews } = await supabaseClient.from('news').select('*').order('id', { ascending: false });
 
-      const notices = (supabaseNotices || []).map(n => ({ ...n, originType: 'notice' }));
-      const news = getStored(STORE_KEYS.NEWS, []).map(w => ({ ...w, originType: 'news' }));
-      const combined = [...notices, ...news].sort((a, b) => parseCustomDate(b.date, b.id) - parseCustomDate(a.date, a.id));
-      const recentThree = combined.slice(0, 3);
-      
-      homeBoardBox.innerHTML = '';
-      if (recentThree.length === 0) {
-        homeBoardBox.innerHTML = '<div class="empty-state-card"><p>등록된 게시물이 없습니다.</p></div>';
-      } else {
-        recentThree.forEach((item) => {
-          const isNews = item.originType === 'news';
-          const tagText = isNews ? 'News' : 'Notice';
-          const tagClass = isNews ? 'notice-tag news-tag' : 'notice-tag';
-          const box = document.createElement('article');
-          box.className = 'notice-box'; box.style.cursor = 'pointer';
-          box.innerHTML = `<span class="${tagClass}">${escapeHtml(tagText)}</span><h3 class="notice-title">${escapeHtml(item.title)}</h3><div class="notice-desc">${formatDesc(item.desc || '')}</div><span class="notice-date">${escapeHtml(item.date || '')}</span>`;
-          box.addEventListener('click', () => { location.href = `view.html?type=${item.originType}&id=${item.id}`; });
-          homeBoardBox.appendChild(box);
-        });
-      }
-    })();
+    const notices = (supabaseNotices || []).map(n => ({ ...n, originType: 'notice' }));
+    const news = (supabaseNews || []).map(w => ({ ...w, originType: 'news' }));
+    const combined = [...notices, ...news].sort((a, b) => parseCustomDate(b.date, b.id) - parseCustomDate(a.date, a.id));
+    const recentThree = combined.slice(0, 3);
+    
+    homeBoardBox.innerHTML = '';
+    if (recentThree.length === 0) {
+      homeBoardBox.innerHTML = '<div class="empty-state-card"><p>등록된 게시물이 없습니다.</p></div>';
+    } else {
+      recentThree.forEach((item) => {
+        const isNews = item.originType === 'news';
+        const tagText = isNews ? 'News' : 'Notice';
+        const tagClass = isNews ? 'notice-tag news-tag' : 'notice-tag';
+        const box = document.createElement('article');
+        box.className = 'notice-box'; box.style.cursor = 'pointer';
+        box.innerHTML = `<span class="${tagClass}">${escapeHtml(tagText)}</span><h3 class="notice-title">${escapeHtml(item.title)}</h3><div class="notice-desc">${formatDesc(item.desc || '')}</div><span class="notice-date">${escapeHtml(item.date || '')}</span>`;
+        box.addEventListener('click', () => { location.href = `view.html?type=${item.originType}&id=${item.id}`; });
+        homeBoardBox.appendChild(box);
+      });
+    }
   }
 
+  // 4. Home Publications
   const homePubBox = document.getElementById('homePubContainer');
   if (homePubBox) {
-    const allPubs = getStored(STORE_KEYS.PUB, []);
-    const sortedPubs = allPubs.sort((a, b) => parseCustomDate(b.year, b.id) - parseCustomDate(a.year, a.id));
+    const { data: allPubs } = await supabaseClient.from('publications').select('*');
+    const sortedPubs = (allPubs || []).sort((a, b) => parseCustomDate(b.year, b.id) - parseCustomDate(a.year, a.id));
     const papersOnly = sortedPubs.filter(p => (p.type || 'paper') === 'paper').slice(0, 5);
     homePubBox.innerHTML = '';
     if (papersOnly.length === 0) {
@@ -1427,44 +1228,49 @@ function syncPublicPagesInternal() {
     }
   }
 
+  // 5. Director Page
   const dirNameKo = document.querySelector('.pi-name');
   if (dirNameKo) {
-    const dir = getStored(STORE_KEYS.DIRECTOR, DEFAULT_DIRECTOR);
-    dirNameKo.textContent = dir.nameKo || '';
-    const dirNameEn = document.querySelector('.pi-eng-name');
-    if (dirNameEn) dirNameEn.textContent = dir.nameEn || '';
-    const dirPos = document.querySelector('.pi-position');
-    if (dirPos) dirPos.textContent = dir.position || '';
-    const dirText = document.querySelector('.cv-text');
-    if (dirText) dirText.textContent = dir.greeting || '';
-    const avatarPlaceholder = document.querySelector('.avatar-placeholder');
-    if (avatarPlaceholder) {
-      if (dir.image) {
-        avatarPlaceholder.innerHTML = `<img src="${dir.image}" alt="프로필 사진" style="width:100%; height:100%; object-fit:cover; border-radius:10px;" />`;
-      } else {
-        avatarPlaceholder.innerHTML = `<span>Photo</span>`;
+    const { data: dir } = await supabaseClient.from('director_info').select('*').eq('id', 1).single();
+    if (dir) {
+      dirNameKo.textContent = dir.name_ko || '';
+      const dirNameEn = document.querySelector('.pi-eng-name');
+      if (dirNameEn) dirNameEn.textContent = dir.name_en || '';
+      const dirPos = document.querySelector('.pi-position');
+      if (dirPos) dirPos.textContent = dir.position || '';
+      const dirText = document.querySelector('.cv-text');
+      if (dirText) dirText.textContent = dir.greeting || '';
+      const avatarPlaceholder = document.querySelector('.avatar-placeholder');
+      if (avatarPlaceholder) {
+        if (dir.image) {
+          avatarPlaceholder.innerHTML = `<img src="${dir.image}" alt="프로필 사진" style="width:100%; height:100%; object-fit:cover; border-radius:10px;" />`;
+        } else {
+          avatarPlaceholder.innerHTML = `<span>Photo</span>`;
+        }
+      }
+      const contactPillList = document.querySelector('.contact-pill-list');
+      if (contactPillList) {
+        contactPillList.innerHTML = '';
+        let hasContact = false;
+        if (dir.email) { contactPillList.innerHTML += `<div class="pill-row"><strong>E-mail</strong> <span>${escapeHtml(dir.email)}</span></div>`; hasContact = true; }
+        if (dir.tel) { contactPillList.innerHTML += `<div class="pill-row"><strong>Tel</strong> <span>${escapeHtml(dir.tel)}</span></div>`; hasContact = true; }
+        if (dir.office) { contactPillList.innerHTML += `<div class="pill-row"><strong>Office</strong> <span>${escapeHtml(dir.office)}</span></div>`; hasContact = true; }
+        contactPillList.style.display = hasContact ? 'flex' : 'none';
       }
     }
-    const contactPillList = document.querySelector('.contact-pill-list');
-    if (contactPillList) {
-      contactPillList.innerHTML = '';
-      let hasContact = false;
-      if (dir.email) { contactPillList.innerHTML += `<div class="pill-row"><strong>E-mail</strong> <span>${escapeHtml(dir.email)}</span></div>`; hasContact = true; }
-      if (dir.tel) { contactPillList.innerHTML += `<div class="pill-row"><strong>Tel</strong> <span>${escapeHtml(dir.tel)}</span></div>`; hasContact = true; }
-      if (dir.office) { contactPillList.innerHTML += `<div class="pill-row"><strong>Office</strong> <span>${escapeHtml(dir.office)}</span></div>`; hasContact = true; }
-      contactPillList.style.display = hasContact ? 'flex' : 'none';
-    }
+
     const cvSections = document.querySelectorAll('.cv-section');
     if (cvSections && cvSections.length > 0) {
-      cvSections.forEach((section) => {
+      for (const section of cvSections) {
         const titleEl = section.querySelector('.cv-title');
         const wrap = section.querySelector('.edu-timeline-wrap');
-        if (!titleEl || !wrap) return;
+        if (!titleEl || !wrap) continue;
         const titleText = titleEl.textContent.trim();
+
         if (titleText.includes('Education')) {
-          const eduList = getStored(STORE_KEYS.EDUCATION, []);
+          const { data: eduList } = await supabaseClient.from('direcotr_education').select('*').order('id', { ascending: true });
           wrap.innerHTML = '';
-          if (eduList.length === 0) {
+          if (!eduList || eduList.length === 0) {
             wrap.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 학력 정보가 없습니다.</p></div>';
           } else {
             eduList.slice().reverse().forEach(item => {
@@ -1474,9 +1280,9 @@ function syncPublicPagesInternal() {
             });
           }
         } else if (titleText.includes('Experience') || titleText.includes('Professional')) {
-          const expList = getStored(STORE_KEYS.EXPERIENCE, []);
+          const { data: expList } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: true });
           wrap.innerHTML = '';
-          if (expList.length === 0) {
+          if (!expList || expList.length === 0) {
             wrap.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 경력 및 활동 정보가 없습니다.</p></div>';
           } else {
             expList.slice().reverse().forEach(item => {
@@ -1486,19 +1292,21 @@ function syncPublicPagesInternal() {
             });
           }
         }
-      });
+      }
     }
   }
 
-  // Current / Trainee 2단 렌더링
+  // 6. Current Members Page
   const cResearcher = document.getElementById('containerResearcher');
   const cTrainee = document.getElementById('containerTrainee');
   if (cResearcher || cTrainee) {
-    const list = getStored(STORE_KEYS.CURRENT, []);
+    const { data: list } = await supabaseClient.from('current_members').select('*').order('id', { ascending: false });
     if (cResearcher) cResearcher.innerHTML = '';
     if (cTrainee) cTrainee.innerHTML = '';
-    const traineeList = list.filter(m => (m.role || '').includes('교육생') || (m.role || '').toLowerCase().includes('trainee'));
-    const researcherList = list.filter(m => !traineeList.includes(m));
+    const safeList = list || [];
+    const traineeList = safeList.filter(m => (m.role || '').includes('교육생') || (m.role || '').toLowerCase().includes('trainee'));
+    const researcherList = safeList.filter(m => !traineeList.includes(m));
+
     const renderGroup = (arr, container) => {
       if (!container) return;
       if (arr.length === 0) { container.innerHTML = '<div class="empty-state-card" style="grid-column:1/-1;"><p>등록된 멤버가 없습니다.</p></div>'; return; }
@@ -1515,12 +1323,12 @@ function syncPublicPagesInternal() {
     renderGroup(traineeList, cTrainee);
   }
 
-  // Alumni 연도별 렌더링
+  // 7. Alumni Page
   const alumniMainContainer = document.getElementById('alumniContainer');
   if (alumniMainContainer) {
-    const list = getStored(STORE_KEYS.ALUMNI, []);
+    const { data: list } = await supabaseClient.from('alumni_members').select('*').order('year', { ascending: false });
     alumniMainContainer.innerHTML = '';
-    if (list.length === 0) { alumniMainContainer.innerHTML = '<div class="empty-state-card"><p>등록된 졸업생이 없습니다.</p></div>'; return; }
+    if (!list || list.length === 0) { alumniMainContainer.innerHTML = '<div class="empty-state-card"><p>등록된 졸업생이 없습니다.</p></div>'; return; }
     const groupedByYear = {};
     list.forEach((a) => { const yr = a.year || 'Unknown'; if (!groupedByYear[yr]) groupedByYear[yr] = []; groupedByYear[yr].push(a); });
     const sortedYears = Object.keys(groupedByYear).sort((a, b) => b - a);
@@ -1540,150 +1348,108 @@ function syncPublicPagesInternal() {
     });
   }
 
-  // Lab Life 렌더링
+  // 8. Lab Life Page
   const lablifeContainer = document.getElementById('lablifeListContainer');
-  if (lablifeContainer) {
-    const list = getStored(STORE_KEYS.LABLIFE, []);
+  if (lablifeContainer && !document.getElementById('formAdminLabLife')) {
+    const { data: list } = await supabaseClient.from('lab_life').select('*').order('id', { ascending: false });
     lablifeContainer.innerHTML = '';
-    if (list.length === 0) { lablifeContainer.innerHTML = '<div class="empty-state-card" style="grid-column: 1 / -1;"><p>등록된 Lab Life 활동이 없습니다.</p></div>'; }
+    if (!list || list.length === 0) { lablifeContainer.innerHTML = '<div class="empty-state-card" style="grid-column: 1 / -1;"><p>등록된 Lab Life 활동이 없습니다.</p></div>'; }
     else {
-      list.forEach((item, idx) => {
+      list.forEach((item) => {
         const card = document.createElement('article'); card.className = 'lablife-card clickable-card';
-        let thumbImg = (item.images && item.images.length > 0) ? `<img src="${item.images[0]}" alt="사진" style="width:100%; height:100%; object-fit:contain;" />` : (item.image ? `<img src="${item.image}" alt="사진" style="width:100%; height:100%; object-fit:contain;" />` : `<div class="img-placeholder">No Image</div>`);
+        let thumbImg = (item.images && item.images.length > 0) ? `<img src="${item.images[0]}" alt="사진" style="width:100%; height:100%; object-fit:contain;" />` : `<div class="img-placeholder">No Image</div>`;
         card.innerHTML = `<div class="lablife-img-frame">${thumbImg}</div><div class="lablife-content"><span class="lablife-date">${escapeHtml(item.date)}</span><h3 class="lablife-title">${escapeHtml(item.title)}</h3><div class="lablife-desc">${formatDesc(item.desc || '')}</div></div>`;
-        card.addEventListener('click', () => { location.href = `view.html?type=lablife&id=${item.id !== undefined ? item.id : idx}`; });
+        card.addEventListener('click', () => { location.href = `view.html?type=lablife&id=${item.id}`; });
         lablifeContainer.appendChild(card);
       });
     }
   }
 
-  // [SUPABASE 연동] 방문자 페이지 Notice 목록 렌더링
+  // 9. Notice Page
   const noticeTbody = document.getElementById('noticeTableBody');
   if (noticeTbody) {
-    (async () => {
-      const { data: list, error } = await supabaseClient
-        .from('notices')
-        .select('*')
-        .order('id', { ascending: false });
-
-      noticeTbody.innerHTML = '';
-      if (error || !list || list.length === 0) {
-        noticeTbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 40px; color: #475569;">등록된 공지사항이 없습니다.</td></tr>';
-        return;
-      }
-
-      list.forEach((item, idx) => {
-        const tr = document.createElement('tr'); 
-        tr.className = 'notice-row clickable-row';
-        tr.innerHTML = `<td style="text-align:center;">${list.length - idx}</td><td class="notice-title-cell"><span class="board-link">${escapeHtml(item.title)}</span></td><td style="text-align:center;">${escapeHtml(item.date)}</td>`;
-        tr.addEventListener('click', () => { location.href = `view.html?type=notice&id=${item.id}`; });
-        noticeTbody.appendChild(tr);
-      });
-    })();
+    const { data: list } = await supabaseClient.from('notices').select('*').order('id', { ascending: false });
+    noticeTbody.innerHTML = '';
+    if (!list || list.length === 0) {
+      noticeTbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 40px; color: #475569;">등록된 공지사항이 없습니다.</td></tr>';
+      return;
+    }
+    list.forEach((item, idx) => {
+      const tr = document.createElement('tr'); 
+      tr.className = 'notice-row clickable-row';
+      tr.innerHTML = `<td style="text-align:center;">${list.length - idx}</td><td class="notice-title-cell"><span class="board-link">${escapeHtml(item.title)}</span></td><td style="text-align:center;">${escapeHtml(item.date)}</td>`;
+      tr.addEventListener('click', () => { location.href = `view.html?type=notice&id=${item.id}`; });
+      noticeTbody.appendChild(tr);
+    });
   }
 
-  // News 렌더링
+  // 10. News Page
   const newsContainer = document.getElementById('newsListContainer');
-  if (newsContainer) {
-    const list = getStored(STORE_KEYS.NEWS, []);
-    const sortedList = list.slice().sort((a, b) => parseCustomDate(b.date, b.id) - parseCustomDate(a.date, a.id));
+  if (newsContainer && !document.getElementById('formAdminNews')) {
+    const { data: list } = await supabaseClient.from('news').select('*').order('id', { ascending: false });
+    const sortedList = (list || []).sort((a, b) => parseCustomDate(b.date, b.id) - parseCustomDate(a.date, a.id));
     newsContainer.innerHTML = '';
     if (sortedList.length === 0) { newsContainer.innerHTML = '<div class="empty-state-card" style="grid-column: 1 / -1;"><p>등록된 뉴스가 없습니다.</p></div>'; }
     else {
-      sortedList.forEach((item, idx) => {
+      sortedList.forEach((item) => {
         const card = document.createElement('article'); card.className = 'lablife-card clickable-card';
-        let thumbImg = (item.images && item.images.length > 0) ? `<img src="${item.images[0]}" alt="사진" style="width:100%; height:100%; object-fit:contain;" />` : (item.image ? `<img src="${item.image}" alt="사진" style="width:100%; height:100%; object-fit:contain;" />` : `<div class="img-placeholder">No Image</div>`);
+        let thumbImg = (item.images && item.images.length > 0) ? `<img src="${item.images[0]}" alt="사진" style="width:100%; height:100%; object-fit:contain;" />` : `<div class="img-placeholder">No Image</div>`;
         card.innerHTML = `<div class="lablife-img-frame">${thumbImg}</div><div class="lablife-content"><span class="lablife-date">${escapeHtml(item.date)}</span><h3 class="lablife-title">${escapeHtml(item.title)}</h3><div class="lablife-desc">${formatDesc(item.desc || '')}</div></div>`;
-        card.addEventListener('click', () => { location.href = `view.html?type=news&id=${item.id !== undefined ? item.id : idx}`; });
+        card.addEventListener('click', () => { location.href = `view.html?type=news&id=${item.id}`; });
         newsContainer.appendChild(card);
       });
     }
   }
 
-  // [SUPABASE 연동] View 상세 페이지 렌더링
+  // 11. View Detail Page
   const viewTitle = document.getElementById('viewTitle');
   if (viewTitle) {
     const params = new URLSearchParams(location.search);
     const type = params.get('type');
     const id = params.get('id');
+    let tableName = 'notices';
+    let catName = 'NOTICE';
 
-    if (type === 'notice') {
-      (async () => {
-        const { data: item, error } = await supabaseClient
-          .from('notices')
-          .select('*')
-          .eq('id', id)
-          .single();
+    if (type === 'news') { tableName = 'news'; catName = 'NEWS'; }
+    else if (type === 'lablife') { tableName = 'lab_life'; catName = 'LAB LIFE'; }
 
-        if (error || !item) {
-          viewTitle.textContent = '해당 게시물을 찾을 수 없습니다.';
-          const c = document.getElementById('viewContent'); if(c) c.textContent = '삭제되었거나 잘못된 접근입니다.';
-          return;
-        }
+    const { data: item, error } = await supabaseClient.from(tableName).select('*').eq('id', id).single();
+    if (error || !item) {
+      viewTitle.textContent = '해당 게시물을 찾을 수 없습니다.';
+      const c = document.getElementById('viewContent'); if(c) c.textContent = '삭제되었거나 잘못된 접근입니다.';
+      return;
+    }
 
-        const newViews = (item.views || 0) + 1;
-        await supabaseClient
-          .from('notices')
-          .update({ views: newViews })
-          .eq('id', id);
+    const newViews = (item.views || 0) + 1;
+    await supabaseClient.from(tableName).update({ views: newViews }).eq('id', id);
 
-        document.getElementById('viewPageCategory').textContent = 'NOTICE';
-        document.getElementById('viewBadge').textContent = 'Notice';
-        document.getElementById('viewTitle').textContent = item.title;
-        document.getElementById('viewDate').textContent = item.date;
-        document.getElementById('viewViews').textContent = newViews;
-        document.getElementById('viewContent').innerHTML = formatDesc(item.desc || '');
+    document.getElementById('viewPageCategory').textContent = catName;
+    document.getElementById('viewBadge').textContent = catName;
+    document.getElementById('viewTitle').textContent = item.title;
+    document.getElementById('viewDate').textContent = item.date;
+    document.getElementById('viewViews').textContent = newViews;
+    document.getElementById('viewContent').innerHTML = formatDesc(item.desc || '');
 
-        const galleryBox = document.getElementById('viewImagesGallery');
-        const allImgs = [];
-        if (item.images && item.images.length > 0) allImgs.push(...item.images);
-        else if (item.image) allImgs.push(item.image);
-        if (allImgs.length > 0 && galleryBox) {
-          galleryBox.innerHTML = '';
-          allImgs.forEach(src => { 
-            let wrapper = document.createElement('div'); 
-            wrapper.className = 'view-single-img-wrap'; 
-            wrapper.innerHTML = `<img src="${src}" alt="이미지" />`; 
-            galleryBox.appendChild(wrapper); 
-          });
-          galleryBox.style.display = 'block';
-        }
-      })();
-    } else {
-      let storeKey = STORE_KEYS.NEWS, catName = 'NEWS';
-      if (type === 'lablife') { storeKey = STORE_KEYS.LABLIFE; catName = 'LAB LIFE'; }
-      let list = getStored(storeKey, []);
-      let itemIndex = list.findIndex(x => (x.id !== undefined && x.id.toString() === id));
-      if (itemIndex === -1) itemIndex = parseInt(id, 10);
-      const item = list[itemIndex];
-      if (item) {
-        item.views = (item.views || 0) + 1; setStored(storeKey, list);
-        document.getElementById('viewPageCategory').textContent = catName;
-        document.getElementById('viewBadge').textContent = item.category || catName;
-        document.getElementById('viewTitle').textContent = item.title;
-        document.getElementById('viewDate').textContent = item.date;
-        document.getElementById('viewViews').textContent = item.views;
-        document.getElementById('viewContent').innerHTML = formatDesc(item.desc || '');
-        const galleryBox = document.getElementById('viewImagesGallery');
-        const allImgs = [];
-        if (item.images && item.images.length > 0) allImgs.push(...item.images);
-        else if (item.image) allImgs.push(item.image);
-        if (allImgs.length > 0 && galleryBox) {
-          galleryBox.innerHTML = '';
-          allImgs.forEach(src => { let wrapper = document.createElement('div'); wrapper.className = 'view-single-img-wrap'; wrapper.innerHTML = `<img src="${src}" alt="이미지" />`; galleryBox.appendChild(wrapper); });
-          galleryBox.style.display = 'block';
-        }
-      } else {
-        viewTitle.textContent = '해당 게시물을 찾을 수 없습니다.';
-        const c = document.getElementById('viewContent'); if(c) c.textContent = '삭제되었거나 잘못된 접근입니다.';
-      }
+    const galleryBox = document.getElementById('viewImagesGallery');
+    const allImgs = [];
+    if (item.images && item.images.length > 0) allImgs.push(...item.images);
+    else if (item.image) allImgs.push(item.image);
+    if (allImgs.length > 0 && galleryBox) {
+      galleryBox.innerHTML = '';
+      allImgs.forEach(src => { 
+        let wrapper = document.createElement('div'); 
+        wrapper.className = 'view-single-img-wrap'; 
+        wrapper.innerHTML = `<img src="${src}" alt="이미지" />`; 
+        galleryBox.appendChild(wrapper); 
+      });
+      galleryBox.style.display = 'block';
     }
   }
 }
 
 /**
  * ====================================================================
- * [PART 5] 논문 및 특허 전용 검색 및 페이징 뷰어 클래스
+ * [PART 5] 논문 및 특허 전용 검색 클래스
  * ====================================================================
  */
 class DedicatedPubViewer {
@@ -1698,9 +1464,13 @@ class DedicatedPubViewer {
     this.currentPage = 1;
 
     if (!this.container) return;
+    this.initAsyncData();
+  }
 
-    const allItems = getStored(STORE_KEYS.PUB, []);
-    const filteredBase = allItems.filter(item => (item.type || 'paper') === this.targetType);
+  async initAsyncData() {
+    const { data: allItems } = await supabaseClient.from('publications').select('*');
+    const safeList = allItems || [];
+    const filteredBase = safeList.filter(item => (item.type || 'paper') === this.targetType);
     this.baseList = filteredBase.sort((a, b) => parseCustomDate(b.year, b.id) - parseCustomDate(a.year, a.id));
     this.filteredList = [...this.baseList];
 
@@ -1782,81 +1552,16 @@ class DedicatedPubViewer {
 
 /**
  * ====================================================================
- * [PART 6] 일반 게시판 및 목록 검색/페이징 컨트롤러 클래스
- * ====================================================================
- */
-class GenericListController {
-  constructor({ containerId, itemSelector, titleSelector, descSelector, selectId, searchInputId, searchBtnId, paginationId, itemsPerPage = 10 }) {
-    this.containerId = containerId; this.container = document.getElementById(containerId);
-    this.selectEl = document.getElementById(selectId); this.searchInput = document.getElementById(searchInputId);
-    this.searchBtn = document.getElementById(searchBtnId); this.paginationContainer = document.getElementById(paginationId);
-    this.itemSelector = itemSelector; this.titleSelector = titleSelector; this.descSelector = descSelector;
-    this.itemsPerPage = itemsPerPage; this.currentPage = 1;
-    if (!this.container) return;
-    setTimeout(() => { this.container = document.getElementById(this.containerId); this.init(); }, 60);
-  }
-  init() {
-    if (!this.container) return;
-    if (this.searchInput) { this.searchInput.addEventListener('input', () => { this.currentPage = 1; this.render(); }); }
-    if (this.selectEl) { this.selectEl.addEventListener('change', () => { this.currentPage = 1; this.render(); }); }
-    if (this.searchBtn) { this.searchBtn.addEventListener('click', () => { this.currentPage = 1; this.render(); }); }
-    this.render();
-  }
-  render() {
-    if (!this.container) return;
-    const allItems = Array.from(this.container.querySelectorAll(this.itemSelector));
-    if (allItems.length === 0) return;
-    const keyword = (this.searchInput ? this.searchInput.value.trim().toLowerCase() : '').replace(/\s+/g, '');
-    const filtered = allItems.filter((item) => {
-      if (!keyword) return true;
-      const text = item.textContent.trim().toLowerCase().replace(/\s+/g, '');
-      return text.includes(keyword);
-    });
-    allItems.forEach(i => i.style.display = 'none');
-    this.container.querySelectorAll('.empty-state-card').forEach(el => el.remove());
-    if (filtered.length === 0) {
-      const msg = document.createElement('div'); msg.className = 'empty-state-card'; msg.style.gridColumn = '1/-1'; msg.innerHTML = '<p>검색 조건과 일치하는 항목이 없습니다.</p>';
-      this.container.appendChild(msg); return;
-    }
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const currentSlice = filtered.slice(startIndex, startIndex + this.itemsPerPage);
-    currentSlice.forEach(item => { item.style.display = item.tagName === 'TR' ? 'table-row' : 'flex'; });
-    this.renderPagination(filtered.length);
-  }
-  renderPagination(totalCount) {
-    if (!this.paginationContainer) return;
-    this.paginationContainer.innerHTML = '';
-    const totalPages = Math.ceil(totalCount / this.itemsPerPage);
-    if (totalPages <= 1) return;
-    for (let i = 1; i <= totalPages; i++) {
-      const pageBtn = document.createElement('button');
-      pageBtn.className = `page-btn num-btn ${this.currentPage === i ? 'active' : ''}`;
-      pageBtn.textContent = i;
-      pageBtn.addEventListener('click', () => { this.currentPage = i; this.render(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-      this.paginationContainer.appendChild(pageBtn);
-    }
-  }
-}
-
-/**
- * ====================================================================
- * [PART 7] 웹페이지 구동 메인 초기화 루틴
+ * [PART 6] 웹페이지 구동 메인 초기화 루틴
  * ====================================================================
  */
 document.addEventListener('DOMContentLoaded', () => {
   syncPublicPages();
   new UnifiedAdminApp();
+  
   const topBtn = document.getElementById('scrollTopBtn');
   if (topBtn) topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
   new DedicatedPubViewer({ targetType: 'paper', containerId: 'pubListContainer', paginationId: 'pubPagination', selectId: 'searchSelectValue', searchInputId: 'pubSearchInput', searchBtnId: 'pubSearchBtn' });
   new DedicatedPubViewer({ targetType: 'patent', containerId: 'patentListContainer', paginationId: 'patentPagination', selectId: 'searchSelectValue', searchInputId: 'patentSearchInput', searchBtnId: 'patentSearchBtn' });
-  if (document.getElementById('lablifeListContainer')) {
-    new GenericListController({ containerId: 'lablifeListContainer', itemSelector: '.lablife-card', titleSelector: '.lablife-title', descSelector: '.lablife-desc', selectId: 'searchSelectValue', searchInputId: 'lablifeSearchInput', searchBtnId: 'lablifeSearchBtn', paginationId: 'lablifePagination', itemsPerPage: 6 });
-  }
-  if (document.getElementById('noticeTableBody')) {
-  }
-  if (document.getElementById('newsListContainer')) {
-    new GenericListController({ containerId: 'newsListContainer', itemSelector: '.lablife-card', titleSelector: '.lablife-title', descSelector: '.lablife-desc', selectId: 'searchSelectValue', searchInputId: 'newsSearchInput', searchBtnId: 'newsSearchBtn', paginationId: 'newsPagination', itemsPerPage: 6 });
-  }
 });

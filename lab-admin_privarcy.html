@@ -16,7 +16,6 @@
   <header class="navbar subpage-nav admin-navbar">
     <div class="nav-container admin-nav-container">
       
-      <!-- 연구실 로고 및 명칭 -->
       <a href="index.html" class="brand-logo">
         <div class="logo-mark"></div>
         <div class="logo-text">
@@ -25,19 +24,16 @@
         </div>
       </a>
       
-      <!-- 모바일 햄버거 메뉴 (반응형 슬라이드 패널) -->
       <nav class="main-menu admin-mobile-menu">
         <div class="nav-item">
           <a href="index.html" class="main-link" target="_blank" rel="noopener noreferrer">Homepage &rarr;</a>
         </div>
-        <!-- 로그인 상태에 따라 텍스트 및 링크가 유연하게 전환되는 인증 메뉴 -->
         <div class="nav-item" id="adminAuthMenuMobile">
           <a href="#adminAuthBox" class="main-link" id="adminAuthLinkMobile">Login</a>
           <a href="#" class="main-link" id="adminLogoutLinkMobile" style="display:none;">Logout</a>
         </div>
       </nav>
 
-      <!-- 데스크톱 전용 우측 상단 액션 버튼 -->
       <div class="admin-top-actions">
         <a href="index.html" class="btn btn-outline admin-action-btn" target="_blank" rel="noopener noreferrer">Homepage &rarr;</a>
         <a href="#adminAuthBox" class="btn btn-primary admin-action-btn" id="adminLoginBtnDesktop">Login</a>
@@ -70,7 +66,6 @@
       <!-- 로그인 성공 시 노출되는 관리자 패널 콘솔 -->
       <div id="adminPanelBox" style="display: none;">
         
-        <!-- 관리자 기능 탭 네비게이션 버튼 그룹 -->
         <div class="admin-nav-tabs">
           <button class="admin-tab-btn active" data-tab="tab-home">Home</button>
           <button class="admin-tab-btn" data-tab="tab-director">Director</button>
@@ -82,10 +77,8 @@
           <button class="admin-tab-btn" data-tab="tab-news">News</button>
         </div>
 
-        <!-- [TAB 0] Home (홈 화면 히어로 배너 및 주요 연구 분야 관리) -->
+        <!-- [TAB 0] Home -->
         <div id="tab-home" class="admin-tab-content active">
-          
-          <!-- 홈 히어로 대문 배너 관리 폼 -->
           <div class="admin-form-card">
             <h3 class="admin-card-title">홈 화면 히어로 배너 관리</h3>
             <form id="formAdminHomeHero">
@@ -107,7 +100,6 @@
             </form>
           </div>
 
-          <!-- 주요 연구 분야 (Research Areas) 추가/수정 폼 -->
           <div class="admin-form-card" style="margin-top: 30px;">
             <h3 class="admin-card-title" id="researchFormTitle">+ 주요 연구 분야 (Research Areas) 추가</h3>
             <form id="formAdminResearchItem">
@@ -126,7 +118,6 @@
             </form>
           </div>
 
-          <!-- 등록된 주요 연구 분야 목록 테이블 -->
           <div class="admin-table-card">
             <h3 class="admin-card-title">등록된 Research Areas 목록</h3>
             <table class="board-table">
@@ -141,13 +132,10 @@
               <tbody id="tableBodyResearch"></tbody>
             </table>
           </div>
-
         </div>
 
-        <!-- [TAB 1] Director (기본 정보, 학력, 경력 관리) -->
+        <!-- [TAB 1] Director -->
         <div id="tab-director" class="admin-tab-content">
-          
-          <!-- PI 기본 정보 및 프로필 사진 관리 폼 -->
           <div class="admin-form-card">
             <h3 class="admin-card-title">책임연구자(PI) 기본 정보 및 사진 관리</h3>
             <form id="formAdminDirector">
@@ -165,14 +153,13 @@
               </div>
               <div class="form-group">
                 <label>프로필 사진 첨부</label>
-                <input type="file" id="admDirImg" accept="image/*" style="display: block; width: 100%; height: auto !important; padding: 6px 10px !important; background: #ffffff !important; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #475569; box-sizing: border-box; line-height: 1.5 !important;" />
+                <input type="file" id="admDirImg" accept="image/*" />
               </div>
               <div class="form-group"><label>인사말 &amp; 비전 *</label><textarea id="admDirGreeting" rows="4" class="admin-textarea" required></textarea></div>
               <div style="text-align: right; margin-top: 10px;"><button type="submit" class="btn-submit" style="padding: 12px 28px;">Director 기본정보 저장</button></div>
             </form>
           </div>
 
-          <!-- 학력(Education) 추가/수정 폼 -->
           <div class="admin-form-card" style="margin-top: 30px;">
             <h3 class="admin-card-title">+ 학력 (Education) 추가 및 수정</h3>
             <form id="formAdminEdu">
@@ -188,7 +175,6 @@
             </form>
           </div>
           
-          <!-- 등록된 학력 목록 테이블 -->
           <div class="admin-table-card">
             <h3 class="admin-card-title">등록된 Education 목록</h3>
             <table class="board-table">
@@ -204,7 +190,6 @@
             </table>
           </div>
 
-          <!-- 경력 및 활동(Experience) 추가/수정 폼 -->
           <div class="admin-form-card" style="margin-top: 30px;">
             <h3 class="admin-card-title">+ 경력 및 활동 이력 추가</h3>
             <form id="formAdminExp">
@@ -233,7 +218,6 @@
             </form>
           </div>
 
-          <!-- 등록된 경력 목록 테이블 -->
           <div class="admin-table-card">
             <h3 class="admin-card-title">등록된 Professional Experience &amp; Activities 목록</h3>
             <table class="board-table">
@@ -249,10 +233,9 @@
               <tbody id="tableBodyExp"></tbody>
             </table>
           </div>
-
         </div>
 
-        <!-- [TAB 2] Current (현재 연구원 관리 - 1단 평탄화 스택) -->
+        <!-- [TAB 2] Current -->
         <div id="tab-current" class="admin-tab-content">
           <div class="admin-form-card">
             <h3 class="admin-card-title">+ 현재 연구원 등록</h3>
@@ -271,25 +254,11 @@
                   <option value="Undergraduate Trainee">Undergraduate Trainee (학부 교육생)</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label>이름 *</label>
-                <input type="text" id="admCurName" required />
-              </div>
-              <div class="form-group">
-                <label>키워드 태그</label>
-                <input type="text" id="admCurTags" />
-              </div>
-              <div class="form-group">
-                <label>이메일 *</label>
-                <input type="email" id="admCurEmail" required />
-              </div>
-              <div class="form-group">
-                <label>프로필 사진 첨부</label>
-                <input type="file" id="admCurImg" accept="image/*" />
-              </div>
-              <div style="text-align: right; margin-top: 16px;">
-                <button type="submit" class="btn-submit" style="padding: 11px 24px;">연구원 추가하기</button>
-              </div>
+              <div class="form-group"><label>이름 *</label><input type="text" id="admCurName" required /></div>
+              <div class="form-group"><label>키워드 태그</label><input type="text" id="admCurTags" /></div>
+              <div class="form-group"><label>이메일 *</label><input type="email" id="admCurEmail" required /></div>
+              <div class="form-group"><label>프로필 사진 첨부</label><input type="file" id="admCurImg" accept="image/*" /></div>
+              <div style="text-align: right; margin-top: 16px;"><button type="submit" class="btn-submit" style="padding: 11px 24px;">연구원 추가하기</button></div>
             </form>
           </div>
           <div class="admin-table-card">
@@ -308,7 +277,7 @@
           </div>
         </div>
 
-        <!-- [TAB 3] Alumni (졸업생 관리) -->
+        <!-- [TAB 3] Alumni -->
         <div id="tab-alumni" class="admin-tab-content">
           <div class="admin-form-card">
             <h3 class="admin-card-title">+ 졸업생(Alumni) 등록</h3>
@@ -322,10 +291,7 @@
                 <div class="form-group"><label>이메일 *</label><input type="email" id="admAlumEmail" required /></div>
               </div>
               <div class="form-group"><label>키워드 태그</label><input type="text" id="admAlumTags" /></div>
-              <div class="form-group">
-                <label>프로필 사진 첨부</label>
-                <input type="file" id="admAlumImg" accept="image/*" style="display: block; width: 100%; height: auto !important; padding: 6px 10px !important; background: #ffffff !important; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #475569; box-sizing: border-box; line-height: 1.5 !important;" />
-              </div>
+              <div class="form-group"><label>프로필 사진 첨부</label><input type="file" id="admAlumImg" accept="image/*" /></div>
               <div style="text-align: right;"><button type="submit" class="btn-submit" style="padding: 11px 24px;">졸업생 추가하기</button></div>
             </form>
           </div>
@@ -345,7 +311,7 @@
           </div>
         </div>
 
-        <!-- [TAB 4] Publications & Patents (연구 실적 관리) -->
+        <!-- [TAB 4] Publications & Patents -->
         <div id="tab-pub" class="admin-tab-content">
           <div class="admin-form-card">
             <h3 class="admin-card-title">+ 새 논문 또는 특허 등록</h3>
@@ -383,7 +349,7 @@
           </div>
         </div>
 
-        <!-- [TAB 5] Lab Life (랩 라이프 활동 관리) -->
+        <!-- [TAB 5] Lab Life -->
         <div id="tab-lablife" class="admin-tab-content">
           <div class="admin-form-card">
             <h3 class="admin-card-title">+ Lab Life 활동 등록</h3>
@@ -392,10 +358,7 @@
                 <div class="form-group"><label>활동 날짜 *</label><input type="date" id="admLifeDate" required /></div>
                 <div class="form-group"><label>활동 제목 *</label><input type="text" id="admLifeTitle" required /></div>
               </div>
-              <div class="form-group">
-                <label>사진 여러 장 첨부 (선택)</label>
-                <input type="file" id="admLifeImgs" accept="image/*" multiple style="display: block; width: 100%; height: auto !important; padding: 6px 10px !important; background: #ffffff !important; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #475569; box-sizing: border-box; line-height: 1.5 !important;" />
-              </div>
+              <div class="form-group"><label>사진 여러 장 첨부 (선택)</label><input type="file" id="admLifeImgs" accept="image/*" multiple /></div>
               <div class="form-group"><label>활동 상세 설명 *</label><textarea id="admLifeDesc" rows="5" class="admin-textarea" required></textarea></div>
               <div style="text-align: right;"><button type="submit" class="btn-submit" style="padding: 11px 24px;">활동 등록하기</button></div>
             </form>
@@ -415,7 +378,7 @@
           </div>
         </div>
 
-        <!-- [TAB 6] Notice (공지사항 관리) -->
+        <!-- [TAB 6] Notice -->
         <div id="tab-notice" class="admin-tab-content">
           <div class="admin-form-card">
             <h3 class="admin-card-title">+ 새 공지사항 등록</h3>
@@ -424,10 +387,7 @@
                 <div class="form-group"><label>공지 날짜 *</label><input type="date" id="admNotDate" required /></div>
                 <div class="form-group"><label>공지 제목 *</label><input type="text" id="admNotTitle" required /></div>
               </div>
-              <div class="form-group">
-                <label>사진 여러 장 첨부 (선택)</label>
-                <input type="file" id="admNotImgs" accept="image/*" multiple style="display: block; width: 100%; height: auto !important; padding: 6px 10px !important; background: #ffffff !important; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #475569; box-sizing: border-box; line-height: 1.5 !important;" />
-              </div>
+              <div class="form-group"><label>사진 여러 장 첨부 (선택)</label><input type="file" id="admNotImgs" accept="image/*" multiple /></div>
               <div class="form-group"><label>공지 본문 내용 *</label><textarea id="admNotDesc" rows="5" class="admin-textarea" required></textarea></div>
               <div style="text-align: right;"><button type="submit" class="btn-submit" style="padding: 11px 24px;">공지 등록하기</button></div>
             </form>
@@ -447,17 +407,14 @@
           </div>
         </div>
 
-        <!-- [TAB 7] News (랩 뉴스 관리) -->
+        <!-- [TAB 7] News -->
         <div id="tab-news" class="admin-tab-content">
           <div class="admin-form-card">
             <h3 class="admin-card-title">+ 최신 랩 뉴스 등록</h3>
             <form id="formAdminNews">
               <div class="form-group"><label>날짜 *</label><input type="date" id="admNewsDate" required /></div>
               <div class="form-group"><label>뉴스 제목 *</label><input type="text" id="admNewsTitle" required /></div>
-              <div class="form-group">
-                <label>사진 여러 장 첨부 (선택)</label>
-                <input type="file" id="admNewsImgs" accept="image/*" multiple style="display: block; width: 100%; height: auto !important; padding: 6px 10px !important; background: #ffffff !important; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #475569; box-sizing: border-box; line-height: 1.5 !important;" />
-              </div>
+              <div class="form-group"><label>사진 여러 장 첨부 (선택)</label><input type="file" id="admNewsImgs" accept="image/*" multiple /></div>
               <div class="form-group"><label>뉴스 본문 내용 *</label><textarea id="admNewsDesc" rows="5" class="admin-textarea" required></textarea></div>
               <div style="text-align: right;"><button type="submit" class="btn-submit" style="padding: 11px 24px;">뉴스 게시하기</button></div>
             </form>
@@ -481,14 +438,12 @@
     </div>
   </main>
 
-  <!-- ============================================================
-       하단 푸터 영역 (Footer & Admin Console Link)
-       ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- 하단 푸터 영역                                               -->
+  <!-- ============================================================ -->
   <footer class="custom-lab-footer">
     <div class="footer-wrap">
       <div class="footer-grid">
-        
-        <!-- 브랜드 정보 및 이메일 -->
         <div class="footer-col footer-col-brand">
           <div class="footer-brand-header">
             <div class="logo-mark"></div>
@@ -497,45 +452,12 @@
               <p class="footer-brand-sub"></p>
             </div>
           </div>
-          <p class="footer-address" style="display: none;"></p>
-          <div class="footer-contact-chips">
-            <span style="display: none;"></span>
-            <span>E-MAIL. sooya1105@naver.com</span>
-          </div>
+          <span>E-MAIL. sooya1105@naver.com</span>
         </div>
-
-        <!-- 푸터 내비게이션 링크 -->
-        <div class="footer-col footer-col-nav">
-          <div class="footer-nav-group">
-            <h5 class="footer-group-title">Navigation</h5>
-            <ul class="footer-links-list">
-              <li><a href="index.html">Home</a></li>
-              <li><a href="director.html">Director</a></li>
-              <li><a href="members-current.html">Members</a></li>
-            </ul>
-          </div>
-          <div class="footer-nav-group">
-            <h5 class="footer-group-title" style="visibility: hidden;">More</h5>
-            <ul class="footer-links-list">
-              <li><a href="publications.html">Publications</a></li>
-              <li><a href="lab-life.html">Lab Life</a></li>
-              <li><a href="notice.html">Board</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- 연구 분야 태그 클라우드 -->
-        <div class="footer-col footer-col-tags">
-          <h5 class="footer-group-title">Research Focus</h5>
-          <div class="footer-tag-cloud"></div>
-        </div>
-
       </div>
-
     </div>
   </footer>
-  <!-- Supabase 라이브러리 장착 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script src="script.js"></script>
 </body>
 </html>

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title></title>
   <link rel="stylesheet" href="style.css" />
+  <!-- Supabase 통신 도구 장착 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -68,7 +70,6 @@
         <h2 class="section-title-main">Research Areas</h2>
       </div>
 
-      <!-- 자바스크립트가 관리자 등록 데이터 개수에 맞춰 카드를 동적으로 채우는 그리드 -->
       <div class="modern-research-grid" id="homeResearchGrid">
         <div class="empty-state-card"><p>등록된 연구 분야가 없습니다.</p></div>
       </div>
@@ -84,7 +85,6 @@
         </div>
       </div>
 
-      <!-- 자바스크립트가 데이터를 연동하여 카드를 동적으로 채우는 영역 -->
       <div class="notice-grid" id="homeBoardContainer"></div>
     </section>
 
@@ -98,20 +98,18 @@
         </div>
       </div>
 
-      <!-- 자바스크립트가 데이터를 연동하여 리스트를 동적으로 채우는 영역 -->
       <div class="pub-list-wrap" id="homePubContainer"></div>
     </section>
 
   </main>
 
   <!-- ============================================================
-       [4] 하단 푸터 영역 (정보 일괄 동기화 및 관리자 링크)
+       [4] 하단 푸터 영역
        ============================================================ -->
   <footer class="custom-lab-footer">
     <div class="footer-wrap">
       <div class="footer-grid">
         
-        <!-- 브랜드 정보 및 연락처 -->
         <div class="footer-col footer-col-brand">
           <div class="footer-brand-header">
             <div class="logo-mark"></div>
@@ -120,19 +118,9 @@
               <p class="footer-brand-sub"></p>
             </div>
           </div>
-
-          <!-- 현재 노출 중인 이메일 -->
           <span>E-MAIL. sooya1105@naver.com</span>
-
-          <div class="footer-contact-chips">
-            <span style="display: none;">TEL. +82-2-000-0000</span>
-            <p class="footer-address" style="display: none;">
-              (서울특별시 특별구 연구로 123, 00관 0호)
-            </p>
-          </div>
         </div>
 
-        <!-- 빠른 메뉴 바로가기 -->
         <div class="footer-col footer-col-nav">
           <div class="footer-nav-group">
             <h5 class="footer-group-title">Navigation</h5>
@@ -152,20 +140,15 @@
           </div>
         </div>
 
-        <!-- 연구 분야 태그 클라우드 -->
         <div class="footer-col footer-col-tags">
           <h5 class="footer-group-title">Research Focus</h5>
           <div class="footer-tag-cloud"></div>
         </div>
 
       </div>
-
     </div>
   </footer>
 
-  <!-- 공통 자바스크립트 엔진 연결 -->
   <script src="script.js"></script>
-  <!-- Supabase 라이브러리 장착 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>
