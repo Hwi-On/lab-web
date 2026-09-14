@@ -3,13 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lab Life - NCB-LAB</title>
+  <title></title>
+  
+  <!-- 공통 스타일시트 연결 -->
   <link rel="stylesheet" href="style.css" />
+  
+  <!-- Supabase 데이터베이스 통신 라이브러리 연동 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+  <!-- ============================================================
+       [1] 상단 내비게이션 바 (Header & Navigation & 햄버거 메뉴)
+       ============================================================ -->
   <header class="navbar subpage-nav">
     <div class="nav-container">
+      
+      <!-- 브랜드 로고 및 연구실 명칭 (script.js를 통해 Supabase에서 동적 주입) -->
       <a href="index.html" class="brand-logo">
         <div class="logo-mark"></div>
         <div class="logo-text">
@@ -17,23 +27,67 @@
           <span class="logo-desc"></span>
         </div>
       </a>
+
+      <!-- 데스크톱용 메인 내비게이션 메뉴 -->
       <nav class="main-menu">
-        <div class="nav-item"><a href="index.html" class="main-link">Home</a><div class="sub-links"><a href="index.html">Home</a></div></div>
-        <div class="nav-item"><a href="director.html" class="main-link">Director</a><div class="sub-links"><a href="director.html">Director</a></div></div>
-        <div class="nav-item"><a href="members-current.html" class="main-link">Members</a><div class="sub-links"><a href="members-current.html">Current</a><a href="members-alumni.html">Alumni</a></div></div>
-        <div class="nav-item"><a href="publications.html" class="main-link">Publications</a><div class="sub-links"><a href="publications.html">Publications</a><a href="patents.html">Patents</a></div></div>
-        <div class="nav-item"><a href="lab-life.html" class="main-link">Lab Life</a><div class="sub-links"><a href="lab-life.html">Lab Life</a></div></div>
-        <div class="nav-item"><a href="notice.html" class="main-link">Board</a><div class="sub-links"><a href="notice.html">Notice</a><a href="news.html">News</a></div></div>
+        <div class="nav-item">
+          <a href="index.html" class="main-link">Home</a>
+          <div class="sub-links"><a href="index.html">Home</a></div>
+        </div>
+        <div class="nav-item">
+          <a href="director.html" class="main-link">Director</a>
+          <div class="sub-links"><a href="director.html">Director</a></div>
+        </div>
+        <div class="nav-item">
+          <a href="members-current.html" class="main-link">Members</a>
+          <div class="sub-links">
+            <a href="members-current.html">Current</a>
+            <a href="members-alumni.html">Alumni</a>
+          </div>
+        </div>
+        <div class="nav-item">
+          <a href="publications.html" class="main-link">Publications</a>
+          <div class="sub-links">
+            <a href="publications.html">Publications</a>
+            <a href="patents.html">Patents</a>
+          </div>
+        </div>
+        <div class="nav-item">
+          <a href="lab-life.html" class="main-link">Lab Life</a>
+          <div class="sub-links"><a href="lab-life.html">Lab Life</a></div>
+        </div>
+        <div class="nav-item">
+          <a href="notice.html" class="main-link">Board</a>
+          <div class="sub-links">
+            <a href="notice.html">Notice</a>
+            <a href="news.html">News</a>
+          </div>
+        </div>
       </nav>
+
+      <!-- 모바일 화면용 햄버거 메뉴 토글 버튼 -->
+      <button class="mobile-menu-toggle" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+
     </div>
     <div class="sub-menu-bg"></div>
   </header>
 
+  <!-- 모바일 메뉴 활성화 시 배경 어두운 백드롭 효과 -->
+  <div class="mobile-backdrop"></div>
+
+  <!-- ============================================================
+       [2] 메인 본문 컨텐츠 영역 (Lab Life 갤러리 및 검색 툴바)
+       ============================================================ -->
   <main class="page-body">
+    
+    <!-- 서브페이지 상단 타이틀 배너 -->
     <div class="subpage-header">
       <h1 class="subpage-title">Lab Life</h1>
     </div>
 
+    <!-- 하위 페이지 이동을 위한 스티키 서브바 -->
     <nav class="sticky-subbar" id="stickySubbar">
       <div class="sticky-subbar-inner">
         <div class="subbar-left">
@@ -50,7 +104,10 @@
       </div>
     </nav>
     
+    <!-- Lab Life 본문 컨테이너 (검색 및 카드 그리드) -->
     <div class="section-container">
+      
+      <!-- 상단 검색 툴바 영역 -->
       <div class="toolbar-box">
         <div class="search-bar-combo" id="customSearchCombo">
           <div class="custom-select-wrap" id="customSelectWrap">
@@ -72,18 +129,26 @@
         </div>
       </div>
 
+      <!-- Lab Life 갤러리 카드 그리드 (script.js를 통해 Supabase에서 동적 연동) -->
       <div class="lablife-grid" id="lablifeListContainer">
         <div class="empty-state-card" style="grid-column: 1 / -1;">
           <p>등록된 Lab Life 활동이 없습니다.</p>
         </div>
       </div>
+
+      <!-- 페이지네이션 영역 (이전/다음 화살표 및 숫자 버튼 동적 생성) -->
       <div class="pagination-wrap" id="lablifePagination"></div>
     </div>
   </main>
 
+  <!-- ============================================================
+       [3] 하단 푸터 영역 
+       ============================================================ -->
   <footer class="custom-lab-footer">
     <div class="footer-wrap">
       <div class="footer-grid">
+        
+        <!-- 1. 브랜드 및 연락처 정보 -->
         <div class="footer-col footer-col-brand">
           <div class="footer-brand-header">
             <div class="logo-mark"></div>
@@ -92,8 +157,14 @@
               <p class="footer-brand-sub"></p>
             </div>
           </div>
-          <span>E-MAIL. sooya1105@naver.com</span>
+          <div class="footer-contact-info" style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px; font-size: 0.88rem; color: #94a3b8;">
+            <span id="footerEmail" style="display: block;">E-MAIL. sooya1105@naver.com</span>
+            <span id="footerTel" style="display: none;">TEL. 02-000-0000</span>
+            <span id="footerAddress" style="display: none;">ADDRESS. 서울특별시 연구실로 123</span>
+          </div>
         </div>
+
+        <!-- 2. 사이트맵 내비게이션 링크 -->
         <div class="footer-col footer-col-nav">
           <div class="footer-nav-group">
             <h5 class="footer-group-title">Navigation</h5>
@@ -112,14 +183,23 @@
             </ul>
           </div>
         </div>
+
+        <!-- 3. 연구 포커스 태그 클라우드 영역 -->
         <div class="footer-col footer-col-tags">
           <h5 class="footer-group-title">Research Focus</h5>
           <div class="footer-tag-cloud"></div>
         </div>
+
+      </div>
+
+      <!-- 하단 저작권 표기 -->
+      <div class="footer-bottom-bar" style="border-top: 1px solid #1e293b; margin-top: 30px; padding-top: 20px; text-align: center;">
+        <p class="copyright-text" style="font-size: 0.82rem; color: #64748b;"></p>
       </div>
     </div>
   </footer>
 
+  <!-- 동적 데이터 연동 및 인터랙션을 담당하는 메인 스크립트 파일 -->
   <script src="script.js"></script>
 </body>
 </html>

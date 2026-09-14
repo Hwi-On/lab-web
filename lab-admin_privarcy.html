@@ -4,13 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lab Admin - NCB-LAB</title>
+  
+  <!-- 공통 스타일시트 연결 -->
   <link rel="stylesheet" href="style.css" />
+  
+  <!-- Supabase 데이터베이스 통신 라이브러리 연동 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body style="background-color: #ffffff;">
-  <!-- 관리자 전용 깔끔한 네비게이션 헤더 (흰색 배경 버그 원천 차단) -->
-  <header class="navbar subpage-nav" style="background-color: #070d19 !important; position: relative !important;">
-    <div class="nav-container">
+
+  <!-- ============================================================
+       [1] 관리자 전용 네비게이션 헤더 (모바일 반응형 최적화)
+       ============================================================ -->
+  <header class="navbar subpage-nav" style="background-color: #070d19 !important; height: 80px !important;">
+    <div class="nav-container" style="height: 80px !important;">
+      
+      <!-- 브랜드 로고 및 연구실 명칭 (script.js를 통해 Supabase에서 동적 주입) -->
       <a href="index.html" class="brand-logo">
         <div class="logo-mark"></div>
         <div class="logo-text">
@@ -19,33 +28,41 @@
         </div>
       </a>
       
-      <!-- 데스크탑 우측 버튼 그룹 -->
+      <!-- 데스크톱 우측 버튼 그룹 -->
       <div class="admin-top-actions" style="display: flex; align-items: center; gap: 12px;">
-        <a href="index.html" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none; border-radius: 6px;">홈페이지로 가기 &rarr;</a>
-        <button id="adminLogoutBtn" class="btn-primary" style="display: none; background: #ef4444; border: none; padding: 8px 16px; font-size: 0.85rem; border-radius: 6px; cursor: pointer; color: #ffffff; font-weight: 700;">로그아웃</button>
+        <a href="index.html" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none; border-radius: 6px; color: #fff; background: #1e293b; border: 1px solid #334155;">Homepage &rarr;</a>
+        <button id="adminLogoutBtn" class="btn-primary" style="display: none; background: #ef4444; border: none; padding: 8px 16px; font-size: 0.85rem; border-radius: 6px; cursor: pointer; color: #ffffff; font-weight: 700;">Logout</button>
       </div>
 
       <!-- 모바일 햄버거 토글 버튼 -->
       <button class="mobile-menu-toggle" aria-label="메뉴 열기">
         <span></span><span></span><span></span>
       </button>
-    </div>
 
-    <!-- 모바일 전용 슬라이드 메뉴 -->
-    <nav class="admin-mobile-menu" style="display: none;">
-      <div class="nav-item">
-        <a href="index.html" class="main-link">홈페이지로 가기</a>
-      </div>
-      <div class="nav-item" id="adminMobileLogoutItem" style="display: none;">
-        <a href="#" id="adminLogoutLinkMobile" class="main-link" style="color: #ef4444 !important;">로그아웃</a>
-      </div>
-    </nav>
+      <!-- 모바일 전용 슬라이드 메뉴 -->
+      <nav class="main-menu" style="display: none;">
+        <div class="nav-item">
+          <a href="index.html" class="main-link">Homepage</a>
+        </div>
+        <div class="nav-item" id="adminMobileAuthItem">
+          <a href="#" id="adminAuthLinkMobile" class="main-link" style="color: #ef4444 !important;">Login</a>
+        </div>
+      </nav>
+
+    </div>
   </header>
+
+  <!-- 모바일 메뉴 활성화 시 배경 어두운 백드롭 효과 -->
   <div class="mobile-backdrop"></div>
 
-  <main class="page-body" style="padding-top: 60px; padding-bottom: 80px;">
-    <div class="subpage-header">
-      <h1 class="subpage-title">Admin Management</h1>
+  <!-- ============================================================
+       [2] 관리자 메인 본문 대시보드 영역
+       ============================================================ -->
+  <main class="page-body" style="padding-top: 0px; padding-bottom: 80px;">
+    
+    <!-- 서브페이지 상단 타이틀 배너 -->
+    <div class="subpage-header" style="background: #070d19 !important; padding: 50px 24px !important; margin-top: 0 !important;">
+      <h1 class="subpage-title" style="color: #ffffff !important;">Admin</h1>
     </div>
 
     <!-- 1. 관리자 로그인 인증 박스 -->
@@ -57,7 +74,7 @@
           
           <div style="text-align: left; margin-bottom: 14px;">
             <label style="font-size: 0.8rem; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">관리자 이메일</label>
-            <input type="email" id="adminEmailInput" placeholder="이메일을 입력하세요" required style="width: 100%; height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none; background: #fff; color: #111827;" />
+            <input type="email" id="adminEmailInput" placeholder="이메일 입력" required style="width: 100%; height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none; background: #fff; color: #111827;" />
           </div>
 
           <div style="text-align: left; margin-bottom: 6px;">
@@ -65,14 +82,16 @@
             <input type="password" id="adminPasswordInput" placeholder="비밀번호 입력" required style="width: 100%; height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none; background: #fff; color: #111827;" />
           </div>
         </div>
-        <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 6px; cursor: pointer; border: none;">관리자 로그인</button>
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 6px; cursor: pointer; border: none; background: #0ea5e9; color: #fff;">관리자 로그인</button>
       </form>
     </div>
 
-    <!-- 2. 관리자 대시보드 패널 (로그인 성공 시 노출) -->
-    <div id="adminPanelBox" style="display: none; max-width: 1200px; margin: 0 auto; background: #fff; padding: 36px; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+    <!-- 2. 관리자 대시보드 패널 -->
+    <div id="adminPanelBox" style="display: none; max-width: 1200px; margin: 40px auto; background: #fff; padding: 36px; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+      
+      <!-- 탭 메뉴 네비게이션 -->
       <div class="admin-nav-tabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;">
-        <button type="button" class="admin-tab-btn active" data-tab="tabHome">Home 제어</button>
+        <button type="button" class="admin-tab-btn active" data-tab="tabHome">Home</button>
         <button type="button" class="admin-tab-btn" data-tab="tabDirector">Director</button>
         <button type="button" class="admin-tab-btn" data-tab="tabMembers">Members</button>
         <button type="button" class="admin-tab-btn" data-tab="tabPubs">Publications</button>
@@ -81,30 +100,388 @@
         <button type="button" class="admin-tab-btn" data-tab="tabNews">News</button>
       </div>
 
-      <!-- 탭 컨텐츠 영역들 -->
+      <!-- [Tab 1] Home 관리 -->
       <div id="tabHome" class="admin-tab-content active">
         <div class="admin-form-card">
           <h3 class="admin-card-title">Home 히어로 배너 관리</h3>
           <form id="formAdminHomeHero">
             <div class="form-group"><label>상단 뱃지 텍스트</label><input type="text" id="admHomeBadge" /></div>
             <div class="form-group"><label>메인 대제목</label><input type="text" id="admHomeTitle" /></div>
-            <div class="form-group"><label>서브 소개 문구</label><textarea id="admHomeDesc" class="admin-textarea" rows="3"></textarea></div>
-            <button type="submit" class="btn-primary" style="padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700;">히어로 배너 저장</button>
+            <div class="form-group"><label>서브 소개 문구</label><textarea id="admHomeDesc" class="admin-textarea" rows="3" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;"></textarea></div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-primary" style="padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; background: #0ea5e9; color: #fff;">히어로 배너 저장</button>
+            </div>
           </form>
         </div>
+
+        <div class="admin-form-card" style="margin-top:30px;">
+          <h3 id="researchFormTitle" class="admin-card-title">+ 주요 연구 분야 (Research Areas) 추가</h3>
+          <form id="formAdminResearchItem">
+            <div class="form-group"><label>태그 (Tag)</label><input type="text" id="admResTag" required /></div>
+            <div class="form-group"><label>제목 (Heading)</label><input type="text" id="admResHeading" required /></div>
+            <div class="form-group"><label>상세 설명 (Detail)</label><textarea id="admResDetail" class="admin-textarea" rows="3" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;"></textarea></div>
+            <div style="display:flex; gap:10px; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">연구 분야 추가하기</button>
+              <button type="button" id="btnCancelRes" style="display:none; padding:10px 20px; background:#64748b; color:#fff; border:none; border-radius:6px; cursor:pointer;">취소</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-table-card" style="margin-top:30px;">
+          <h3 class="admin-card-title">등록된 연구 분야 목록</h3>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <thead><tr><th>태그</th><th>제목</th><th>설명</th><th style="text-align:center;">관리</th></tr></thead>
+              <tbody id="tableBodyResearch"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <div id="tabDirector" class="admin-tab-content"><div class="admin-form-card"><h3 class="admin-card-title">Director 프로필 및 CV 관리</h3><form id="formAdminDirector"><div class="form-row-2"><div class="form-group"><label>한국어 이름</label><input type="text" id="admDirNameKo" /></div><div class="form-group"><label>영문 이름</label><input type="text" id="admDirNameEn" /></div></div><div class="form-group"><label>직함 (Position)</label><input type="text" id="admDirPosition" /></div><div class="form-row-2"><div class="form-group"><label>이메일</label><input type="email" id="admDirEmail" /></div><div class="form-group"><label>전화번호</label><input type="text" id="admDirTel" /></div></div><div class="form-group"><label>연구실 위치 (Office)</label><input type="text" id="admDirOffice" /></div><div class="form-group"><label>프로필 사진 파일</label><input type="file" id="admDirImg" accept="image/*" /></div><div class="form-group"><label>인사말 및 소개</label><textarea id="admDirGreeting" class="admin-textarea" rows="4"></textarea></div><button type="submit" class="btn-primary" style="padding:10px 20px; border:none; border-radius:6px; cursor:pointer; font-weight:700;">Director 정보 저장</button></form></div></div>
-      <div id="tabMembers" class="admin-tab-content"><div class="admin-form-card"><h3 class="admin-card-title">Current & Alumni 멤버 관리</h3><form id="formAdminCurrent"><input type="hidden" id="admCurRole" value="Postdoctoral Researcher"><div class="form-row-2"><div class="form-group"><label>이름</label><input type="text" id="admCurName" required></div><div class="form-group"><label>이메일</label><input type="email" id="admCurEmail" required></div></div><div class="form-group"><label>태그 (쉼표로 구분)</label><input type="text" id="admCurTags"></div><div class="form-group"><label>프로필 사진</label><input type="file" id="admCurImg" accept="image/*"></div><button type="submit" class="btn-primary" style="padding:10px 20px; border:none; border-radius:6px; cursor:pointer; font-weight:700;">연구원 추가하기</button></form><div style="margin-top:25px;"><table class="board-table"><thead><tr><th>역할</th><th>이름</th><th>태그</th><th style="text-align:center;">관리</th></tr></thead><tbody id="tableBodyCurrent"></tbody></table></div></div></div>
-      <div id="tabPubs" class="admin-tab-content"><div class="admin-form-card"><h3 class="admin-card-title">Publications & Patents 관리</h3><form id="formAdminPub"><div class="form-row-2"><div class="form-group"><label>구분</label><select id="admPubType" class="admin-select"><option value="paper">Paper (논문)</option><option value="patent">Patent (특허)</option></select></div><div class="form-group"><label>발행일 (예: 2026.03)</label><input type="text" id="admPubYear"></div></div><div class="form-group"><label>제목</label><input type="text" id="admPubTitle" required></div><div class="form-group"><label>저자 목록</label><input type="text" id="admPubAuthors" required></div><div class="form-row-2"><div class="form-group"><label>저널 / 출처</label><input type="text" id="admPubJournal" required></div><div class="form-group"><label>상세 링크 URL</label><input type="text" id="admPubLink"></div></div><button type="submit" class="btn-primary" style="padding:10px 20px; border:none; border-radius:6px; cursor:pointer; font-weight:700;">등록하기</button></form><div style="margin-top:25px;"><table class="board-table"><thead><tr><th style="width:80px; text-align:center;">유형</th><th>제목 및 저자</th><th style="width:100px; text-align:center;">연도</th><th style="width:120px; text-align:center;">관리</th></tr></thead><tbody id="tableBodyPub"></tbody></table></div></div></div>
-      <div id="tabLabLife" class="admin-tab-content"><div class="admin-form-card"><h3 class="admin-card-title">Lab Life 활동 관리</h3><form id="formAdminLabLife"><div class="form-row-2"><div class="form-group"><label>날짜 (예: 2026.03.14)</label><input type="text" id="admLifeDate"></div><div class="form-group"><label>제목</label><input type="text" id="admLifeTitle" required></div></div><div class="form-group"><label>내용</label><textarea id="admLifeDesc" class="admin-textarea" rows="4"></textarea></div><div class="form-group"><label>사진 첨부 (다중 선택 가능)</label><input type="file" id="admLifeImgs" accept="image/*" multiple></div><button type="submit" class="btn-primary" style="padding:10px 20px; border:none; border-radius:6px; cursor:pointer; font-weight:700;">활동 등록하기</button></form><div style="margin-top:25px;"><table class="board-table"><thead><tr><th style="width:120px; text-align:center;">날짜</th><th>제목</th><th style="width:120px; text-align:center;">관리</th></tr></thead><tbody id="tableBodyLabLife"></tbody></table></div></div></div>
-      <div id="tabNotices" class="admin-tab-content"><div class="admin-form-card"><h3 class="admin-card-title">Notice 공지사항 관리</h3><form id="formAdminNotice"><div class="form-row-2"><div class="form-group"><label>날짜</label><input type="text" id="admNotDate"></div><div class="form-group"><label>제목</label><input type="text" id="admNotTitle" required></div></div><div class="form-group"><label>내용</label><textarea id="admNotDesc" class="admin-textarea" rows="4"></textarea></div><div class="form-group"><label>사진 첨부</label><input type="file" id="admNotImgs" accept="image/*" multiple></div><button type="submit" class="btn-primary" style="padding:10px 20px; border:none; border-radius:6px; cursor:pointer; font-weight:700;">공지 등록하기</button></form><div style="margin-top:25px;"><table class="board-table"><thead><tr><th style="width:120px; text-align:center;">날짜</th><th>제목</th><th style="width:120px; text-align:center;">관리</th></tr></thead><tbody id="tableBodyNotice"></tbody></table></div></div></div>
-      <div id="tabNews" class="admin-tab-content"><div class="admin-form-card"><h3 class="admin-card-title">News 소식 관리</h3><form id="formAdminNews"><div class="form-row-2"><div class="form-group"><label>날짜</label><input type="text" id="admNewsDate"></div><div class="form-group"><label>제목</label><input type="text" id="admNewsTitle" required></div></div><div class="form-group"><label>내용</label><textarea id="admNewsDesc" class="admin-textarea" rows="4"></textarea></div><div class="form-group"><label>사진 첨부</label><input type="file" id="admNewsImgs" accept="image/*" multiple></div><button type="submit" class="btn-primary" style="padding:10px 20px; border:none; border-radius:6px; cursor:pointer; font-weight:700;">뉴스 게시하기</button></form><div style="margin-top:25px;"><table class="board-table"><thead><tr><th style="width:120px; text-align:center;">날짜</th><th>제목</th><th style="width:120px; text-align:center;">관리</th></tr></thead><tbody id="tableBodyNews"></tbody></table></div></div></div>
+
+      <!-- [Tab 2] Director 관리 -->
+      <div id="tabDirector" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">Director 기본 프로필 관리</h3>
+          <form id="formAdminDirector">
+            <div class="form-row-2">
+              <div class="form-group"><label>이름 (국문)</label><input type="text" id="admDirNameKo" required /></div>
+              <div class="form-group"><label>이름 (영문)</label><input type="text" id="admDirNameEn" required /></div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group"><label>직함 (Position)</label><input type="text" id="admDirPosition" required /></div>
+              <div class="form-group">
+                <label>프로필 사진</label>
+                <div style="display: flex; gap: 10px; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; background: #fff; height: 40px;">
+                  <input type="file" id="admDirImg" accept="image/*" style="flex: 1; border: none; padding: 0; height: auto;" />
+                  <label style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #dc2626; cursor: pointer; white-space: nowrap; margin: 0;">
+                    <input type="checkbox" id="admDirImgDelete" style="width: auto; height: auto;" /> 사진 삭제
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group"><label>이메일</label><input type="email" id="admDirEmail" /></div>
+              <div class="form-group"><label>전화번호</label><input type="text" id="admDirTel" /></div>
+            </div>
+            <div class="form-group"><label>연구실 위치 (Office)</label><input type="text" id="admDirOffice" /></div>
+            <div class="form-group"><label>인사말 / 소개</label><textarea id="admDirGreeting" class="admin-textarea" rows="4" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;"></textarea></div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">프로필 정보 저장</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-form-card" style="margin-top:30px;">
+          <h3 class="admin-card-title">+ 학력 (Education) 추가</h3>
+          <form id="formAdminEdu">
+            <div class="form-row-2">
+              <div class="form-group"><label>기간 (Period)</label><input type="text" id="admEduPeriod" required /></div>
+              <div class="form-group"><label>학위 및 전공 (Degree)</label><input type="text" id="admEduDegree" required /></div>
+            </div>
+            <div class="form-group"><label>학교 / 기관 (Institution)</label><input type="text" id="admEduInst" required /></div>
+            <div style="display:flex; gap:10px; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">학력 추가하기</button>
+              <button type="button" id="btnCancelEdu" style="display:none; padding:10px 20px; background:#64748b; color:#fff; border:none; border-radius:6px; cursor:pointer;">취소</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-table-card" style="margin-top:20px;">
+          <h3 class="admin-card-title">학력 목록</h3>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <thead><tr><th>기간</th><th>학위</th><th>기관</th><th style="text-align:center;">관리</th></tr></thead>
+              <tbody id="tableBodyEdu"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="admin-form-card" style="margin-top:30px;">
+          <h3 class="admin-card-title">+ 경력 및 이력 추가</h3>
+          <form id="formAdminExp">
+            <div class="form-row-2">
+              <div class="form-group"><label>기간 (Period)</label><input type="text" id="admExpPeriod" required /></div>
+              <div class="form-group"><label>직위 / 내용 (Degree/Title)</label><input type="text" id="admExpDegree" required /></div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group"><label>기관 (Institution)</label><input type="text" id="admExpInst" required /></div>
+            </div>
+            <div style="display:flex; gap:10px; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">이력 추가하기</button>
+              <button type="button" id="btnCancelExp" style="display:none; padding:10px 20px; background:#64748b; color:#fff; border:none; border-radius:6px; cursor:pointer;">취소</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-table-card" style="margin-top:20px;">
+          <h3 class="admin-card-title">경력 및 이력 목록</h3>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <thead><tr><th>구분</th><th>기간</th><th>내용</th><th>기관</th><th style="text-align:center;">관리</th></tr></thead>
+              <tbody id="tableBodyExp"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- [Tab 3] Members 관리 -->
+      <div id="tabMembers" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">+ 현재 연구원 및 교육생 추가</h3>
+          <form id="formAdminCurrent">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>세부 직함 / 역할 선택 (Role)</label>
+                <select id="admCurRole" class="admin-select">
+                  <optgroup label="연구원 (Researchers)">
+                    <option value="Postdoctoral Researcher">박사후연구원 (Postdoctoral Researcher)</option>
+                    <option value="Ph.D. Candidate">박사 연구원 (Ph.D. Researcher)</option>
+                    <option value="M.S. Student">석사 연구원 (Master's Researcher)</option>
+                    <option value="B.S. Researcher">학사 연구원 (Bachelor of Science Researcher)</option>
+                    <option value="Undergraduate Researcher">학부생 연구원 (Undergraduate Researcher)</option>
+                  </optgroup>
+                  <optgroup label="교육생 (Trainees)">
+                    <option value="Ph.D. Trainee">박사 교육생 (Ph.D. Trainee)</option>
+                    <option value="M.S. Trainee">석사 교육생 (Master's Trainee)</option>
+                    <option value="B.S. Trainee">학사 교육생 (Bachelor of Science Trainee)</option>
+                    <option value="Undergraduate Trainee">학부 교육생 (Undergraduate Trainee)</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="form-group"><label>이름</label><input type="text" id="admCurName" required /></div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group"><label>이메일</label><input type="email" id="admCurEmail" required /></div>
+              <div class="form-group"><label>태그 (쉼표로 구분)</label><input type="text" id="admCurTags" /></div>
+            </div>
+            <div class="form-group">
+              <label>프로필 사진</label>
+              <div style="display: flex; gap: 10px; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; background: #fff; height: 40px;">
+                <input type="file" id="admCurImg" accept="image/*" style="flex: 1; border: none; padding: 0; height: auto;" />
+                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #dc2626; cursor: pointer; white-space: nowrap; margin: 0;">
+                  <input type="checkbox" id="admCurImgDelete" style="width: auto; height: auto;" /> 사진 삭제
+                </label>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">연구원 추가하기</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-table-card" style="margin-top:20px;">
+          <h3 class="admin-card-title">현재 멤버 목록</h3>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <thead><tr><th>역할</th><th>이름</th><th>태그</th><th style="text-align:center;">관리</th></tr></thead>
+              <tbody id="tableBodyCurrent"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="admin-form-card" style="margin-top:40px;">
+          <h3 class="admin-card-title">+ 졸업생 (Alumni) 추가</h3>
+          <form id="formAdminAlumni">
+            <div class="form-row-2">
+              <div class="form-group"><label>졸업 연도 (Year)</label><input type="text" id="admAlumYear" required /></div>
+              <div class="form-group"><label>이름</label><input type="text" id="admAlumName" required /></div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>직급 (Degree)</label>
+                <select id="admAlumDegree" class="admin-select">
+                  <optgroup label="연구원 (Researchers)">
+                    <option value="Postdoctoral Researcher">박사후연구원 (Postdoctoral Researcher)</option>
+                    <option value="Ph.D. Researcher">박사 연구원 (Ph.D. Researcher)</option>
+                    <option value="Master's Researcher">석사 연구원 (Master's Researcher)</option>
+                    <option value="Bachelor of Science Researcher">학사 연구원 (Bachelor of Science Researcher)</option>
+                    <option value="Undergraduate Researcher">학부생 연구원 (Undergraduate Researcher)</option>
+                  </optgroup>
+                  <optgroup label="교육생 (Trainees)">
+                    <option value="Ph.D. Trainee">박사 교육생 (Ph.D. Trainee)</option>
+                    <option value="Master's Trainee">석사 교육생 (Master's Trainee)</option>
+                    <option value="Bachelor of Science Trainee">학사 교육생 (Bachelor of Science Trainee)</option>
+                    <option value="Undergraduate Trainee">학부 교육생 (Undergraduate Trainee)</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="form-group"><label>이메일</label><input type="email" id="admAlumEmail" /></div>
+            </div>
+            <div class="form-group"><label>태그</label><input type="text" id="admAlumTags" /></div>
+            <div class="form-group">
+              <label>사진</label>
+              <div style="display: flex; gap: 10px; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; background: #fff; height: 40px;">
+                <input type="file" id="admAlumImg" accept="image/*" style="flex: 1; border: none; padding: 0; height: auto;" />
+                <label style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #dc2626; cursor: pointer; white-space: nowrap; margin: 0;">
+                  <input type="checkbox" id="admAlumImgDelete" style="width: auto; height: auto;" /> 사진 삭제
+                </label>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">졸업생 추가하기</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-table-card" style="margin-top:20px;">
+          <h3 class="admin-card-title">졸업생 목록</h3>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <thead><tr><th>연도</th><th>이름/학위</th><th>태그</th><th style="text-align:center;">관리</th></tr></thead>
+              <tbody id="tableBodyAlumni"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- [Tab 4] Publications 관리 -->
+      <div id="tabPubs" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">+ 논문 및 특허 (Publications & Patents) 등록</h3>
+          <form id="formAdminPub">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>구분</label>
+                <select id="admPubType" class="admin-select">
+                  <option value="paper">논문 (Paper)</option>
+                  <option value="patent">특허 (Patent)</option>
+                </select>
+              </div>
+              <div class="form-group"><label>발행 연도 / 날짜</label><input type="date" id="admPubYear" required /></div>
+            </div>
+            <div class="form-group"><label>제목 (Title)</label><input type="text" id="admPubTitle" required /></div>
+            <div class="form-group"><label>저자 (Authors)</label><input type="text" id="admPubAuthors" required /></div>
+            <div class="form-row-2">
+              <div class="form-group"><label>저널명 / 학회명 (Journal)</label><input type="text" id="admPubJournal" required /></div>
+              <div class="form-group"><label>링크 (Link URL)</label><input type="text" id="admPubLink" /></div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">등록하기</button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="admin-table-card" style="margin-top:20px;">
+          <h3 class="admin-card-title">등록된 논문 및 특허 목록</h3>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <thead><tr><th>구분</th><th>제목 및 저자 정보</th><th>연도</th><th style="text-align:center;">관리</th></tr></thead>
+              <tbody id="tableBodyPub"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- [Tab 5] Lab Life 관리 -->
+      <div id="tabLabLife" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">+ Lab Life 활동 게시물 등록</h3>
+          <form id="formAdminLabLife">
+            <div class="form-row-2">
+              <div class="form-group"><label>날짜</label><input type="date" id="admLifeDate" required /></div>
+              <div class="form-group">
+                <label>이미지 여러 장 첨부</label>
+                <div style="display: flex; gap: 10px; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; background: #fff; height: 40px; box-sizing: border-box;">
+                  <input type="file" id="admLifeImgs" accept="image/*" multiple style="flex: 1; border: none; padding: 0; height: auto;" />
+                </div>
+              </div>
+            </div>
+            <div class="form-group"><label>제목</label><input type="text" id="admLifeTitle" required /></div>
+            <div class="form-group"><label>내용</label><textarea id="admLifeDesc" class="admin-textarea" rows="5" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;"></textarea></div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">활동 등록하기</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-table-card" style="margin-top:20px;">
+          <h3 class="admin-card-title">Lab Life 목록</h3>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <thead><tr><th>날짜</th><th>제목</th><th style="text-align:center;">관리</th></tr></thead>
+              <tbody id="tableBodyLabLife"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- [Tab 6] Notice 관리 -->
+      <div id="tabNotices" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">+ 공지사항 (Notice) 등록</h3>
+          <form id="formAdminNotice">
+            <div class="form-row-2">
+              <div class="form-group"><label>날짜</label><input type="date" id="admNotDate" required /></div>
+              <div class="form-group">
+                <label>이미지 첨부 (선택)</label>
+                <div style="display: flex; gap: 10px; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; background: #fff; height: 40px; box-sizing: border-box;">
+                  <input type="file" id="admNotImgs" accept="image/*" multiple style="flex: 1; border: none; padding: 0; height: auto;" />
+                </div>
+              </div>
+            </div>
+            <div class="form-group"><label>제목</label><input type="text" id="admNotTitle" required /></div>
+            <div class="form-group"><label>내용</label><textarea id="admNotDesc" class="admin-textarea" rows="5" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;"></textarea></div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">공지 등록하기</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-table-card" style="margin-top:20px;">
+          <h3 class="admin-card-title">공지사항 목록</h3>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <thead><tr><th>날짜</th><th>제목</th><th style="text-align:center;">관리</th></tr></thead>
+              <tbody id="tableBodyNotice"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- [Tab 7] News 관리 -->
+      <div id="tabNews" class="admin-tab-content">
+        <div class="admin-form-card">
+          <h3 class="admin-card-title">+ 연구실 뉴스 (News) 등록</h3>
+          <form id="formAdminNews">
+            <div class="form-row-2">
+              <div class="form-group"><label>날짜</label><input type="date" id="admNewsDate" required /></div>
+              <div class="form-group">
+                <label>이미지 첨부 (선택)</label>
+                <div style="display: flex; gap: 10px; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; background: #fff; height: 40px; box-sizing: border-box;">
+                  <input type="file" id="admNewsImgs" accept="image/*" multiple style="flex: 1; border: none; padding: 0; height: auto;" />
+                </div>
+              </div>
+            </div>
+            <div class="form-group"><label>제목</label><input type="text" id="admNewsTitle" required /></div>
+            <div class="form-group"><label>내용</label><textarea id="admNewsDesc" class="admin-textarea" rows="5" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;"></textarea></div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">뉴스 게시하기</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-table-card" style="margin-top:20px;">
+          <h3 class="admin-card-title">뉴스 목록</h3>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <thead><tr><th>날짜</th><th>제목</th><th style="text-align:center;">관리</th></tr></thead>
+              <tbody id="tableBodyNews"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
+  <!-- ============================================================
+       [3] 하단 푸터 영역
+       ============================================================ -->
   <footer class="custom-lab-footer">
     <div class="footer-wrap">
       <div class="footer-grid">
+        
+        <!-- 1. 브랜드 및 연락처 정보 -->
         <div class="footer-col footer-col-brand">
           <div class="footer-brand-header">
             <div class="logo-mark"></div>
@@ -113,12 +490,49 @@
               <p class="footer-brand-sub"></p>
             </div>
           </div>
-          <span>E-MAIL. sooya1105@naver.com</span>
+          <div class="footer-contact-info" style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px; font-size: 0.88rem; color: #94a3b8;">
+            <span id="footerEmail" style="display: block;">E-MAIL. sooya1105@naver.com</span>
+            <span id="footerTel" style="display: none;">TEL. 02-000-0000</span>
+            <span id="footerAddress" style="display: none;">ADDRESS. 서울특별시 연구실로 123</span>
+          </div>
         </div>
+
+        <!-- 2. 사이트맵 내비게이션 링크 -->
+        <div class="footer-col footer-col-nav">
+          <div class="footer-nav-group">
+            <h5 class="footer-group-title">Navigation</h5>
+            <ul class="footer-links-list">
+              <li><a href="index.html">Home</a></li>
+              <li><a href="director.html">Director</a></li>
+              <li><a href="members-current.html">Members</a></li>
+            </ul>
+          </div>
+          <div class="footer-nav-group">
+            <h5 class="footer-group-title" style="visibility: hidden;">More</h5>
+            <ul class="footer-links-list">
+              <li><a href="publications.html">Publications</a></li>
+              <li><a href="lab-life.html">Lab Life</a></li>
+              <li><a href="notice.html">Board</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 3. 연구 포커스 태그 클라우드 영역 -->
+        <div class="footer-col footer-col-tags">
+          <h5 class="footer-group-title">Research Focus</h5>
+          <div class="footer-tag-cloud"></div>
+        </div>
+
+      </div>
+
+      <!-- 하단 저작권 표기 -->
+      <div class="footer-bottom-bar" style="border-top: 1px solid #1e293b; margin-top: 30px; padding-top: 20px; text-align: center;">
+        <p class="copyright-text" style="font-size: 0.82rem; color: #64748b;"></p>
       </div>
     </div>
   </footer>
 
+  <!-- 동적 데이터 연동 및 인터랙션을 담당하는 메인 스크립트 파일 -->
   <script src="script.js"></script>
 </body>
 </html>

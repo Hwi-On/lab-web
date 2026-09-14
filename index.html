@@ -4,19 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title></title>
+  
+  <!-- 공통 스타일시트 연결 -->
   <link rel="stylesheet" href="style.css" />
-  <!-- Supabase 통신 도구 장착 -->
+  
+  <!-- Supabase 데이터베이스 통신 라이브러리 연동 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
   <!-- ============================================================
-       [1] 상단 내비게이션 바 (Header & Navigation)
+       [1] 상단 네비게이션 바 (Header & Responsive Navigation)
        ============================================================ -->
   <header class="navbar">
     <div class="nav-container">
       
-      <!-- 브랜드 로고 및 연구실 명칭 (스크립트에서 동적 주입) -->
+      <!-- 브랜드 로고 및 연구실 명칭 (script.js를 통해 Supabase에서 동적 주입) -->
       <a href="index.html" class="brand-logo">
         <div class="logo-mark"></div>
         <div class="logo-text">
@@ -25,22 +28,57 @@
         </div>
       </a>
 
-      <!-- 메인 메뉴 네비게이션 -->
+      <!-- 데스크톱용 메인 내비게이션 메뉴 및 드롭다운 서브 링크 -->
       <nav class="main-menu">
-        <div class="nav-item"><a href="index.html" class="main-link">Home</a><div class="sub-links"><a href="index.html">Home</a></div></div>
-        <div class="nav-item"><a href="director.html" class="main-link">Director</a><div class="sub-links"><a href="director.html">Director</a></div></div>
-        <div class="nav-item"><a href="members-current.html" class="main-link">Members</a><div class="sub-links"><a href="members-current.html">Current</a><a href="members-alumni.html">Alumni</a></div></div>
-        <div class="nav-item"><a href="publications.html" class="main-link">Publications</a><div class="sub-links"><a href="publications.html">Publications</a><a href="patents.html">Patents</a></div></div>
-        <div class="nav-item"><a href="lab-life.html" class="main-link">Lab Life</a><div class="sub-links"><a href="lab-life.html">Lab Life</a></div></div>
-        <div class="nav-item"><a href="notice.html" class="main-link">Board</a><div class="sub-links"><a href="notice.html">Notice</a><a href="news.html">News</a></div></div>
+        <div class="nav-item">
+          <a href="index.html" class="main-link">Home</a>
+          <div class="sub-links"><a href="index.html">Home</a></div>
+        </div>
+        <div class="nav-item">
+          <a href="director.html" class="main-link">Director</a>
+          <div class="sub-links"><a href="director.html">Director</a></div>
+        </div>
+        <div class="nav-item">
+          <a href="members-current.html" class="main-link">Members</a>
+          <div class="sub-links">
+            <a href="members-current.html">Current</a>
+            <a href="members-alumni.html">Alumni</a>
+          </div>
+        </div>
+        <div class="nav-item">
+          <a href="publications.html" class="main-link">Publications</a>
+          <div class="sub-links">
+            <a href="publications.html">Publications</a>
+            <a href="patents.html">Patents</a>
+          </div>
+        </div>
+        <div class="nav-item">
+          <a href="lab-life.html" class="main-link">Lab Life</a>
+          <div class="sub-links"><a href="lab-life.html">Lab Life</a></div>
+        </div>
+        <div class="nav-item">
+          <a href="notice.html" class="main-link">Board</a>
+          <div class="sub-links">
+            <a href="notice.html">Notice</a>
+            <a href="news.html">News</a>
+          </div>
+        </div>
       </nav>
+
+      <!-- 모바일 화면용 햄버거 메뉴 토글 버튼 -->
+      <button class="mobile-menu-toggle" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
 
     </div>
     <div class="sub-menu-bg"></div>
   </header>
 
+  <!-- 모바일 메뉴 활성화 시 배경 어두운 백드롭 효과 -->
+  <div class="mobile-backdrop"></div>
+
   <!-- ============================================================
-       [2] 히어로 대문 배너 영역 (관리자 페이지에서 동적 연동)
+       [2] 히어로 대문 배너 영역 (관리자 연동 타이틀 및 설명)
        ============================================================ -->
   <section class="hero-section" id="home">
     <div class="hero-bg-wrap">
@@ -60,22 +98,21 @@
   </section>
 
   <!-- ============================================================
-       [3] 메인 본문 컨텐츠 영역 (연구 분야, 게시판, 연구 실적)
+       [3] 메인 본문 컨텐츠 영역 (Research Areas, Board, Publications)
        ============================================================ -->
   <main class="main-body-wrap">
 
-    <!-- 1. 주요 연구 분야 (Research Areas - 관리자 동적 연동 영역) -->
+    <!-- 1. 주요 연구 분야 섹션 (관리자 동적 연동) -->
     <section class="section-container" id="research-areas">
       <div class="section-header-clean">
         <h2 class="section-title-main">Research Areas</h2>
       </div>
-
       <div class="modern-research-grid" id="homeResearchGrid">
         <div class="empty-state-card"><p>등록된 연구 분야가 없습니다.</p></div>
       </div>
     </section>
 
-    <!-- 2. 게시판 (Board - Notice & News) -->
+    <!-- 2. 게시판 섹션 (Notice & News 요약 연동) -->
     <section class="section-container" id="board">
       <div class="section-header-flex">
         <h2 class="section-title-main">Board</h2>
@@ -84,11 +121,10 @@
           <a href="news.html" class="link-more">News &rarr;</a>
         </div>
       </div>
-
       <div class="notice-grid" id="homeBoardContainer"></div>
     </section>
 
-    <!-- 3. 연구실적 (Publications) -->
+    <!-- 3. 연구 실적 섹션 (Publications & Patents 연동) -->
     <section class="section-container" id="publications">
       <div class="section-header-flex">
         <h2 class="section-title-main">Publications</h2>
@@ -97,19 +133,19 @@
           <a href="patents.html" class="link-more">Patents &rarr;</a>
         </div>
       </div>
-
       <div class="pub-list-wrap" id="homePubContainer"></div>
     </section>
 
   </main>
 
   <!-- ============================================================
-       [4] 하단 푸터 영역
+       [4] 하단 푸터 영역 (연락처, 내비게이션, 태그 클라우드 및 저작권)
        ============================================================ -->
   <footer class="custom-lab-footer">
     <div class="footer-wrap">
       <div class="footer-grid">
         
+        <!-- 1. 브랜드 및 연락처 정보 -->
         <div class="footer-col footer-col-brand">
           <div class="footer-brand-header">
             <div class="logo-mark"></div>
@@ -118,9 +154,14 @@
               <p class="footer-brand-sub"></p>
             </div>
           </div>
-          <span>E-MAIL. sooya1105@naver.com</span>
+          <div class="footer-contact-info" style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px; font-size: 0.88rem; color: #94a3b8;">
+            <span id="footerEmail" style="display: block;">E-MAIL. sooya1105@naver.com</span>
+            <span id="footerTel" style="display: none;">TEL. 02-000-0000</span>
+            <span id="footerAddress" style="display: none;">ADDRESS. 서울특별시 연구실로 123</span>
+          </div>
         </div>
 
+        <!-- 2. 사이트맵 내비게이션 링크 -->
         <div class="footer-col footer-col-nav">
           <div class="footer-nav-group">
             <h5 class="footer-group-title">Navigation</h5>
@@ -140,15 +181,22 @@
           </div>
         </div>
 
+        <!-- 3. 연구 포커스 태그 클라우드 영역 -->
         <div class="footer-col footer-col-tags">
           <h5 class="footer-group-title">Research Focus</h5>
           <div class="footer-tag-cloud"></div>
         </div>
 
       </div>
+
+      <!-- 하단 저작권 표기 -->
+      <div class="footer-bottom-bar" style="border-top: 1px solid #1e293b; margin-top: 30px; padding-top: 20px; text-align: center;">
+        <p class="copyright-text" style="font-size: 0.82rem; color: #64748b;"></p>
+      </div>
     </div>
   </footer>
 
+  <!-- 동적 데이터 연동 및 인터랙션을 담당하는 메인 스크립트 파일 -->
   <script src="script.js"></script>
 </body>
 </html>

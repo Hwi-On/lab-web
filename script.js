@@ -53,17 +53,16 @@ if (subLinks.length > 0) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const navContainer = document.querySelector('.nav-container');
-  if (navContainer && !document.querySelector('.mobile-menu-toggle')) {
-    const toggleBtn = document.createElement('button');
-    toggleBtn.className = 'mobile-menu-toggle';
-    toggleBtn.innerHTML = '<span></span><span></span><span></span>';
-    navContainer.appendChild(toggleBtn);
-
-    const backdrop = document.createElement('div');
+  const toggleBtn = document.querySelector('.mobile-menu-toggle');
+  
+  let backdrop = document.querySelector('.mobile-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
     backdrop.className = 'mobile-backdrop';
     document.body.appendChild(backdrop);
+  }
 
+  if (toggleBtn) {
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (navbar) navbar.classList.toggle('mobile-open');
@@ -76,11 +75,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const mobileMenuLinks = document.querySelectorAll('.main-menu a, .admin-mobile-menu a');
+  const mobileMenuLinks = document.querySelectorAll('.main-menu a');
   mobileMenuLinks.forEach(link => {
-    link.addEventListener('click', () => {
+    link.addEventListener('click', (e) => {
+      // 모바일 메뉴에서 Logout 버튼 클릭 시 기본 링크 이동을 막고 이벤트 차단
+      if (link.id === 'adminAuthLinkMobile' && link.textContent.trim() === 'Logout') {
+        e.preventDefault();
+        return; 
+      }
       if (navbar) navbar.classList.remove('mobile-open');
-      const backdrop = document.querySelector('.mobile-backdrop');
       if (backdrop) backdrop.classList.remove('active');
     });
   });
@@ -249,7 +252,7 @@ class UnifiedAdminApp {
         if (!error && data) {
           this.showAdminPanel();
         } else {
-          alert('관리자 로그인 실패: 이메일 또는 비밀번호를 다시 확인해주세요.');
+          alert('관리자 로그인 실패: ' + (error ? error.message : '알 수 없는 오류'));
         }
       });
     }
@@ -262,6 +265,20 @@ class UnifiedAdminApp {
     };
 
     if (this.logoutBtn) this.logoutBtn.addEventListener('click', handleLogout);
+    
+    // 모바일 햄버거 메뉴 내 로그아웃 버튼 이벤트 바인딩 추가
+    const mobileAuthLink = document.getElementById('adminAuthLinkMobile');
+    if (mobileAuthLink) {
+      mobileAuthLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (mobileAuthLink.textContent.trim() === 'Logout') {
+          await handleLogout();
+          if (navbar) navbar.classList.remove('mobile-open');
+          const backdrop = document.querySelector('.mobile-backdrop');
+          if (backdrop) backdrop.classList.remove('active');
+        }
+      });
+    }
   }
 
   showAdminPanel() {
@@ -269,6 +286,13 @@ class UnifiedAdminApp {
     if (this.authBox) this.authBox.style.display = 'none';
     if (this.panelBox) this.panelBox.style.display = 'block';
     if (this.logoutBtn) this.logoutBtn.style.display = 'inline-block';
+    
+    const mobileAuthLink = document.getElementById('adminAuthLinkMobile');
+    if (mobileAuthLink) {
+      mobileAuthLink.textContent = 'Logout';
+      mobileAuthLink.style.color = '#ef4444';
+    }
+
     this.renderAll();
   }
 
@@ -276,6 +300,12 @@ class UnifiedAdminApp {
     if (this.authBox) this.authBox.style.display = 'block';
     if (this.panelBox) this.panelBox.style.display = 'none';
     if (this.logoutBtn) this.logoutBtn.style.display = 'none';
+    
+    const mobileAuthLink = document.getElementById('adminAuthLinkMobile');
+    if (mobileAuthLink) {
+      mobileAuthLink.textContent = 'Login';
+      mobileAuthLink.style.color = '#0ea5e9';
+    }
   }
 
   initTabs() {
@@ -296,15 +326,14 @@ class UnifiedAdminApp {
   }
 
   initForms() {
-    // 1. Home Hero
     const heroForm = document.getElementById('formAdminHomeHero');
     if (heroForm) {
       heroForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const payload = {
-          badge: document.getElementById('admHomeBadge').value.trim(),
-          title: document.getElementById('admHomeTitle').value.trim(),
-          desc: document.getElementById('admHomeDesc').value.trim()
+          badge: document.getElementById('admHomeBadge')?.value.trim() || '',
+          title: document.getElementById('admHomeTitle')?.value.trim() || '',
+          desc: document.getElementById('admHomeDesc')?.value.trim() || ''
         };
         const { error } = await supabaseClient.from('home_hero').upsert({ id: 1, ...payload });
         if (error) { alert('저장 실패: ' + error.message); return; }
@@ -312,7 +341,6 @@ class UnifiedAdminApp {
       });
     }
 
-    // 2. Research Areas
     const resForm = document.getElementById('formAdminResearchItem');
     const btnCancelRes = document.getElementById('btnCancelRes');
     const researchFormTitle = document.getElementById('researchFormTitle');
@@ -320,9 +348,9 @@ class UnifiedAdminApp {
       resForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const payload = {
-          tag: document.getElementById('admResTag').value.trim(),
-          heading: document.getElementById('admResHeading').value.trim(),
-          detail: document.getElementById('admResDetail').value.trim()
+          tag: document.getElementById('admResTag')?.value.trim() || '',
+          heading: document.getElementById('admResHeading')?.value.trim() || '',
+          detail: document.getElementById('admResDetail')?.value.trim() || ''
         };
 
         if (this.editResId) {
@@ -353,20 +381,19 @@ class UnifiedAdminApp {
       }
     }
 
-    // 3. Director Info
     const dirForm = document.getElementById('formAdminDirector');
     if (dirForm) {
       dirForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgBase64 = await convertFileToBase64('admDirImg');
         const payload = {
-          name_ko: document.getElementById('admDirNameKo').value.trim(),
-          name_en: document.getElementById('admDirNameEn').value.trim(),
-          position: document.getElementById('admDirPosition').value.trim(),
-          email: document.getElementById('admDirEmail').value.trim(),
-          tel: document.getElementById('admDirTel').value.trim(),
-          office: document.getElementById('admDirOffice').value.trim(),
-          greeting: document.getElementById('admDirGreeting').value.trim()
+          name_ko: document.getElementById('admDirNameKo')?.value.trim() || '',
+          name_en: document.getElementById('admDirNameEn')?.value.trim() || '',
+          position: document.getElementById('admDirPosition')?.value.trim() || '',
+          email: document.getElementById('admDirEmail')?.value.trim() || '',
+          tel: document.getElementById('admDirTel')?.value.trim() || '',
+          office: document.getElementById('admDirOffice')?.value.trim() || '',
+          greeting: document.getElementById('admDirGreeting')?.value.trim() || ''
         };
         if (imgBase64) payload.image = imgBase64;
 
@@ -376,26 +403,25 @@ class UnifiedAdminApp {
       });
     }
 
-    // 4. Education
     const eduForm = document.getElementById('formAdminEdu');
     const btnCancelEdu = document.getElementById('btnCancelEdu');
     if (eduForm) {
       eduForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const payload = {
-          period: document.getElementById('admEduPeriod').value.trim(),
-          degree: document.getElementById('admEduDegree').value.trim(),
-          inst: document.getElementById('admEduInst').value.trim()
+          period: document.getElementById('admEduPeriod')?.value.trim() || '',
+          degree: document.getElementById('admEduDegree')?.value.trim() || '',
+          inst: document.getElementById('admEduInst')?.value.trim() || ''
         };
         if (this.editEduId) {
-          const { error } = await supabaseClient.from('direcotr_education').update(payload).eq('id', this.editEduId);
+          const { error } = await supabaseClient.from('director_education').update(payload).eq('id', this.editEduId);
           if (error) { alert('수정 실패: ' + error.message); return; }
           this.editEduId = null;
           eduForm.querySelector('button[type="submit"]').textContent = '학력 추가하기';
           if (btnCancelEdu) btnCancelEdu.style.display = 'none';
           alert('학력 정보가 수정되었습니다.');
         } else {
-          const { error } = await supabaseClient.from('direcotr_education').insert([payload]);
+          const { error } = await supabaseClient.from('director_education').insert([payload]);
           if (error) { alert('등록 실패: ' + error.message); return; }
           alert('학력 정보가 추가되었습니다.');
         }
@@ -412,17 +438,16 @@ class UnifiedAdminApp {
       }
     }
 
-    // 5. Experience
     const expForm = document.getElementById('formAdminExp');
     const btnCancelExp = document.getElementById('btnCancelExp');
     if (expForm) {
       expForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const payload = {
-          category: document.getElementById('admExpCategory').value,
-          period: document.getElementById('admExpPeriod').value.trim(),
-          degree: document.getElementById('admExpDegree').value.trim(),
-          inst: document.getElementById('admExpInst').value.trim()
+          category: document.getElementById('admExpCategory')?.value || '',
+          period: document.getElementById('admExpPeriod')?.value.trim() || '',
+          degree: document.getElementById('admExpDegree')?.value.trim() || '',
+          inst: document.getElementById('admExpInst')?.value.trim() || ''
         };
         if (this.editExpId) {
           const { error } = await supabaseClient.from('director_experience').update(payload).eq('id', this.editExpId);
@@ -449,7 +474,6 @@ class UnifiedAdminApp {
       }
     }
 
-    // 6. Current Members
     const curForm = document.getElementById('formAdminCurrent');
     if (curForm) {
       curForm.addEventListener('submit', async (e) => {
@@ -459,9 +483,9 @@ class UnifiedAdminApp {
         const roleVal = roleHidden ? roleHidden.value : 'Postdoctoral Researcher';
         const payload = {
           role: roleVal,
-          name: document.getElementById('admCurName').value.trim(),
-          tags: document.getElementById('admCurTags').value.trim(),
-          email: document.getElementById('admCurEmail').value.trim()
+          name: document.getElementById('admCurName')?.value.trim() || '',
+          tags: document.getElementById('admCurTags')?.value.trim() || '',
+          email: document.getElementById('admCurEmail')?.value.trim() || ''
         };
         if (imgBase64) payload.image = imgBase64;
 
@@ -481,18 +505,17 @@ class UnifiedAdminApp {
       });
     }
 
-    // 7. Alumni
     const alumForm = document.getElementById('formAdminAlumni');
     if (alumForm) {
       alumForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgBase64 = await convertFileToBase64('admAlumImg');
         const payload = {
-          year: document.getElementById('admAlumYear').value.trim(),
-          name: document.getElementById('admAlumName').value.trim(),
-          degree: document.getElementById('admAlumDegree').value,
-          tags: document.getElementById('admAlumTags').value.trim(),
-          email: document.getElementById('admAlumEmail').value.trim()
+          year: document.getElementById('admAlumYear')?.value.trim() || '',
+          name: document.getElementById('admAlumName')?.value.trim() || '',
+          degree: document.getElementById('admAlumDegree')?.value || '',
+          tags: document.getElementById('admAlumTags')?.value.trim() || '',
+          email: document.getElementById('admAlumEmail')?.value.trim() || ''
         };
         if (imgBase64) payload.image = imgBase64;
 
@@ -512,20 +535,19 @@ class UnifiedAdminApp {
       });
     }
 
-    // 8. Publications & Patents
     const pubForm = document.getElementById('formAdminPub');
     if (pubForm) {
       pubForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const rawDate = document.getElementById('admPubYear').value.trim();
+        const rawDate = document.getElementById('admPubYear')?.value.trim() || '';
         const formattedDate = rawDate ? rawDate.replace(/-/g, '.') : new Date().toISOString().substring(0, 10).replace(/-/g, '.');
         const payload = {
-          type: document.getElementById('admPubType').value,
-          title: document.getElementById('admPubTitle').value.trim(),
-          authors: document.getElementById('admPubAuthors').value.trim(),
-          journal: document.getElementById('admPubJournal').value.trim(),
+          type: document.getElementById('admPubType')?.value || 'paper',
+          title: document.getElementById('admPubTitle')?.value.trim() || '',
+          authors: document.getElementById('admPubAuthors')?.value.trim() || '',
+          journal: document.getElementById('admPubJournal')?.value.trim() || '',
           year: formattedDate,
-          link: document.getElementById('admPubLink').value.trim() || '#'
+          link: document.getElementById('admPubLink')?.value.trim() || '#'
         };
 
         if (this.editPubId) {
@@ -544,16 +566,15 @@ class UnifiedAdminApp {
       });
     }
 
-    // 9. Lab Life
     const lifeForm = document.getElementById('formAdminLabLife');
     if (lifeForm) {
       lifeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgsArray = await convertFilesToMultipleBase64('admLifeImgs');
         const payload = {
-          date: document.getElementById('admLifeDate').value.replace(/-/g, '.'),
-          title: document.getElementById('admLifeTitle').value.trim(),
-          desc: document.getElementById('admLifeDesc').value.trim()
+          date: document.getElementById('admLifeDate')?.value.replace(/-/g, '.') || '',
+          title: document.getElementById('admLifeTitle')?.value.trim() || '',
+          desc: document.getElementById('admLifeDesc')?.value.trim() || ''
         };
         if (imgsArray.length > 0) payload.images = imgsArray;
 
@@ -574,16 +595,15 @@ class UnifiedAdminApp {
       });
     }
 
-    // 10. Notices
     const notForm = document.getElementById('formAdminNotice');
     if (notForm) {
       notForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgsArray = await convertFilesToMultipleBase64('admNotImgs');
         const payload = {
-          date: document.getElementById('admNotDate').value.replace(/-/g, '.'),
-          title: document.getElementById('admNotTitle').value.trim(),
-          desc: document.getElementById('admNotDesc').value.trim()
+          date: document.getElementById('admNotDate')?.value.replace(/-/g, '.') || '',
+          title: document.getElementById('admNotTitle')?.value.trim() || '',
+          desc: document.getElementById('admNotDesc')?.value.trim() || ''
         };
         if (imgsArray.length > 0) payload.images = imgsArray;
 
@@ -604,16 +624,15 @@ class UnifiedAdminApp {
       });
     }
 
-    // 11. News
     const newsForm = document.getElementById('formAdminNews');
     if (newsForm) {
       newsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgsArray = await convertFilesToMultipleBase64('admNewsImgs');
         const payload = {
-          date: document.getElementById('admNewsDate').value.replace(/-/g, '.'),
-          title: document.getElementById('admNewsTitle').value.trim(),
-          desc: document.getElementById('admNewsDesc').value.trim()
+          date: document.getElementById('admNewsDate')?.value.replace(/-/g, '.') || '',
+          title: document.getElementById('admNewsTitle')?.value.trim() || '',
+          desc: document.getElementById('admNewsDesc')?.value.trim() || ''
         };
         if (imgsArray.length > 0) payload.images = imgsArray;
 
@@ -653,9 +672,9 @@ class UnifiedAdminApp {
     const { data } = await supabaseClient.from('home_hero').select('*').eq('id', 1).single();
     if (!document.getElementById('admHomeBadge')) return;
     if (data) {
-      document.getElementById('admHomeBadge').value = data.badge || '';
-      document.getElementById('admHomeTitle').value = data.title || '';
-      document.getElementById('admHomeDesc').value = data.desc || '';
+      const badgeEl = document.getElementById('admHomeBadge'); if (badgeEl) badgeEl.value = data.badge || '';
+      const titleEl = document.getElementById('admHomeTitle'); if (titleEl) titleEl.value = data.title || '';
+      const descEl = document.getElementById('admHomeDesc'); if (descEl) descEl.value = data.desc || '';
     }
   }
 
@@ -687,10 +706,11 @@ class UnifiedAdminApp {
         const item = list.find(x => x.id === id);
         if (item) {
           this.editResId = id;
-          document.getElementById('admResTag').value = item.tag;
-          document.getElementById('admResHeading').value = item.heading;
-          document.getElementById('admResDetail').value = item.detail;
-          document.querySelector('#formAdminResearchItem button[type="submit"]').textContent = '연구 분야 수정 완료';
+          const tagEl = document.getElementById('admResTag'); if (tagEl) tagEl.value = item.tag;
+          const headingEl = document.getElementById('admResHeading'); if (headingEl) headingEl.value = item.heading;
+          const detailEl = document.getElementById('admResDetail'); if (detailEl) detailEl.value = item.detail;
+          const submitBtn = document.querySelector('#formAdminResearchItem button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = '연구 분야 수정 완료';
           const resTitleEl = document.getElementById('researchFormTitle');
           if (resTitleEl) resTitleEl.textContent = '연구 분야 수정하기';
           const btnCancelRes = document.getElementById('btnCancelRes');
@@ -706,20 +726,20 @@ class UnifiedAdminApp {
     const { data } = await supabaseClient.from('director_info').select('*').eq('id', 1).single();
     if (!document.getElementById('admDirNameKo')) return;
     if (data) {
-      document.getElementById('admDirNameKo').value = data.name_ko || '';
-      document.getElementById('admDirNameEn').value = data.name_en || '';
-      document.getElementById('admDirPosition').value = data.position || '';
-      document.getElementById('admDirEmail').value = data.email || '';
-      document.getElementById('admDirTel').value = data.tel || '';
-      document.getElementById('admDirOffice').value = data.office || '';
-      document.getElementById('admDirGreeting').value = data.greeting || '';
+      const koEl = document.getElementById('admDirNameKo'); if (koEl) koEl.value = data.name_ko || '';
+      const enEl = document.getElementById('admDirNameEn'); if (enEl) enEl.value = data.name_en || '';
+      const posEl = document.getElementById('admDirPosition'); if (posEl) posEl.value = data.position || '';
+      const emailEl = document.getElementById('admDirEmail'); if (emailEl) emailEl.value = data.email || '';
+      const telEl = document.getElementById('admDirTel'); if (telEl) telEl.value = data.tel || '';
+      const officeEl = document.getElementById('admDirOffice'); if (officeEl) officeEl.value = data.office || '';
+      const greetingEl = document.getElementById('admDirGreeting'); if (greetingEl) greetingEl.value = data.greeting || '';
     }
   }
 
   async renderEdu() {
     const tbody = document.getElementById('tableBodyEdu');
     if (!tbody) return;
-    const { data: list } = await supabaseClient.from('direcotr_education').select('*').order('id', { ascending: true });
+    const { data: list } = await supabaseClient.from('director_education').select('*').order('id', { ascending: true });
     tbody.innerHTML = '';
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:#94a3b8;">등록된 학력이 없습니다.</td></tr>';
@@ -733,7 +753,7 @@ class UnifiedAdminApp {
         <td>${escapeHtml(item.inst)}</td>
         <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
           <button class="btn-edit-edu" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
-          <button class="btn-delete-item" data-table="direcotr_education" data-id="${item.id}">삭제</button>
+          <button class="btn-delete-item" data-table="director_education" data-id="${item.id}">삭제</button>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -744,17 +764,18 @@ class UnifiedAdminApp {
         const item = list.find(x => x.id === id);
         if (item) {
           this.editEduId = id;
-          document.getElementById('admEduPeriod').value = item.period;
-          document.getElementById('admEduDegree').value = item.degree;
-          document.getElementById('admEduInst').value = item.inst;
-          document.querySelector('#formAdminEdu button[type="submit"]').textContent = '학력 수정 완료';
+          const pEl = document.getElementById('admEduPeriod'); if (pEl) pEl.value = item.period;
+          const dEl = document.getElementById('admEduDegree'); if (dEl) dEl.value = item.degree;
+          const iEl = document.getElementById('admEduInst'); if (iEl) iEl.value = item.inst;
+          const submitBtn = document.querySelector('#formAdminEdu button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = '학력 수정 완료';
           const btnCancelEdu = document.getElementById('btnCancelEdu');
           if (btnCancelEdu) btnCancelEdu.style.display = 'inline-block';
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
     });
-    this.attachSupabaseDelete(tbody, 'direcotr_education', () => this.renderEdu());
+    this.attachSupabaseDelete(tbody, 'director_education', () => this.renderEdu());
   }
 
   async renderExp() {
@@ -786,11 +807,12 @@ class UnifiedAdminApp {
         const item = list.find(x => x.id === id);
         if (item) {
           this.editExpId = id;
-          document.getElementById('admExpCategory').value = item.category || '경력 (Experience)';
-          document.getElementById('admExpPeriod').value = item.period;
-          document.getElementById('admExpDegree').value = item.degree;
-          document.getElementById('admExpInst').value = item.inst;
-          document.querySelector('#formAdminExp button[type="submit"]').textContent = '이력 수정 완료';
+          const cEl = document.getElementById('admExpCategory'); if (cEl) cEl.value = item.category || '경력 (Experience)';
+          const pEl = document.getElementById('admExpPeriod'); if (pEl) pEl.value = item.period;
+          const dEl = document.getElementById('admExpDegree'); if (dEl) dEl.value = item.degree;
+          const iEl = document.getElementById('admExpInst'); if (iEl) iEl.value = item.inst;
+          const submitBtn = document.querySelector('#formAdminExp button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = '이력 수정 완료';
           const btnCancelExp = document.getElementById('btnCancelExp');
           if (btnCancelExp) btnCancelExp.style.display = 'inline-block';
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -830,10 +852,11 @@ class UnifiedAdminApp {
           this.editCurrentId = id;
           const roleHidden = document.getElementById('admCurRole');
           if (roleHidden) roleHidden.value = item.role;
-          document.getElementById('admCurName').value = item.name;
-          document.getElementById('admCurTags').value = item.tags || '';
-          document.getElementById('admCurEmail').value = item.email;
-          document.querySelector('#formAdminCurrent button[type="submit"]').textContent = '연구원 수정 완료';
+          const nameEl = document.getElementById('admCurName'); if (nameEl) nameEl.value = item.name;
+          const tagsEl = document.getElementById('admCurTags'); if (tagsEl) tagsEl.value = item.tags || '';
+          const emailEl = document.getElementById('admCurEmail'); if (emailEl) emailEl.value = item.email;
+          const submitBtn = document.querySelector('#formAdminCurrent button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = '연구원 수정 완료';
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
@@ -869,12 +892,13 @@ class UnifiedAdminApp {
         const item = list.find(x => x.id === id);
         if (item) {
           this.editAlumniId = id;
-          document.getElementById('admAlumYear').value = item.year;
-          document.getElementById('admAlumName').value = item.name;
-          document.getElementById('admAlumDegree').value = item.degree;
-          document.getElementById('admAlumTags').value = item.tags || '';
-          document.getElementById('admAlumEmail').value = item.email;
-          document.querySelector('#formAdminAlumni button[type="submit"]').textContent = '졸업생 수정 완료';
+          const yEl = document.getElementById('admAlumYear'); if (yEl) yEl.value = item.year;
+          const nEl = document.getElementById('admAlumName'); if (nEl) nEl.value = item.name;
+          const dEl = document.getElementById('admAlumDegree'); if (dEl) dEl.value = item.degree;
+          const tEl = document.getElementById('admAlumTags'); if (tEl) tEl.value = item.tags || '';
+          const eEl = document.getElementById('admAlumEmail'); if (eEl) eEl.value = item.email;
+          const submitBtn = document.querySelector('#formAdminAlumni button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = '졸업생 수정 완료';
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
@@ -913,13 +937,14 @@ class UnifiedAdminApp {
         const item = list.find(x => x.id === id);
         if (item) {
           this.editPubId = id;
-          document.getElementById('admPubType').value = item.type || 'paper';
-          document.getElementById('admPubYear').value = (item.year || '').replace(/\./g, '-');
-          document.getElementById('admPubTitle').value = item.title;
-          document.getElementById('admPubAuthors').value = item.authors;
-          document.getElementById('admPubJournal').value = item.journal;
-          document.getElementById('admPubLink').value = item.link !== '#' ? item.link : '';
-          document.querySelector('#formAdminPub button[type="submit"]').textContent = '수정 완료';
+          const tEl = document.getElementById('admPubType'); if (tEl) tEl.value = item.type || 'paper';
+          const yEl = document.getElementById('admPubYear'); if (yEl) yEl.value = (item.year || '').replace(/\./g, '-');
+          const titleEl = document.getElementById('admPubTitle'); if (titleEl) titleEl.value = item.title;
+          const authEl = document.getElementById('admPubAuthors'); if (authEl) authEl.value = item.authors;
+          const jEl = document.getElementById('admPubJournal'); if (jEl) jEl.value = item.journal;
+          const lEl = document.getElementById('admPubLink'); if (lEl) lEl.value = item.link !== '#' ? item.link : '';
+          const submitBtn = document.querySelector('#formAdminPub button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = '수정 완료';
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
@@ -954,10 +979,11 @@ class UnifiedAdminApp {
         const item = list.find(x => x.id === id);
         if (item) {
           this.editLabLifeId = id;
-          document.getElementById('admLifeDate').value = (item.date || '').replace(/\./g, '-');
-          document.getElementById('admLifeTitle').value = item.title;
-          document.getElementById('admLifeDesc').value = item.desc || '';
-          document.querySelector('#formAdminLabLife button[type="submit"]').textContent = '활동 수정 완료';
+          const dEl = document.getElementById('admLifeDate'); if (dEl) dEl.value = (item.date || '').replace(/\./g, '-');
+          const tEl = document.getElementById('admLifeTitle'); if (tEl) tEl.value = item.title;
+          const descEl = document.getElementById('admLifeDesc'); if (descEl) descEl.value = item.desc || '';
+          const submitBtn = document.querySelector('#formAdminLabLife button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = '활동 수정 완료';
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
@@ -992,10 +1018,11 @@ class UnifiedAdminApp {
         const item = list.find(x => x.id === id);
         if (item) {
           this.editNoticeId = id;
-          document.getElementById('admNotDate').value = (item.date || '').replace(/\./g, '-');
-          document.getElementById('admNotTitle').value = item.title;
-          document.getElementById('admNotDesc').value = item.desc || '';
-          document.querySelector('#formAdminNotice button[type="submit"]').textContent = '공지 수정 완료';
+          const dEl = document.getElementById('admNotDate'); if (dEl) dEl.value = (item.date || '').replace(/\./g, '-');
+          const tEl = document.getElementById('admNotTitle'); if (tEl) tEl.value = item.title;
+          const descEl = document.getElementById('admNotDesc'); if (descEl) descEl.value = item.desc || '';
+          const submitBtn = document.querySelector('#formAdminNotice button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = '공지 수정 완료';
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
@@ -1030,10 +1057,11 @@ class UnifiedAdminApp {
         const item = list.find(x => x.id === id);
         if (item) {
           this.editNewsId = id;
-          document.getElementById('admNewsDate').value = (item.date || '').replace(/\./g, '-');
-          document.getElementById('admNewsTitle').value = item.title;
-          document.getElementById('admNewsDesc').value = item.desc || '';
-          document.querySelector('#formAdminNews button[type="submit"]').textContent = '뉴스 수정 완료';
+          const dEl = document.getElementById('admNewsDate'); if (dEl) dEl.value = (item.date || '').replace(/\./g, '-');
+          const tEl = document.getElementById('admNewsTitle'); if (tEl) tEl.value = item.title;
+          const descEl = document.getElementById('admNewsDesc'); if (descEl) descEl.value = item.desc || '';
+          const submitBtn = document.querySelector('#formAdminNews button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = '뉴스 수정 완료';
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
@@ -1111,7 +1139,6 @@ function syncPublicPages() {
 }
 
 async function syncPublicPagesInternal() {
-  // 1. Home Hero
   const homeBadgeEl = document.getElementById('homeHeroBadge');
   if (homeBadgeEl) {
     const { data: heroData } = await supabaseClient.from('home_hero').select('*').eq('id', 1).single();
@@ -1124,7 +1151,6 @@ async function syncPublicPagesInternal() {
     }
   }
 
-  // 2. Home Research Areas Grid
   const homeResearchGrid = document.getElementById('homeResearchGrid');
   if (homeResearchGrid) {
     const { data: researchList } = await supabaseClient.from('home_research_areas').select('*').order('id', { ascending: true });
@@ -1141,7 +1167,6 @@ async function syncPublicPagesInternal() {
     }
   }
 
-  // 3. Home Board (Notices + News)
   const homeBoardBox = document.getElementById('homeBoardContainer');
   if (homeBoardBox) {
     const { data: supabaseNotices } = await supabaseClient.from('notices').select('*').order('id', { ascending: false });
@@ -1169,7 +1194,6 @@ async function syncPublicPagesInternal() {
     }
   }
 
-  // 4. Home Publications
   const homePubBox = document.getElementById('homePubContainer');
   if (homePubBox) {
     const { data: allPubs } = await supabaseClient.from('publications').select('*');
@@ -1189,7 +1213,6 @@ async function syncPublicPagesInternal() {
     }
   }
 
-  // 5. Director Page
   const dirNameKo = document.querySelector('.pi-name');
   if (dirNameKo) {
     const { data: dir } = await supabaseClient.from('director_info').select('*').eq('id', 1).single();
@@ -1229,7 +1252,7 @@ async function syncPublicPagesInternal() {
         const titleText = titleEl.textContent.trim();
 
         if (titleText.includes('Education')) {
-          const { data: eduList } = await supabaseClient.from('direcotr_education').select('*').order('id', { ascending: true });
+          const { data: eduList } = await supabaseClient.from('director_education').select('*').order('id', { ascending: true });
           wrap.innerHTML = '';
           if (!eduList || eduList.length === 0) {
             wrap.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 학력 정보가 없습니다.</p></div>';
@@ -1257,7 +1280,6 @@ async function syncPublicPagesInternal() {
     }
   }
 
-  // 6. Current Members Page
   const cResearcher = document.getElementById('containerResearcher');
   const cTrainee = document.getElementById('containerTrainee');
   if (cResearcher || cTrainee) {
@@ -1284,7 +1306,6 @@ async function syncPublicPagesInternal() {
     renderGroup(traineeList, cTrainee);
   }
 
-  // 7. Alumni Page
   const alumniMainContainer = document.getElementById('alumniContainer');
   if (alumniMainContainer) {
     const { data: list } = await supabaseClient.from('alumni_members').select('*').order('year', { ascending: false });
@@ -1309,7 +1330,6 @@ async function syncPublicPagesInternal() {
     });
   }
 
-  // 8. View Detail Page
   const viewTitle = document.getElementById('viewTitle');
   if (viewTitle) {
     const params = new URLSearchParams(location.search);
@@ -1331,12 +1351,12 @@ async function syncPublicPagesInternal() {
     const newViews = (item.views || 0) + 1;
     await supabaseClient.from(tableName).update({ views: newViews }).eq('id', id);
 
-    document.getElementById('viewPageCategory').textContent = catName;
-    document.getElementById('viewBadge').textContent = catName;
-    document.getElementById('viewTitle').textContent = item.title;
-    document.getElementById('viewDate').textContent = item.date;
-    document.getElementById('viewViews').textContent = newViews;
-    document.getElementById('viewContent').innerHTML = formatDesc(item.desc || '');
+    const vCat = document.getElementById('viewPageCategory'); if (vCat) vCat.textContent = catName;
+    const vBadge = document.getElementById('viewBadge'); if (vBadge) vBadge.textContent = catName;
+    const vTitle = document.getElementById('viewTitle'); if (vTitle) vTitle.textContent = item.title;
+    const vDate = document.getElementById('viewDate'); if (vDate) vDate.textContent = item.date;
+    const vViews = document.getElementById('viewViews'); if (vViews) vViews.textContent = newViews;
+    const vContent = document.getElementById('viewContent'); if (vContent) vContent.innerHTML = formatDesc(item.desc || '');
 
     const galleryBox = document.getElementById('viewImagesGallery');
     const allImgs = [];
@@ -1370,7 +1390,13 @@ class DedicatedGenericViewer {
     this.searchInput = document.getElementById(searchInputId);
     this.searchBtn = document.getElementById(searchBtnId);
     this.renderCardCallback = renderCardCallback;
-    this.itemsPerPage = 10;
+    
+    // Publications, Patents, Notice는 한 페이지당 10개, Lab Life와 News는 6개 설정
+    if (this.tableName === 'publications' || this.tableName === 'notices') {
+      this.itemsPerPage = 10;
+    } else {
+      this.itemsPerPage = 6;
+    }
     this.currentPage = 1;
 
     if (!this.container) return;
@@ -1462,15 +1488,59 @@ class DedicatedGenericViewer {
   }
 
   renderPagination(totalPages) {
-    if (!this.paginationContainer || totalPages <= 1) { if(this.paginationContainer) this.paginationContainer.innerHTML=''; return; }
+    if (!this.paginationContainer || totalPages <= 1) { 
+      if(this.paginationContainer) this.paginationContainer.innerHTML = ''; 
+      return; 
+    }
+    
     this.paginationContainer.innerHTML = '';
+
+    // 1. [이전] 버튼 생성
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `page-btn prev-btn ${this.currentPage === 1 ? 'disabled' : ''}`;
+    prevBtn.innerHTML = `&lsaquo;`;
+    prevBtn.title = '이전 페이지';
+    if (this.currentPage === 1) {
+      prevBtn.style.opacity = '0.4';
+      prevBtn.style.cursor = 'not-allowed';
+    } else {
+      prevBtn.addEventListener('click', () => {
+        this.currentPage--;
+        this.render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    this.paginationContainer.appendChild(prevBtn);
+
+    // 2. 숫자 페이지 버튼들 생성
     for (let i = 1; i <= totalPages; i++) {
       const pageBtn = document.createElement('button');
       pageBtn.className = `page-btn num-btn ${this.currentPage === i ? 'active' : ''}`;
       pageBtn.textContent = i;
-      pageBtn.addEventListener('click', () => { this.currentPage = i; this.render(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+      pageBtn.addEventListener('click', () => { 
+        this.currentPage = i; 
+        this.render(); 
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+      });
       this.paginationContainer.appendChild(pageBtn);
     }
+
+    // 3. [다음] 버튼 생성
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `page-btn next-btn ${this.currentPage === totalPages ? 'disabled' : ''}`;
+    nextBtn.innerHTML = `&rsaquo;`;
+    nextBtn.title = '다음 페이지';
+    if (this.currentPage === totalPages) {
+      nextBtn.style.opacity = '0.4';
+      nextBtn.style.cursor = 'not-allowed';
+    } else {
+      nextBtn.addEventListener('click', () => {
+        this.currentPage++;
+        this.render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    this.paginationContainer.appendChild(nextBtn);
   }
 }
 
@@ -1486,7 +1556,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const topBtn = document.getElementById('scrollTopBtn');
   if (topBtn) topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-  // 1. Publications
   new DedicatedGenericViewer({
     tableName: 'publications', targetType: 'paper',
     containerId: 'pubListContainer', paginationId: 'pubPagination',
@@ -1510,7 +1579,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 2. Patents
   new DedicatedGenericViewer({
     tableName: 'publications', targetType: 'patent',
     containerId: 'patentListContainer', paginationId: 'patentPagination',
@@ -1534,7 +1602,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 3. Lab Life
   new DedicatedGenericViewer({
     tableName: 'lab_life',
     containerId: 'lablifeListContainer', paginationId: 'lablifePagination',
@@ -1549,7 +1616,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 4. Notice
   new DedicatedGenericViewer({
     tableName: 'notices',
     containerId: 'noticeTableBody', paginationId: 'noticePagination',
@@ -1563,7 +1629,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 5. News
   new DedicatedGenericViewer({
     tableName: 'news',
     containerId: 'newsListContainer', paginationId: 'newsPagination',

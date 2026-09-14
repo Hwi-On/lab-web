@@ -1,6 +1,6 @@
 /* ============================================================
    0. 구글 폰트(Plus Jakarta Sans) 불러오기 및 리셋
-============================================================ */
+   ============================================================ */
 @font-face {
   font-family: 'Plus Jakarta Sans';
   src: url('fonts/PlusJakartaSans-VariableFont_wght.ttf') format('truetype');
@@ -13,6 +13,16 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* ============================================================
+   [전역 텍스트 단어 단위 줄바꿈 일괄 적용]
+   ============================================================ */
+h1, h2, h3, h4, h5, h6, p, span, a, 
+.hero-title, .hero-desc, .card-heading, .card-detail, 
+.edu-details, .cv-text, .notice-desc, .lablife-title, .notice-title {
+  word-break: keep-all !important;      /* 글자가 중간에 잘리지 않고 단어 단위로 꺾이도록 설정 */
+  overflow-wrap: break-word !important; /* 너무 긴 영어 단어도 영역을 안 뚫고 안전하게 보호 */
 }
 
 html {
@@ -36,11 +46,16 @@ body {
 
 main.page-body {
   flex: 1;
+  padding-top: 0 !important;
+}
+
+main.page-body > .subpage-header:first-child {
+  margin-top: 0 !important;
 }
 
 /* ============================================================
    1. 글로벌 네비게이션 헤더 & 유연한 로고 크기 조정
-============================================================ */
+   ============================================================ */
 .navbar {
   position: absolute;
   top: 0;
@@ -207,7 +222,7 @@ main.page-body {
 
 /* ============================================================
    2. 홈 히어로 배너 섹션
-============================================================ */
+   ============================================================ */
 .hero-section {
   position: relative;
   width: 100%;
@@ -278,13 +293,17 @@ main.page-body {
 }
 
 .hero-title {
-  font-size: clamp(2.2rem, 4.5vw, 3.4rem) !important;
+  font-size: clamp(2rem, 4.5vw, 3.5rem) !important;
   font-weight: 800;
   line-height: 1.2 !important;
   color: #ffffff;
   letter-spacing: -0.6px;
   margin-bottom: 20px;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  word-break: break-all !important;
+  overflow-wrap: anywhere !important;
+  max-width: 100% !important;
+  white-space: normal !important;
 }
 
 .hero-desc {
@@ -294,6 +313,8 @@ main.page-body {
   margin-bottom: 32px;
   max-width: 680px;
   word-break: keep-all;
+  overflow-wrap: anywhere !important;
+  white-space: normal !important;
 }
 
 .hero-actions {
@@ -326,7 +347,7 @@ main.page-body {
 
 /* ============================================================
    3. 홈 및 본문 섹션
-============================================================ */
+   ============================================================ */
 .main-body-wrap {
   flex: 1 !important;
   background-color: #ffffff;
@@ -393,25 +414,32 @@ main.page-body {
 }
 
 .modern-research-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: clamp(20px, 2.5vw, 32px);
-  width: 100%;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: clamp(20px, 2.5vw, 32px) !important;
+  width: 100% !important;
 }
 
-.modern-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 36px 30px;
-  transition: all 0.25s ease !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+.modern-research-grid > div,
+.modern-card,
+.notice-box,
+.pub-card {
+  background: transparent !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 14px !important;
+  padding: 30px 24px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
-.modern-card:hover {
-  transform: translateY(-6px) !important;
+.modern-research-grid > div:hover,
+.modern-card:hover,
+.notice-box:hover,
+.pub-card:hover {
+  transform: translateY(-4px) !important;
   border-color: #0ea5e9 !important;
-  box-shadow: 0 16px 32px rgba(14, 165, 233, 0.15) !important;
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.15) !important;
 }
 
 .card-tag {
@@ -427,6 +455,13 @@ main.page-body {
   font-weight: 700;
   color: #0f172a;
   margin-bottom: 12px;
+  word-break: keep-all;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.4 !important;
 }
 
 .card-detail {
@@ -436,27 +471,10 @@ main.page-body {
 }
 
 .notice-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: clamp(20px, 2.5vw, 32px);
-  width: 100%;
-}
-
-.notice-box {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 30px 24px;
-  display: flex;
-  flex-direction: column;
-  min-height: 240px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-  transition: all 0.2s ease;
-}
-
-.notice-box:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: clamp(20px, 2.5vw, 32px) !important;
+  width: 100% !important;
 }
 
 .notice-tag {
@@ -474,15 +492,30 @@ main.page-body {
   font-size: 1.08rem;
   font-weight: 700;
   color: #0f172a;
-  line-height: 1.45;
+  line-height: 1.4;
   margin-bottom: 12px;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
 }
 
-.notice-desc {
-  font-size: 0.88rem;
-  color: #64748b;
-  line-height: 1.6;
+.notice-desc, 
+.modern-research-grid p,
+.modern-card .card-detail {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 0.88rem !important;
+  color: #64748b !important;
+  line-height: 1.6 !important;
   margin-bottom: auto;
+  word-break: break-word !important;
 }
 
 .notice-date {
@@ -494,7 +527,7 @@ main.page-body {
 
 /* ============================================================
    4. 엠티 스테이트
-============================================================ */
+   ============================================================ */
 .empty-state-card {
   width: 100%;
   grid-column: 1 / -1;
@@ -510,8 +543,8 @@ main.page-body {
 }
 
 /* ============================================================
-   5. 서브페이지 헤더 & 검색 툴바 (우측 정렬 고정 완료)
-============================================================ */
+   5. 서브페이지 헤더 및 검색 툴바 & 페이지네이션
+   ============================================================ */
 .subpage-header {
   background: #070d19;
   padding: clamp(60px, 8vw, 85px) 24px clamp(40px, 6vw, 65px) !important;
@@ -525,50 +558,11 @@ main.page-body {
   letter-spacing: -0.5px !important;
 }
 
-.pub-search-box {
-  display: flex;
-  justify-content: flex-end; /* 검색바 우측 정렬 강제 고정 */
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 24px;
-  width: 100%;
-}
-
 .toolbar-box {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 20px;
   width: 100%;
-}
-
-.pub-category-tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.pub-tab-btn {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-  padding: 8px 18px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.pub-tab-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-}
-
-.pub-tab-btn.active {
-  background: #0ea5e9;
-  border-color: #0ea5e9;
-  color: #ffffff;
 }
 
 .search-bar-combo {
@@ -715,9 +709,25 @@ main.page-body {
   font-weight: 700;
 }
 
+.page-btn.prev-btn,
+.page-btn.next-btn {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+.page-btn.disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  background-color: #f8fafc !important;
+}
+
 /* ============================================================
    6. [Members] 프로필 카드 UI
-============================================================ */
+   ============================================================ */
 .member-category-section {
   margin-bottom: 60px;
 }
@@ -832,7 +842,7 @@ main.page-body {
 
 /* ============================================================
    7. [Publications] 리스트 UI
-============================================================ */
+   ============================================================ */
 .pub-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -897,8 +907,8 @@ main.page-body {
 }
 
 /* ============================================================
-   8. [Lab Life & News] 갤러리 그리드
-============================================================ */
+   8. [Lab Life & News] 갤러리 그리드 및 호버 효과
+   ============================================================ */
 .lablife-grid {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -908,12 +918,19 @@ main.page-body {
 
 .lablife-card {
   background: #ffffff !important;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-  display: flex;
-  flex-direction: column;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.lablife-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.15) !important;
 }
 
 .lablife-img-frame {
@@ -954,6 +971,13 @@ main.page-body {
   color: #0f172a;
   line-height: 1.4;
   margin-bottom: 8px;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
 }
 
 .lablife-desc {
@@ -971,7 +995,7 @@ main.page-body {
 
 /* ============================================================
    9. [Notice] 게시판 UI & 상세 보기 페이지 스타일
-============================================================ */
+   ============================================================ */
 .board-table-wrap {
   width: 100% !important;
   background: #ffffff;
@@ -1032,17 +1056,40 @@ main.page-body {
   line-height: 1.8;
   min-height: 180px;
   white-space: pre-wrap;
-  word-break: break-all;
+  word-break: keep-all !important;      /* 한글은 어절 단위로 자연스럽게 줄바꿈 */
+  overflow-wrap: break-word !important; /* 긴 영문 단어도 박스를 안 뚫고 단어 단위로 안전하게 줄바꿈 */
   margin-bottom: 40px;
+}
+
+.view-single-img-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 20px 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.view-single-img-wrap img {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 500px !important;
+  object-fit: contain !important;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  display: block !important;
 }
 
 /* ============================================================
    10. [Director] 전용 프로필 UI
-============================================================ */
+   ============================================================ */
 .director-profile-grid {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 50px;
+  display: grid !important;
+  grid-template-columns: minmax(280px, 320px) 1fr !important;
+  gap: clamp(20px, 4vw, 50px) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  align-items: start !important;
 }
 
 .director-avatar-card {
@@ -1051,11 +1098,13 @@ main.page-body {
   border-radius: 14px;
   padding: 28px;
   text-align: center;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .avatar-placeholder {
-  width: 180px;
-  height: 220px;
+  width: 160px;
+  height: 200px;
   background: #e2e8f0;
   border-radius: 10px;
   margin: 0 auto 20px auto;
@@ -1092,21 +1141,28 @@ main.page-body {
   padding-top: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   text-align: left;
   font-size: 0.88rem;
+  width: 100%;
 }
 
 .pill-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
+  width: 100%;
 }
 
-.pill-row strong { color: #475569; }
-.pill-row span { color: #0f172a; word-break: break-all; }
+.pill-row strong { color: #475569; flex-shrink: 0; }
+.pill-row span { color: #0f172a; word-break: break-all; text-align: right; }
 
-.cv-section { margin-bottom: 40px; }
+.cv-section { 
+  margin-bottom: 40px; 
+  width: 100%;
+  box-sizing: border-box;
+}
 
 .cv-title {
   font-size: 1.25rem;
@@ -1125,7 +1181,7 @@ main.page-body {
 
 /* ============================================================
    11. [ADMIN] 관리자 폼 스타일
-============================================================ */
+   ============================================================ */
 .admin-top-actions {
   display: flex;
   align-items: center;
@@ -1165,6 +1221,8 @@ main.page-body {
   margin-bottom: 30px;
   border-bottom: 2px solid #e2e8f0;
   padding-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-tab-btn {
@@ -1177,6 +1235,7 @@ main.page-body {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex: 0 0 auto !important;
 }
 
 .admin-tab-btn.active {
@@ -1196,6 +1255,13 @@ main.page-body {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
 }
 
+#adminPanelBox {
+  width: 100% !important;
+  max-width: 1200px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
 .admin-card-title {
   font-size: 1.25rem;
   font-weight: 800;
@@ -1205,11 +1271,39 @@ main.page-body {
   padding-bottom: 12px;
 }
 
+.admin-form-card form {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+.admin-form-card form > button[type="submit"],
+.admin-form-card form .btn-primary,
+.admin-form-card form .btn-submit {
+  align-self: flex-end !important;
+  margin-left: auto !important;
+  margin-top: 20px !important;
+}
+
+.admin-form-card input[type="file"] {
+  border: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+  height: auto !important;
+}
+
+.admin-form-card .form-group {
+  margin-bottom: 16px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin-bottom: 14px;
+  width: 100%;
 }
 
 .form-group label {
@@ -1218,7 +1312,11 @@ main.page-body {
   color: #475569;
 }
 
-.form-group input, .admin-select {
+.form-group input, 
+.form-group select, 
+.form-group textarea,
+.admin-select,
+input[type="file"] {
   height: 40px;
   padding: 0 12px;
   border: 1px solid #cbd5e1;
@@ -1226,22 +1324,53 @@ main.page-body {
   font-size: 0.9rem;
   outline: none;
   background: #ffffff;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+input[type="file"] {
+  padding: 6px 10px !important;
+  display: flex;
+  align-items: center;
+  color: #475569 !important;
+}
+
+input[type="file"]::file-selector-button {
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background 0.2s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: #e2e8f0;
 }
 
 .admin-textarea {
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  outline: none;
-  font-family: inherit;
-  resize: vertical;
+  width: 100% !important;
+  padding: 10px 12px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  outline: none !important;
+  background: #ffffff !important;
+  font-family: inherit !important;
+  font-size: 0.9rem !important;
+  resize: vertical !important;
+  box-sizing: border-box !important;
 }
 
 .form-row-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .btn-submit {
@@ -1252,6 +1381,7 @@ main.page-body {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  padding: 10px 20px;
 }
 
 .btn-submit:hover { background: #0284c7; }
@@ -1271,37 +1401,33 @@ main.page-body {
 
 /* ============================================================
    12. Education 및 Experience 카드 전용 모던 스타일
-============================================================ */
+   ============================================================ */
 .edu-timeline-wrap {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-top: 14px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .edu-row {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
-  justify-content: flex-start !important;
-  text-align: left !important;
-  gap: 24px !important;
+  gap: 20px !important;
   padding: 22px 28px !important;
   background: #ffffff !important;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   transition: all 0.2s ease;
-}
-
-.edu-row:hover {
-  border-color: #0ea5e9;
-  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.08);
-  transform: translateX(4px);
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .edu-period {
-  flex: 0 0 140px !important;
-  text-align: left !important;
+  flex: 0 0 130px !important;
+  text-align: center !important;
 }
 
 .edu-badge {
@@ -1315,6 +1441,7 @@ main.page-body {
   font-weight: 700;
   text-align: center;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .edu-details {
@@ -1323,7 +1450,10 @@ main.page-body {
   flex-direction: row !important;
   align-items: center !important;
   flex-wrap: wrap !important;
-  gap: 10px !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
 }
 
 .edu-degree {
@@ -1349,7 +1479,7 @@ main.page-body {
 
 /* ============================================================
    13. 맞춤형 푸터 디자인
-============================================================ */
+   ============================================================ */
 .custom-lab-footer {
   background-color: #070d19;
   border-top: 1px solid #1e293b;
@@ -1475,7 +1605,7 @@ main.page-body {
 
 /* ============================================================
    14. 스티키 서브바
-============================================================ */
+   ============================================================ */
 .sticky-subbar {
   position: sticky;
   top: 0;
@@ -1572,8 +1702,8 @@ main.page-body {
 }
 
 /* ============================================================
-   15. 반응형 햄버거 메뉴
-============================================================ */
+   15. 모바일 메뉴, 백드롭 및 반응형 미디어쿼리 모음
+   ============================================================ */
 .mobile-menu-toggle {
   display: none;
   background: transparent;
@@ -1615,20 +1745,50 @@ main.page-body {
   background-color: #0f172a !important;
 }
 
-@media (max-width: 1080px) {
-  .navbar .main-menu {
-    display: none !important;
-  }
+.mobile-backdrop {
+  display: none !important;
+}
+.navbar.mobile-open ~ .mobile-backdrop,
+.mobile-backdrop.active {
+  display: block !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  z-index: 9999 !important;
+}
 
-  .mobile-menu-toggle {
+.admin-mobile-menu {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  background-color: #ffffff !important;
+  padding: 90px 24px 40px !important;
+  width: 320px !important;
+  max-width: 85vw !important;
+  height: 100vh !important;
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.18) !important;
+  z-index: 10002 !important;
+  overflow-y: auto !important;
+}
+
+@media (max-width: 1024px) {
+  .navbar .mobile-menu-toggle {
     display: flex !important;
     z-index: 10003 !important;
   }
-
+  .navbar .main-menu {
+    display: none !important;
+  }
   .navbar.mobile-open {
     z-index: 10001 !important;
   }
-
   .navbar.mobile-open .main-menu {
     display: flex !important;
     position: fixed !important;
@@ -1648,7 +1808,7 @@ main.page-body {
     gap: 0 !important;
     pointer-events: auto !important;
   }
-
+  
   .navbar.mobile-open .main-menu .nav-item {
     width: 100% !important;
     height: auto !important;
@@ -1657,135 +1817,14 @@ main.page-body {
     padding: 14px 0 !important;
     flex-direction: column !important;
   }
-
   .navbar.mobile-open .main-menu .main-link {
     color: #0f172a !important;
     font-size: 1.15rem !important;
     font-weight: 700 !important;
     width: 100% !important;
     padding: 4px 0 !important;
-    pointer-events: auto !important;
     text-decoration: none !important;
   }
-}
-
-.mobile-backdrop {
-  display: none;
-}
-.navbar.mobile-open ~ .mobile-backdrop,
-.mobile-backdrop.active {
-  display: block !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  background-color: rgba(0, 0, 0, 0.45) !important;
-  z-index: 10000 !important;
-}
-
-.custom-select-wrap {
-  flex: 0 0 clamp(110px, 30%, 140px) !important;
-}
-
-.custom-select-options li {
-  white-space: nowrap !important;
-}
-/* 관리자 페이지 헤더 배경 색상 및 레이아웃 강제 고정 */
-.navbar.subpage-nav {
-  background-color: #070d19 !important;
-  position: relative !important;
-}
-
-.navbar.subpage-nav.mobile-open {
-  background-color: #070d19 !important;
-}
-
-.navbar.subpage-nav.mobile-open .admin-mobile-menu {
-  display: flex !important;
-  position: fixed !important;
-  top: 0 !important;
-  right: 0 !important;
-  width: 320px !important;
-  max-width: 85vw !important;
-  height: 100vh !important;
-  background-color: #ffffff !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  padding: 90px 24px 40px !important;
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.18) !important;
-  z-index: 10002 !important;
-  overflow-y: auto !important;
-}
-/* 관리자 페이지 헤더 및 흰색 공백 버그 원천 차단 */
-.navbar.subpage-nav {
-  background-color: #070d19 !important;
-  position: relative !important;
-  height: 80px !important;
-}
-
-/* 게시판 및 커뮤니티 검색바 우측 정렬 강제 고정 */
-.pub-search-box {
-  display: flex !important;
-  justify-content: flex-end !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin-bottom: 24px !important;
-  width: 100% !important;
-}
-/* PC 호버 시 흰색 드롭다운 패널 및 텍스트 색상 정상화 */
-.navbar.menu-open {
-  background-color: #ffffff !important;
-}
-.navbar.menu-open .logo-title { color: #0f172a !important; }
-.navbar.menu-open .logo-desc { color: #64748b !important; }
-.navbar.menu-open .main-link { color: #1e293b !important; }
-.navbar.menu-open .main-link:hover { color: #0284c7 !important; }
-.navbar.menu-open .sub-links,
-.navbar.menu-open .sub-menu-bg {
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-/* 모바일 햄버거 메뉴 내부에서 하위 세부 테마 항목들이 세로로 예쁘게 펼쳐지도록 설정 */
-@media (max-width: 1080px) {
-  .navbar.mobile-open .main-menu {
-    display: flex !important;
-    position: fixed !important;
-    top: 0 !important;
-    right: 0 !important;
-    width: 320px !important;
-    max-width: 85vw !important;
-    height: 100vh !important;
-    background-color: #ffffff !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
-    padding: 90px 24px 40px !important;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.18) !important;
-    z-index: 10002 !important;
-    overflow-y: auto !important;
-  }
-
-  .navbar.mobile-open .main-menu .nav-item {
-    width: 100% !important;
-    height: auto !important;
-    align-items: flex-start !important;
-    border-bottom: 1px solid #f1f5f9 !important;
-    padding: 12px 0 !important;
-    flex-direction: column !important;
-  }
-
-  .navbar.mobile-open .main-menu .main-link {
-    color: #0f172a !important;
-    font-size: 1.1rem !important;
-    font-weight: 700 !important;
-    width: 100% !important;
-    padding: 4px 0 !important;
-  }
-
-  /* 모바일에서 하위 메뉴 숨김 해제 및 세로 정렬 */
   .navbar.mobile-open .main-menu .sub-links {
     position: static !important;
     transform: none !important;
@@ -1801,14 +1840,78 @@ main.page-body {
     width: 100% !important;
   }
 
-  .navbar.mobile-open .main-menu .sub-links a {
-    font-size: 0.9rem !important;
-    color: #64748b !important;
-    font-weight: 500 !important;
-    text-decoration: none !important;
+  .profile-horizontal-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .profile-h-card {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 24px !important;
+  }
+  .profile-photo-square {
+    width: 120px !important;
+    height: 150px !important;
+    margin-bottom: 12px !important;
+  }
+  .profile-info-side {
+    align-items: center !important;
+    width: 100% !important;
+  }
+  .profile-tags {
+    justify-content: center !important;
+  }
+  .profile-contact {
+    justify-content: center !important;
+    width: 100% !important;
+  }
+  .navbar .admin-top-actions {
+    display: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .director-profile-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
   }
 
-  .navbar.mobile-open .main-menu .sub-links a:hover {
-    color: #0ea5e9 !important;
+  .edu-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 18px 16px !important;
+  }
+
+  .edu-period {
+    flex: unset !important;
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-row-2 {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+  .form-group {
+    width: 100% !important;
+  }
+  .form-group input, 
+  .form-group select, 
+  .form-group textarea,
+  .admin-select,
+  input[type="file"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .lablife-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .lablife-img-frame {
+    height: 200px !important;
   }
 }
