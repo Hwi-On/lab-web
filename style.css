@@ -1734,3 +1734,81 @@ main.page-body {
   margin-bottom: 24px !important;
   width: 100% !important;
 }
+/* PC 호버 시 흰색 드롭다운 패널 및 텍스트 색상 정상화 */
+.navbar.menu-open {
+  background-color: #ffffff !important;
+}
+.navbar.menu-open .logo-title { color: #0f172a !important; }
+.navbar.menu-open .logo-desc { color: #64748b !important; }
+.navbar.menu-open .main-link { color: #1e293b !important; }
+.navbar.menu-open .main-link:hover { color: #0284c7 !important; }
+.navbar.menu-open .sub-links,
+.navbar.menu-open .sub-menu-bg {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* 모바일 햄버거 메뉴 내부에서 하위 세부 테마 항목들이 세로로 예쁘게 펼쳐지도록 설정 */
+@media (max-width: 1080px) {
+  .navbar.mobile-open .main-menu {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 320px !important;
+    max-width: 85vw !important;
+    height: 100vh !important;
+    background-color: #ffffff !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    padding: 90px 24px 40px !important;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.18) !important;
+    z-index: 10002 !important;
+    overflow-y: auto !important;
+  }
+
+  .navbar.mobile-open .main-menu .nav-item {
+    width: 100% !important;
+    height: auto !important;
+    align-items: flex-start !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 12px 0 !important;
+    flex-direction: column !important;
+  }
+
+  .navbar.mobile-open .main-menu .main-link {
+    color: #0f172a !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    width: 100% !important;
+    padding: 4px 0 !important;
+  }
+
+  /* 모바일에서 하위 메뉴 숨김 해제 및 세로 정렬 */
+  .navbar.mobile-open .main-menu .sub-links {
+    position: static !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    padding: 8px 0 4px 12px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 100% !important;
+  }
+
+  .navbar.mobile-open .main-menu .sub-links a {
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+  }
+
+  .navbar.mobile-open .main-menu .sub-links a:hover {
+    color: #0ea5e9 !important;
+  }
+}
