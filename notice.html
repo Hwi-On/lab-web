@@ -53,7 +53,7 @@
     </nav>
 
     <div class="section-container">
-      <!-- 검색바 영역 추가 -->
+      <!-- Publications와 완전히 동일한 고품격 검색바 디자인 적용 -->
       <div class="pub-search-box">
         <div class="custom-select-wrapper">
           <div class="custom-select-toggle" id="customSelectToggle">
@@ -68,8 +68,10 @@
           <input type="hidden" id="searchSelectValue" value="all">
         </div>
         <div class="pub-search-input-wrap">
-          <input type="text" id="noticeSearchInput" placeholder="검색어를 입력하세요..." />
-          <button type="button" id="noticeSearchBtn" class="pub-search-btn">검색</button>
+          <input type="text" id="noticeSearchInput" placeholder="공지사항 검색어를 입력하세요..." />
+          <button type="button" id="noticeSearchBtn" class="pub-search-btn" title="검색">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
         </div>
       </div>
 
@@ -83,7 +85,7 @@
             </tr>
           </thead>
           <tbody id="noticeTableBody">
-            <tr id="emptyNoticeRow">
+            <tr>
               <td colspan="3" style="text-align: center; padding: 40px; color: #475569;">
                 등록된 공지사항이 없습니다.
               </td>
