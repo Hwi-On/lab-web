@@ -58,8 +58,13 @@
         <h3>관리자 인증<br> (Admin Verification)</h3>
         <p>연구실 배너 메뉴 항목의 콘텐츠를 관리하려면 암호를 입력하세요.</p>
         <form id="adminLoginForm" class="admin-login-form">
-          <input type="password" id="adminPasswordInput" placeholder="관리자 비밀번호" required />
-          <button type="submit" class="btn-submit" style="height: 42px;">관리자 로그인</button>
+          <div class="form-group">
+            <label>관리자 인증 (Admin Verification)</label>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">연구실 배너 메뉴 항목의 콘텐츠를 관리하려면 암호를 입력하세요.</p>
+            <!-- 여기에 이메일 입력창이 빠져 있습니다 -->
+            <input type="password" id="adminPasswordInput" placeholder="관리자 비밀번호" required />
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">관리자 로그인</button>
         </form>
       </div>
 
