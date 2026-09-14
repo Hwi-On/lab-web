@@ -510,7 +510,7 @@ main.page-body {
 }
 
 /* ============================================================
-   5. 서브페이지 헤더 & 검색 툴바 (우측 정렬 고정 완료)
+   5. 서브페이지 헤더 & 검색 툴바
 ============================================================ */
 .subpage-header {
   background: #070d19;
@@ -523,15 +523,6 @@ main.page-body {
   font-size: clamp(2rem, 3.5vw, 2.6rem) !important;
   font-weight: 800 !important;
   letter-spacing: -0.5px !important;
-}
-
-.pub-search-box {
-  display: flex;
-  justify-content: flex-end; /* 검색바 우측 정렬 강제 고정 */
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 24px;
-  width: 100%;
 }
 
 .toolbar-box {
@@ -956,6 +947,7 @@ main.page-body {
   margin-bottom: 8px;
 }
 
+/* 3줄 초과 시 ... 처리 및 개행(br) 가독성 유지 최적화 */
 .lablife-desc {
   display: -webkit-box !important;
   -webkit-line-clamp: 3 !important;
@@ -1397,6 +1389,23 @@ main.page-body {
   margin-top: 2px;
 }
 
+.footer-address {
+  font-size: 0.86rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin-bottom: 14px;
+  word-break: keep-all;
+}
+
+.footer-contact-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 0.82rem;
+  color: #38bdf8;
+  font-weight: 600;
+}
+
 .footer-col-nav {
   display: flex;
   gap: 36px;
@@ -1472,6 +1481,30 @@ main.page-body {
   box-sizing: border-box !important;
   white-space: nowrap !important;
 }
+
+.footer-bottom-bar {
+  border-top: 1px solid #1e293b;
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: #64748b;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.copyright-text { color: #64748b; }
+
+.footer-admin-link {
+  color: #475569;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.footer-admin-link:hover { color: #38bdf8; }
 
 /* ============================================================
    14. 스티키 서브바
@@ -1572,7 +1605,7 @@ main.page-body {
 }
 
 /* ============================================================
-   15. 반응형 햄버거 메뉴
+   15. [최종 완성] 태블릿 및 모바일 반응형 햄버거 메뉴 (1080px 이하 전면 전환)
 ============================================================ */
 .mobile-menu-toggle {
   display: none;
@@ -1667,6 +1700,57 @@ main.page-body {
     pointer-events: auto !important;
     text-decoration: none !important;
   }
+
+  .navbar.mobile-open .main-menu .nav-item:nth-child(1) .sub-links,
+  .navbar.mobile-open .main-menu .nav-item:nth-child(2) .sub-links,
+  .navbar.mobile-open .main-menu .nav-item:nth-child(5) .sub-links {
+    display: none !important;
+  }
+
+  .navbar.mobile-open .main-menu .sub-links {
+    position: static !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 8px 0 2px 10px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    pointer-events: auto !important;
+  }
+
+  .navbar.mobile-open .main-menu .sub-links a {
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    pointer-events: auto !important;
+  }
+
+  .navbar.mobile-open .main-menu .sub-links a:hover {
+    color: #0ea5e9 !important;
+  }
+}
+
+@media (max-width: 960px) {
+  .profile-horizontal-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .lablife-grid { grid-template-columns: 1fr !important; }
+  .section-header-flex {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding-bottom: 20px !important;
+    margin-bottom: 28px !important;
+  }
 }
 
 .mobile-backdrop {
@@ -1684,10 +1768,656 @@ main.page-body {
   z-index: 10000 !important;
 }
 
+/* ============================================================
+   [최종 확정] Board 및 Publications 클릭/호버 시 파란색 포인트 고정
+============================================================ */
+.notice-row:hover, 
+.notice-box:hover, 
+.pub-card:hover, 
+.lablife-card:hover {
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.12) !important;
+  transform: translateY(-3px) !important;
+}
+
+.notice-row:active, 
+.notice-box:active, 
+.pub-card:active, 
+.lablife-card:active,
+.board-link:active {
+  background-color: #f0f9ff !important;
+  color: #0ea5e9 !important;
+}
+
+.board-link {
+  color: #1e293b !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease !important;
+}
+
+.notice-row:hover .board-link,
+.board-link:hover {
+  color: #0ea5e9 !important;
+}
+
+.pub-card:hover .pub-title {
+  color: #0ea5e9 !important;
+}
+
+.pub-link-icon:hover {
+  background-color: #0ea5e9 !important;
+  color: #ffffff !important;
+  border-color: #0ea5e9 !important;
+}
+
+.profile-h-card {
+  transition: all 0.25s ease !important;
+}
+
+.profile-h-card:hover {
+  transform: translateY(-6px) !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 16px 32px rgba(14, 165, 233, 0.12) !important;
+}
+
+.notice-row:hover, 
+.notice-box:hover {
+  transform: none !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+}
+
 .custom-select-wrap {
   flex: 0 0 clamp(110px, 30%, 140px) !important;
 }
 
 .custom-select-options li {
   white-space: nowrap !important;
+}
+
+@media (max-width: 1080px) {
+  .hero-section {
+    min-height: 65vh !important;
+    padding-top: 90px !important;
+    padding-bottom: 50px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-section {
+    min-height: 75vh !important;
+    padding-top: 80px !important;
+    padding-bottom: 40px !important;
+  }
+  
+  .hero-title {
+    font-size: clamp(1.7rem, 7vw, 2.3rem) !important;
+    line-height: 1.25 !important;
+  }
+}
+
+.subpage-header {
+  background: #070d19 !important;
+  padding: clamp(50px, 7vw, 75px) 24px !important;
+  text-align: center !important;
+}
+
+.subpage-title {
+  color: #ffffff !important;
+  font-size: clamp(2rem, 3.5vw, 2.6rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.5px !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .subpage-header {
+    padding: 40px 20px 35px !important;
+  }
+}
+
+.edu-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  gap: 24px !important;
+  padding: 22px 28px !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.edu-period {
+  flex: 0 0 140px !important;
+  text-align: left !important;
+}
+
+.edu-badge {
+  display: inline-block !important;
+  padding: 6px 12px !important;
+  background: #e0f2fe !important;
+  color: #0284c7 !important;
+  border: 1px solid #bae6fd !important;
+  border-radius: 6px !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.edu-details {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+.edu-degree {
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.3px !important;
+}
+
+.edu-sep {
+  color: #cbd5e1 !important;
+  font-weight: 300 !important;
+  font-size: 0.95rem !important;
+  display: inline !important;
+}
+
+.edu-institution {
+  font-size: 0.95rem !important;
+  font-weight: 400 !important;
+  color: #64748b !important;
+  letter-spacing: -0.2px !important;
+}
+
+@media (max-width: 960px) {
+  .edu-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+    padding: 20px !important;
+  }
+
+  .edu-period {
+    flex: none !important;
+    width: 100% !important;
+  }
+
+  .edu-badge {
+    width: auto !important;
+    display: inline-block !important;
+  }
+
+  .edu-details {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+  }
+
+  .edu-sep {
+    display: none !important;
+  }
+
+  .director-avatar-card {
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 400px !important;
+  }
+}
+
+.profile-horizontal-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: 28px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.profile-h-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  padding: 28px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  gap: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  transition: all 0.2s ease !important;
+}
+
+.profile-h-card .profile-photo-square {
+  width: 140px !important;
+  height: 170px !important;
+  min-width: 0 !important;
+  margin: 0 auto 4px auto !important;
+  background-color: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.profile-h-card .profile-photo-square img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.profile-h-card .profile-info-side {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.profile-h-card .profile-tags {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  margin: 8px 0 16px 0 !important;
+  width: 100% !important;
+}
+
+.profile-h-card .profile-contact {
+  margin-top: auto !important;
+  border-top: 1px solid #f1f5f9 !important;
+  padding-top: 14px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  font-size: 0.88rem !important;
+  color: #64748b !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  flex-wrap: wrap !important;
+}
+
+.profile-h-card .profile-contact span {
+  display: inline-block !important;
+  white-space: normal !important;
+  word-break: break-all !important;
+}
+
+@media (max-width: 960px) {
+  .director-profile-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 30px !important;
+    width: 100% !important;
+  }
+}
+
+.edu-row:hover {
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.12) !important;
+}
+
+@media (max-width: 960px) {
+  .lablife-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: 24px !important;
+    width: 100% !important;
+  }
+}
+
+.empty-state-card {
+  width: 100% !important;
+  grid-column: 1 / -1 !important;
+  padding: 50px 24px !important;
+  text-align: center !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 14px !important;
+  color: #475569 !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.015) !important;
+  margin: 10px 0 !important;
+}
+
+.admin-table-card .board-table th,
+.admin-table-card .board-table td {
+  padding: 14px 16px !important;
+  vertical-align: middle !important;
+  font-size: 0.9rem !important;
+}
+
+.admin-table-card .board-table td .tag-chip {
+  display: inline-block !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 768px) {
+  .admin-navbar .admin-nav-container {
+    flex-direction: column !important;
+    height: auto !important;
+    padding: 16px 20px !important;
+    gap: 12px !important;
+  }
+  
+  .admin-top-actions {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  
+  .admin-action-btn {
+    font-size: 0.82rem !important;
+    padding: 8px 14px !important;
+  }
+
+  .admin-nav-tabs {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .admin-tab-btn {
+    flex: 1 1 calc(33.333% - 6px) !important;
+    text-align: center !important;
+    padding: 10px 8px !important;
+    font-size: 0.85rem !important;
+  }
+}
+
+@media (max-width: 960px) {
+  .admin-nav-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .admin-tab-btn {
+    width: 100% !important;
+    flex: none !important;
+    text-align: center !important;
+    padding: 12px 10px !important;
+    font-size: 0.88rem !important;
+    border-radius: 8px !important;
+  }
+
+  .form-row-2 {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .form-row-2 .form-group {
+    width: 100% !important;
+  }
+
+  .admin-form-card, .admin-table-card {
+    padding: 20px 16px !important;
+    overflow-x: auto !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-navbar .admin-nav-container {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    height: 65px !important;
+    padding: 0 15px !important;
+  }
+
+  .admin-navbar .logo-desc {
+    display: block !important; 
+  }
+  
+  .admin-navbar .logo-title {
+    font-size: 1.1rem !important;
+    white-space: nowrap !important;
+    margin-bottom: 0 !important;
+  }
+
+  .admin-top-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    width: auto !important;
+  }
+  
+  .admin-action-btn {
+    font-size: 0.75rem !important;
+    padding: 6px 10px !important;
+    white-space: nowrap !important;
+    border-radius: 6px !important;
+  }
+}
+
+.admin-mobile-menu {
+  display: none !important;
+}
+
+.admin-mobile-toggle {
+  display: none !important;
+}
+
+@media (max-width: 1080px) {
+  .admin-top-actions {
+    display: none !important;
+  }
+
+  .mobile-menu-toggle {
+    display: flex !important;
+    z-index: 10003 !important;
+  }
+
+  .navbar.subpage-nav.mobile-open .admin-mobile-menu {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 320px !important;
+    max-width: 85vw !important;
+    height: 100vh !important;
+    background-color: #ffffff !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    padding: 90px 24px 40px !important;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.18) !important;
+    z-index: 10002 !important;
+    overflow-y: auto !important;
+    gap: 0 !important;
+    pointer-events: auto !important;
+  }
+
+  .navbar.subpage-nav.mobile-open .admin-mobile-menu .nav-item {
+    width: 100% !important;
+    height: auto !important;
+    align-items: flex-start !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 14px 0 !important;
+    flex-direction: column !important;
+  }
+
+  .navbar.subpage-nav.mobile-open .admin-mobile-menu .main-link {
+    color: #0f172a !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    width: 100% !important;
+    padding: 4px 0 !important;
+    pointer-events: auto !important;
+    text-decoration: none !important;
+  }
+}
+
+body, h1, h2, h3, h4, h5, h6, p, span, a, td, th, label, input, textarea, button {
+  word-break: keep-all !important;
+  word-wrap: break-word !important;
+}
+
+.lablife-card.no-image-card {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  min-height: 160px !important;
+}
+
+.lablife-card.no-image-card .lablife-content {
+  padding: 30px 24px !important;
+}
+/* ============================================================
+   [패치] 3줄 초과 시 ... 처리 및 개행(br) 가독성 유지 최적화
+============================================================ */
+.lablife-desc, .notice-desc {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  word-break: break-word !important;
+  font-size: 0.88rem !important;
+  color: #64748b !important;
+  line-height: 1.6 !important;
+  margin-top: 8px !important;
+}
+
+/* 홈 화면 Board(Notice/News) 박스 내부 텍스트도 3줄 제한 적용을 위해 디테일 보완 */
+.notice-box .notice-desc {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  word-break: break-word !important;
+  margin-bottom: auto !important;
+}
+@media (min-width: 1081px) {
+  .navbar {
+    padding-top: 14px; /* 원하는 만큼 px 조절 (예: 12px ~ 20px) */
+  }
+}
+/* 관리자 폼 내 셀렉트 박스 스타일을 인풋창과 동일하게 맞춤 */
+.form-group select.admin-select,
+.form-group select {
+  height: 40px !important;
+  padding: 0 12px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  font-size: 0.9rem !important;
+  color: #111827 !important;
+  background-color: #ffffff !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.form-group select:focus {
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+/* 관리자 폼 내부 모든 입력·선택·버튼 요소 규격 일괄 통일 */
+.admin-form-card .form-group input,
+.admin-form-card .form-group select,
+.admin-form-card .form-group textarea,
+.admin-auth-card input {
+  width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  font-size: 0.9rem !important;
+  line-height: normal !important;
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  display: block !important;
+}
+
+/* 텍스트어레디어나 파일 업로드 등 예외 높이 처리 필요 시 조정 */
+.admin-form-card .form-group textarea.admin-textarea {
+  height: auto !important;
+  min-height: 90px !important;
+  padding: 10px 12px !important;
+}
+
+/* 셀렉트 드롭다운 내부 옵션 레이아웃 안정화 */
+select optgroup {
+  font-weight: 700;
+  color: #0284c7;
+  background: #f0f9ff;
+}
+
+select option {
+  padding: 6px 12px;
+  color: #111827;
+  background: #ffffff;
+}
+/* 태블릿/모바일(1080px 이하) 뷰포트에서 셀렉트 및 폼 내부 가로 스크롤/오버플로우 방지 */
+@media (max-width: 1080px) {
+  .admin-form-card .form-group {
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  .admin-form-card .form-group select {
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 0.82rem !important; /* 좁은 화면에서 글자 크기 살짝 줄여서 레이아웃 보호 */
+  }
+}
+
+/* 옵션 텍스트 줄바꿈 허용 및 가로 폭 안정화 */
+select optgroup, select option {
+  white-space: normal !important;
+  word-break: break-all !important;
+  font-size: 0.85rem !important;
+}
+
+select optgroup {
+  padding: 4px 8px !important;
+  background-color: #f1f5f9 !important;
+  color: #0369a1 !important;
+}
+/* 파일 업로드 인풋 전용 높이/스타일 정상화 락 */
+.admin-form-card .form-group input[type="file"] {
+  height: auto !important;
+  min-height: 42px !important;
+  padding: 6px 12px !important;
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #cbd5e1 !important;
+  display: block !important;
+}
+
+.admin-form-card .form-group input[type="file"]::file-selector-button {
+  height: 30px !important;
+  line-height: 1 !important;
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 4px !important;
+  padding: 0 12px !important;
+  margin-right: 12px !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
 }
