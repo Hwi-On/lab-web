@@ -51,6 +51,26 @@
     </nav>
     
     <div class="section-container">
+      <!-- 검색바 영역 추가 -->
+      <div class="pub-search-box">
+        <div class="custom-select-wrapper">
+          <div class="custom-select-toggle" id="customSelectToggle">
+            <span id="customSelectedLabel">전체</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <ul class="custom-select-options" id="customSelectOptions">
+            <li data-value="all" class="selected">전체</li>
+            <li data-value="title">제목</li>
+            <li data-value="author">내용</li>
+          </ul>
+          <input type="hidden" id="searchSelectValue" value="all">
+        </div>
+        <div class="pub-search-input-wrap">
+          <input type="text" id="lablifeSearchInput" placeholder="검색어를 입력하세요..." />
+          <button type="button" id="lablifeSearchBtn" class="pub-search-btn">검색</button>
+        </div>
+      </div>
+
       <div class="lablife-grid" id="lablifeListContainer">
         <div class="empty-state-card" style="grid-column: 1 / -1;">
           <p>등록된 Lab Life 활동이 없습니다.</p>
@@ -63,7 +83,6 @@
   <footer class="custom-lab-footer">
     <div class="footer-wrap">
       <div class="footer-grid">
-        
         <div class="footer-col footer-col-brand">
           <div class="footer-brand-header">
             <div class="logo-mark"></div>
@@ -74,7 +93,6 @@
           </div>
           <span>E-MAIL. sooya1105@naver.com</span>
         </div>
-
         <div class="footer-col footer-col-nav">
           <div class="footer-nav-group">
             <h5 class="footer-group-title">Navigation</h5>
@@ -93,12 +111,10 @@
             </ul>
           </div>
         </div>
-
         <div class="footer-col footer-col-tags">
           <h5 class="footer-group-title">Research Focus</h5>
           <div class="footer-tag-cloud"></div>
         </div>
-
       </div>
     </div>
   </footer>

@@ -3,8 +3,6 @@
  * [PART 0] 기본 설정 및 Supabase 클라이언트 연결
  * ====================================================================
  */
-const ADMIN_PASSWORD = 'admin1234!';
-
 const SUPABASE_URL = "https://qckjwpurukvqgwbqispo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_wLEpW0OXffcNvtEtVKTyng_ri4PQGRc";
 
@@ -242,6 +240,9 @@ class UnifiedAdminApp {
     this.panelBox = document.getElementById('adminPanelBox');
     this.loginForm = document.getElementById('adminLoginForm');
     this.logoutBtn = document.getElementById('adminLogoutBtn');
+    this.logoutLinkMobile = document.getElementById('adminLogoutLinkMobile');
+    this.loginBtnDesktop = document.getElementById('adminLoginBtnDesktop');
+    this.authAuthLinkMobile = document.getElementById('adminAuthLinkMobile');
 
     this.editResId = null;
     this.editEduId = null;
@@ -258,63 +259,74 @@ class UnifiedAdminApp {
     this.initAuth();
     this.initTabs();
     this.initForms();
-    this.renderAll();
   }
 
   initAuth() {
-    const isAuth = sessionStorage.getItem('lab_admin_authenticated') === 'true';
-    const authAuthLinkMobile = document.getElementById('adminAuthLinkMobile');
-    const logoutLinkMobile = document.getElementById('adminLogoutLinkMobile');
-    const loginBtnDesktop = document.getElementById('adminLoginBtnDesktop');
-
-    if (isAuth) {
-      this.authBox.style.display = 'none';
-      this.panelBox.style.display = 'block';
-      if (this.logoutBtn) this.logoutBtn.style.display = 'inline-block';
-      if (loginBtnDesktop) loginBtnDesktop.style.display = 'none';
-      if (authAuthLinkMobile) authAuthLinkMobile.style.display = 'none';
-      if (logoutLinkMobile) logoutLinkMobile.style.display = 'block';
-    } else {
-      if (loginBtnDesktop) loginBtnDesktop.style.display = 'inline-flex';
-      if (authAuthLinkMobile) {
-        authAuthLinkMobile.textContent = 'Login';
-        authAuthLinkMobile.setAttribute('href', '#adminAuthBox');
-        authAuthLinkMobile.style.display = 'block';
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        this.showAdminPanel();
+      } else {
+        this.showLoginForm();
       }
-      if (logoutLinkMobile) logoutLinkMobile.style.display = 'none';
-    }
+    });
 
     if (this.loginForm) {
-      this.loginForm.addEventListener('submit', (e) => {
+      this.loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const pwd = document.getElementById('adminPasswordInput').value.trim();
-        if (pwd === ADMIN_PASSWORD) {
-          sessionStorage.setItem('lab_admin_authenticated', 'true');
-          this.authBox.style.display = 'none';
-          this.panelBox.style.display = 'block';
-          if (this.logoutBtn) this.logoutBtn.style.display = 'inline-block';
-          if (loginBtnDesktop) loginBtnDesktop.style.display = 'none';
-          if (authAuthLinkMobile) authAuthLinkMobile.style.display = 'none';
-          if (logoutLinkMobile) logoutLinkMobile.style.display = 'block';
-          this.renderAll();
+        const adminEmail = "labadmin@privarcy.com"; 
+        
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: adminEmail,
+          password: pwd
+        });
+
+        if (!error && data) {
+          this.showAdminPanel();
         } else {
-          alert('비밀번호가 올바르지 않습니다.');
+          alert('관리자 로그인 실패: 비밀번호가 올바르지 않습니다.');
         }
       });
     }
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+      await supabaseClient.auth.signOut();
       sessionStorage.removeItem('lab_admin_authenticated');
-      location.reload();
+      this.showLoginForm();
+      alert('로그아웃 되었습니다.');
     };
 
     if (this.logoutBtn) this.logoutBtn.addEventListener('click', handleLogout);
-    if (logoutLinkMobile) {
-      logoutLinkMobile.addEventListener('click', (e) => {
+    if (this.logoutLinkMobile) {
+      this.logoutLinkMobile.addEventListener('click', (e) => {
         e.preventDefault();
         handleLogout();
       });
     }
+  }
+
+  showAdminPanel() {
+    sessionStorage.setItem('lab_admin_authenticated', 'true');
+    if (this.authBox) this.authBox.style.display = 'none';
+    if (this.panelBox) this.panelBox.style.display = 'block';
+    if (this.logoutBtn) this.logoutBtn.style.display = 'inline-block';
+    if (this.loginBtnDesktop) this.loginBtnDesktop.style.display = 'none';
+    if (this.authAuthLinkMobile) this.authAuthLinkMobile.style.display = 'none';
+    if (this.logoutLinkMobile) this.logoutLinkMobile.style.display = 'block';
+    this.renderAll();
+  }
+
+  showLoginForm() {
+    if (this.authBox) this.authBox.style.display = 'block';
+    if (this.panelBox) this.panelBox.style.display = 'none';
+    if (this.logoutBtn) this.logoutBtn.style.display = 'none';
+    if (this.loginBtnDesktop) this.loginBtnDesktop.style.display = 'inline-flex';
+    if (this.authAuthLinkMobile) {
+      this.authAuthLinkMobile.textContent = 'Login';
+      this.authAuthLinkMobile.setAttribute('href', '#adminAuthBox');
+      this.authAuthLinkMobile.style.display = 'block';
+    }
+    if (this.logoutLinkMobile) this.logoutLinkMobile.style.display = 'none';
   }
 
   initTabs() {
@@ -1348,60 +1360,7 @@ async function syncPublicPagesInternal() {
     });
   }
 
-  // 8. Lab Life Page
-  const lablifeContainer = document.getElementById('lablifeListContainer');
-  if (lablifeContainer && !document.getElementById('formAdminLabLife')) {
-    const { data: list } = await supabaseClient.from('lab_life').select('*').order('id', { ascending: false });
-    lablifeContainer.innerHTML = '';
-    if (!list || list.length === 0) { lablifeContainer.innerHTML = '<div class="empty-state-card" style="grid-column: 1 / -1;"><p>등록된 Lab Life 활동이 없습니다.</p></div>'; }
-    else {
-      list.forEach((item) => {
-        const card = document.createElement('article'); card.className = 'lablife-card clickable-card';
-        let thumbImg = (item.images && item.images.length > 0) ? `<img src="${item.images[0]}" alt="사진" style="width:100%; height:100%; object-fit:contain;" />` : `<div class="img-placeholder">No Image</div>`;
-        card.innerHTML = `<div class="lablife-img-frame">${thumbImg}</div><div class="lablife-content"><span class="lablife-date">${escapeHtml(item.date)}</span><h3 class="lablife-title">${escapeHtml(item.title)}</h3><div class="lablife-desc">${formatDesc(item.desc || '')}</div></div>`;
-        card.addEventListener('click', () => { location.href = `view.html?type=lablife&id=${item.id}`; });
-        lablifeContainer.appendChild(card);
-      });
-    }
-  }
-
-  // 9. Notice Page
-  const noticeTbody = document.getElementById('noticeTableBody');
-  if (noticeTbody) {
-    const { data: list } = await supabaseClient.from('notices').select('*').order('id', { ascending: false });
-    noticeTbody.innerHTML = '';
-    if (!list || list.length === 0) {
-      noticeTbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 40px; color: #475569;">등록된 공지사항이 없습니다.</td></tr>';
-      return;
-    }
-    list.forEach((item, idx) => {
-      const tr = document.createElement('tr'); 
-      tr.className = 'notice-row clickable-row';
-      tr.innerHTML = `<td style="text-align:center;">${list.length - idx}</td><td class="notice-title-cell"><span class="board-link">${escapeHtml(item.title)}</span></td><td style="text-align:center;">${escapeHtml(item.date)}</td>`;
-      tr.addEventListener('click', () => { location.href = `view.html?type=notice&id=${item.id}`; });
-      noticeTbody.appendChild(tr);
-    });
-  }
-
-  // 10. News Page
-  const newsContainer = document.getElementById('newsListContainer');
-  if (newsContainer && !document.getElementById('formAdminNews')) {
-    const { data: list } = await supabaseClient.from('news').select('*').order('id', { ascending: false });
-    const sortedList = (list || []).sort((a, b) => parseCustomDate(b.date, b.id) - parseCustomDate(a.date, a.id));
-    newsContainer.innerHTML = '';
-    if (sortedList.length === 0) { newsContainer.innerHTML = '<div class="empty-state-card" style="grid-column: 1 / -1;"><p>등록된 뉴스가 없습니다.</p></div>'; }
-    else {
-      sortedList.forEach((item) => {
-        const card = document.createElement('article'); card.className = 'lablife-card clickable-card';
-        let thumbImg = (item.images && item.images.length > 0) ? `<img src="${item.images[0]}" alt="사진" style="width:100%; height:100%; object-fit:contain;" />` : `<div class="img-placeholder">No Image</div>`;
-        card.innerHTML = `<div class="lablife-img-frame">${thumbImg}</div><div class="lablife-content"><span class="lablife-date">${escapeHtml(item.date)}</span><h3 class="lablife-title">${escapeHtml(item.title)}</h3><div class="lablife-desc">${formatDesc(item.desc || '')}</div></div>`;
-        card.addEventListener('click', () => { location.href = `view.html?type=news&id=${item.id}`; });
-        newsContainer.appendChild(card);
-      });
-    }
-  }
-
-  // 11. View Detail Page
+  // 8. View Detail Page
   const viewTitle = document.getElementById('viewTitle');
   if (viewTitle) {
     const params = new URLSearchParams(location.search);
@@ -1449,17 +1408,19 @@ async function syncPublicPagesInternal() {
 
 /**
  * ====================================================================
- * [PART 5] 논문 및 특허 전용 검색 클래스
+ * [PART 5] 게시판 및 논문/특허 전용 통합 검색 클래스 (새로 추가됨)
  * ====================================================================
  */
-class DedicatedPubViewer {
-  constructor({ targetType, containerId, paginationId, selectId, searchInputId, searchBtnId }) {
+class DedicatedGenericViewer {
+  constructor({ tableName, targetType, containerId, paginationId, selectId, searchInputId, searchBtnId, renderCardCallback }) {
+    this.tableName = tableName;
     this.targetType = targetType;
     this.container = document.getElementById(containerId);
     this.paginationContainer = document.getElementById(paginationId);
     this.selectEl = document.getElementById(selectId);
     this.searchInput = document.getElementById(searchInputId);
     this.searchBtn = document.getElementById(searchBtnId);
+    this.renderCardCallback = renderCardCallback;
     this.itemsPerPage = 10;
     this.currentPage = 1;
 
@@ -1468,10 +1429,15 @@ class DedicatedPubViewer {
   }
 
   async initAsyncData() {
-    const { data: allItems } = await supabaseClient.from('publications').select('*');
-    const safeList = allItems || [];
-    const filteredBase = safeList.filter(item => (item.type || 'paper') === this.targetType);
-    this.baseList = filteredBase.sort((a, b) => parseCustomDate(b.year, b.id) - parseCustomDate(a.year, a.id));
+    let query = supabaseClient.from(this.tableName).select('*');
+    const { data: allItems } = await query;
+    let safeList = allItems || [];
+
+    if (this.tableName === 'publications' && this.targetType) {
+      safeList = safeList.filter(item => (item.type || 'paper') === this.targetType);
+    }
+
+    this.baseList = safeList.sort((a, b) => parseCustomDate(b.year || b.date, b.id) - parseCustomDate(a.year || a.date, a.id));
     this.filteredList = [...this.baseList];
 
     this.initEvents();
@@ -1490,17 +1456,19 @@ class DedicatedPubViewer {
   filterData() {
     const keyword = this.searchInput ? this.searchInput.value.trim().toLowerCase() : '';
     const filterType = this.selectEl ? this.selectEl.value : 'all';
+
     if (!keyword) {
       this.filteredList = [...this.baseList];
     } else {
       this.filteredList = this.baseList.filter((item) => {
         const title = (item.title || '').toLowerCase();
-        const author = (item.authors || '').toLowerCase();
+        const author = (item.authors || item.desc || '').toLowerCase();
         const journal = (item.journal || '').toLowerCase();
+
         if (filterType === 'title') return title.includes(keyword);
         if (filterType === 'author') return author.includes(keyword);
         if (filterType === 'journal') return journal.includes(keyword);
-        return title.includes(keyword) || author.includes(keyword) || journal.includes(keyword) || (item.year || '').includes(keyword);
+        return title.includes(keyword) || author.includes(keyword) || journal.includes(keyword) || (item.year || item.date || '').includes(keyword);
       });
     }
     this.currentPage = 1;
@@ -1509,31 +1477,28 @@ class DedicatedPubViewer {
 
   render() {
     this.container.innerHTML = '';
-    const emptyMsg = this.targetType === 'patent' ? '등록된 특허가 없습니다.' : '등록된 논문이 없습니다.';
-    if (this.baseList.length === 0) { this.container.innerHTML = `<div class="empty-state-card"><p>${emptyMsg}</p></div>`; if (this.paginationContainer) this.paginationContainer.innerHTML = ''; return; }
-    if (this.filteredList.length === 0) { this.container.innerHTML = '<div class="empty-state-card"><p>검색 조건과 일치하는 항목이 없습니다.</p></div>'; if (this.paginationContainer) this.paginationContainer.innerHTML = ''; return; }
+    const emptyMsg = this.tableName === 'publications' ? (this.targetType === 'patent' ? '등록된 특허가 없습니다.' : '등록된 논문이 없습니다.') : '등록된 게시물이 없습니다.';
+    
+    if (this.baseList.length === 0) { 
+      this.container.innerHTML = `<div class="empty-state-card" style="grid-column:1/-1;"><p>${emptyMsg}</p></div>`; 
+      if (this.paginationContainer) this.paginationContainer.innerHTML = ''; 
+      return; 
+    }
+    if (this.filteredList.length === 0) { 
+      this.container.innerHTML = '<div class="empty-state-card" style="grid-column:1/-1;"><p>검색 조건과 일치하는 항목이 없습니다.</p></div>'; 
+      if (this.paginationContainer) this.paginationContainer.innerHTML = ''; 
+      return; 
+    }
 
     const totalPages = Math.ceil(this.filteredList.length / this.itemsPerPage);
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const pagedItems = this.filteredList.slice(startIndex, startIndex + this.itemsPerPage);
 
-    pagedItems.forEach((pub) => {
-      const article = document.createElement('article');
-      article.className = 'pub-card';
-      article.innerHTML = `
-        <div class="pub-info">
-          <h3 class="pub-title">${formatTitle(pub.title)}</h3>
-          <div class="pub-meta">
-            <span class="pub-authors">${formatTitle(pub.authors)}</span>
-            <span class="pub-journal">${escapeHtml(pub.journal)}</span>
-            <span class="pub-year">${escapeHtml(pub.year)}</span>
-          </div>
-        </div>
-        <a href="${escapeHtml(pub.link || '#')}" class="pub-link-icon" target="_blank" rel="noopener noreferrer">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        </a>`;
-      this.container.appendChild(article);
+    pagedItems.forEach((item, idx) => {
+      const globalIdx = this.filteredList.length - startIndex - idx;
+      this.renderCardCallback(this.container, item, globalIdx);
     });
+
     this.renderPagination(totalPages);
   }
 
@@ -1562,6 +1527,95 @@ document.addEventListener('DOMContentLoaded', () => {
   const topBtn = document.getElementById('scrollTopBtn');
   if (topBtn) topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-  new DedicatedPubViewer({ targetType: 'paper', containerId: 'pubListContainer', paginationId: 'pubPagination', selectId: 'searchSelectValue', searchInputId: 'pubSearchInput', searchBtnId: 'pubSearchBtn' });
-  new DedicatedPubViewer({ targetType: 'patent', containerId: 'patentListContainer', paginationId: 'patentPagination', selectId: 'searchSelectValue', searchInputId: 'patentSearchInput', searchBtnId: 'patentSearchBtn' });
+  // 1. Publications
+  new DedicatedGenericViewer({
+    tableName: 'publications', targetType: 'paper',
+    containerId: 'pubListContainer', paginationId: 'pubPagination',
+    selectId: 'searchSelectValue', searchInputId: 'pubSearchInput', searchBtnId: 'pubSearchBtn',
+    renderCardCallback: (container, pub) => {
+      const article = document.createElement('article');
+      article.className = 'pub-card';
+      article.innerHTML = `
+        <div class="pub-info">
+          <h3 class="pub-title">${formatTitle(pub.title)}</h3>
+          <div class="pub-meta">
+            <span class="pub-authors">${formatTitle(pub.authors)}</span>
+            <span class="pub-journal">${escapeHtml(pub.journal)}</span>
+            <span class="pub-year">${escapeHtml(pub.year)}</span>
+          </div>
+        </div>
+        <a href="${escapeHtml(pub.link || '#')}" class="pub-link-icon" target="_blank" rel="noopener noreferrer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        `;
+      container.appendChild(article);
+    }
+  });
+
+  // 2. Patents
+  new DedicatedGenericViewer({
+    tableName: 'publications', targetType: 'patent',
+    containerId: 'patentListContainer', paginationId: 'patentPagination',
+    selectId: 'searchSelectValue', searchInputId: 'patentSearchInput', searchBtnId: 'patentSearchBtn',
+    renderCardCallback: (container, pub) => {
+      const article = document.createElement('article');
+      article.className = 'pub-card';
+      article.innerHTML = `
+        <div class="pub-info">
+          <h3 class="pub-title">${formatTitle(pub.title)}</h3>
+          <div class="pub-meta">
+            <span class="pub-authors">${formatTitle(pub.authors)}</span>
+            <span class="pub-journal">${escapeHtml(pub.journal)}</span>
+            <span class="pub-year">${escapeHtml(pub.year)}</span>
+          </div>
+        </div>
+        <a href="${escapeHtml(pub.link || '#')}" class="pub-link-icon" target="_blank" rel="noopener noreferrer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        `;
+      container.appendChild(article);
+    }
+  });
+
+  // 3. Lab Life (검색 기능 추가)
+  new DedicatedGenericViewer({
+    tableName: 'lab_life',
+    containerId: 'lablifeListContainer', paginationId: 'lablifePagination',
+    selectId: 'searchSelectValue', searchInputId: 'lablifeSearchInput', searchBtnId: 'lablifeSearchBtn',
+    renderCardCallback: (container, item) => {
+      const card = document.createElement('article'); 
+      card.className = 'lablife-card clickable-card';
+      let thumbImg = (item.images && item.images.length > 0) ? `<img src="${item.images[0]}" alt="사진" style="width:100%; height:100%; object-fit:contain;" />` : `<div class="img-placeholder">No Image</div>`;
+      card.innerHTML = `<div class="lablife-img-frame">${thumbImg}</div><div class="lablife-content"><span class="lablife-date">${escapeHtml(item.date)}</span><h3 class="lablife-title">${escapeHtml(item.title)}</h3><div class="lablife-desc">${formatDesc(item.desc || '')}</div></div>`;
+      card.addEventListener('click', () => { location.href = `view.html?type=lablife&id=${item.id}`; });
+      container.appendChild(card);
+    }
+  });
+
+  // 4. Notice (검색 기능 추가)
+  new DedicatedGenericViewer({
+    tableName: 'notices',
+    containerId: 'noticeTableBody', paginationId: 'noticePagination',
+    selectId: 'searchSelectValue', searchInputId: 'noticeSearchInput', searchBtnId: 'noticeSearchBtn',
+    renderCardCallback: (container, item, displayNo) => {
+      const tr = document.createElement('tr'); 
+      tr.className = 'notice-row clickable-row';
+      tr.innerHTML = `<td style="text-align:center;">${displayNo}</td><td class="notice-title-cell"><span class="board-link">${escapeHtml(item.title)}</span></td><td style="text-align:center;">${escapeHtml(item.date)}</td>`;
+      tr.addEventListener('click', () => { location.href = `view.html?type=notice&id=${item.id}`; });
+      container.appendChild(tr);
+    }
+  });
+
+  // 5. News (검색 기능 추가)
+  new DedicatedGenericViewer({
+    tableName: 'news',
+    containerId: 'newsListContainer', paginationId: 'newsPagination',
+    selectId: 'searchSelectValue', searchInputId: 'newsSearchInput', searchBtnId: 'newsSearchBtn',
+    renderCardCallback: (container, item) => {
+      const card = document.createElement('article'); 
+      card.className = 'lablife-card clickable-card';
+      let thumbImg = (item.images && item.images.length > 0) ? `<img src="${item.images[0]}" alt="사진" style="width:100%; height:100%; object-fit:contain;" />` : `<div class="img-placeholder">No Image</div>`;
+      card.innerHTML = `<div class="lablife-img-frame">${thumbImg}</div><div class="lablife-content"><span class="lablife-date">${escapeHtml(item.date)}</span><h3 class="lablife-title">${escapeHtml(item.title)}</h3><div class="lablife-desc">${formatDesc(item.desc || '')}</div></div>`;
+      card.addEventListener('click', () => { location.href = `view.html?type=news&id=${item.id}`; });
+      container.appendChild(card);
+    }
+  });
 });
