@@ -5,6 +5,13 @@
  */
 const ADMIN_PASSWORD = 'admin1234!';
 
+// ===== Supabase 연결 설정 =====
+const SUPABASE_URL = "https://qckjwpurukvqgwbqispo.supabase.co";
+const SUPABASE_KEY = "sb_publishable_wLEpW0OXffcNvtEtVKTyng_ri4PQGRc";
+
+// Supabase 클라이언트(조종기) 생성
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const STORE_KEYS = {
   HOME_HERO: 'lab_data_home_hero',
   RESEARCH_AREAS: 'lab_data_research_areas',
@@ -729,37 +736,60 @@ class UnifiedAdminApp {
       });
     }
 
+    // [SUPABASE 연동] 공지사항 등록 및 수정 폼
     const notForm = document.getElementById('formAdminNotice');
     if (notForm) {
       notForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgsArray = await convertFilesToMultipleBase64('admNotImgs');
-        const list = getStored(STORE_KEYS.NOTICE, []);
+        const dateVal = document.getElementById('admNotDate').value.replace(/-/g, '.');
+        const titleVal = document.getElementById('admNotTitle').value.trim();
+        const descVal = document.getElementById('admNotDesc').value.trim();
+
         if (this.editNoticeId) {
-          const idx = list.findIndex(item => item.id === this.editNoticeId);
-          if (idx !== -1) {
-            list[idx].date = document.getElementById('admNotDate').value.replace(/-/g, '.');
-            list[idx].title = document.getElementById('admNotTitle').value.trim();
-            list[idx].desc = document.getElementById('admNotDesc').value.trim();
-            if (imgsArray.length > 0) list[idx].images = imgsArray;
+          const updateData = {
+            date: dateVal,
+            title: titleVal,
+            desc: descVal
+          };
+          if (imgsArray.length > 0) updateData.images = imgsArray;
+
+          const { error } = await supabaseClient
+            .from('notices')
+            .update(updateData)
+            .eq('id', this.editNoticeId);
+
+          if (error) {
+            alert('수정 실패: ' + error.message);
+            return;
           }
+
           this.editNoticeId = null;
           notForm.querySelector('button[type="submit"]').textContent = '공지 등록하기';
           alert('공지사항이 수정되었습니다.');
         } else {
-          list.unshift({
-            id: Date.now(),
-            date: document.getElementById('admNotDate').value.replace(/-/g, '.'),
-            title: document.getElementById('admNotTitle').value.trim(),
-            desc: document.getElementById('admNotDesc').value.trim(),
-            images: imgsArray,
-            views: 0
-          });
+          const { error } = await supabaseClient
+            .from('notices')
+            .insert([
+              {
+                date: dateVal,
+                title: titleVal,
+                desc: descVal,
+                images: imgsArray,
+                views: 0
+              }
+            ]);
+
+          if (error) {
+            alert('등록 실패: ' + error.message);
+            return;
+          }
+
           alert('공지사항이 등록되었습니다.');
         }
-        setStored(STORE_KEYS.NOTICE, list);
+
         notForm.reset();
-        this.renderNotice();
+        await this.renderNotice();
       });
     }
 
@@ -1140,27 +1170,40 @@ class UnifiedAdminApp {
     this.attachDelete(tbody, STORE_KEYS.LABLIFE, () => this.renderLabLife());
   }
 
-  renderNotice() {
-    const list = getStored(STORE_KEYS.NOTICE, []);
+  // [SUPABASE 연동] 관리자 페이지 공지 목록 렌더링
+  async renderNotice() {
     const tbody = document.getElementById('tableBodyNotice');
     if (!tbody) return;
+    
+    const { data: list, error } = await supabaseClient
+      .from('notices')
+      .select('*')
+      .order('id', { ascending: false });
+
+    if (error) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:red;">데이터 로드 실패</td></tr>';
+      return;
+    }
+
     tbody.innerHTML = '';
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">등록된 공지사항이 없습니다.</td></tr>';
       return;
     }
-    list.forEach((item, idx) => {
+
+    list.forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="text-align:center;">${escapeHtml(item.date)}</td>
         <td><strong>${escapeHtml(item.title)}</strong></td>
         <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
           <button class="btn-edit-item" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
-          <button class="btn-delete-item" data-idx="${idx}">삭제</button>
+          <button class="btn-delete-item" data-id="${item.id}">삭제</button>
         </td>`;
       tbody.appendChild(tr);
     });
 
+    // 수정 버튼 이벤트 바인딩
     tbody.querySelectorAll('.btn-edit-item').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
@@ -1176,7 +1219,24 @@ class UnifiedAdminApp {
       });
     });
 
-    this.attachDelete(tbody, STORE_KEYS.NOTICE, () => this.renderNotice());
+    // 삭제 버튼 이벤트 바인딩 (Supabase 연동)
+    tbody.querySelectorAll('.btn-delete-item').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
+        if (confirm('선택한 항목을 삭제하시겠습니까?')) {
+          const { error } = await supabaseClient
+            .from('notices')
+            .delete()
+            .eq('id', id);
+
+          if (error) {
+            alert('삭제 실패: ' + error.message);
+            return;
+          }
+          await this.renderNotice();
+        }
+      });
+    });
   }
 
   renderNews() {
@@ -1316,27 +1376,36 @@ function syncPublicPagesInternal() {
     }
   }
 
+  // 홈 화면 최신 게시물 연동 (Supabase notices 포함)
   const homeBoardBox = document.getElementById('homeBoardContainer');
   if (homeBoardBox) {
-    const notices = getStored(STORE_KEYS.NOTICE, []).map(n => ({ ...n, originType: 'notice' }));
-    const news = getStored(STORE_KEYS.NEWS, []).map(w => ({ ...w, originType: 'news' }));
-    const combined = [...notices, ...news].sort((a, b) => parseCustomDate(b.date, b.id) - parseCustomDate(a.date, a.id));
-    const recentThree = combined.slice(0, 3);
-    homeBoardBox.innerHTML = '';
-    if (recentThree.length === 0) {
-      homeBoardBox.innerHTML = '<div class="empty-state-card"><p>등록된 게시물이 없습니다.</p></div>';
-    } else {
-      recentThree.forEach((item, idx) => {
-        const isNews = item.originType === 'news';
-        const tagText = isNews ? 'News' : 'Notice';
-        const tagClass = isNews ? 'notice-tag news-tag' : 'notice-tag';
-        const box = document.createElement('article');
-        box.className = 'notice-box'; box.style.cursor = 'pointer';
-        box.innerHTML = `<span class="${tagClass}">${escapeHtml(tagText)}</span><h3 class="notice-title">${escapeHtml(item.title)}</h3><div class="notice-desc">${formatDesc(item.desc || '')}</div><span class="notice-date">${escapeHtml(item.date || '')}</span>`;
-        box.addEventListener('click', () => { location.href = `view.html?type=${item.originType}&id=${item.id !== undefined ? item.id : idx}`; });
-        homeBoardBox.appendChild(box);
-      });
-    }
+    (async () => {
+      const { data: supabaseNotices } = await supabaseClient
+        .from('notices')
+        .select('*')
+        .order('id', { ascending: false });
+
+      const notices = (supabaseNotices || []).map(n => ({ ...n, originType: 'notice' }));
+      const news = getStored(STORE_KEYS.NEWS, []).map(w => ({ ...w, originType: 'news' }));
+      const combined = [...notices, ...news].sort((a, b) => parseCustomDate(b.date, b.id) - parseCustomDate(a.date, a.id));
+      const recentThree = combined.slice(0, 3);
+      
+      homeBoardBox.innerHTML = '';
+      if (recentThree.length === 0) {
+        homeBoardBox.innerHTML = '<div class="empty-state-card"><p>등록된 게시물이 없습니다.</p></div>';
+      } else {
+        recentThree.forEach((item) => {
+          const isNews = item.originType === 'news';
+          const tagText = isNews ? 'News' : 'Notice';
+          const tagClass = isNews ? 'notice-tag news-tag' : 'notice-tag';
+          const box = document.createElement('article');
+          box.className = 'notice-box'; box.style.cursor = 'pointer';
+          box.innerHTML = `<span class="${tagClass}">${escapeHtml(tagText)}</span><h3 class="notice-title">${escapeHtml(item.title)}</h3><div class="notice-desc">${formatDesc(item.desc || '')}</div><span class="notice-date">${escapeHtml(item.date || '')}</span>`;
+          box.addEventListener('click', () => { location.href = `view.html?type=${item.originType}&id=${item.id}`; });
+          homeBoardBox.appendChild(box);
+        });
+      }
+    })();
   }
 
   const homePubBox = document.getElementById('homePubContainer');
@@ -1488,21 +1557,29 @@ function syncPublicPagesInternal() {
     }
   }
 
-  // Notice 렌더링
+  // [SUPABASE 연동] 방문자 페이지 Notice 목록 렌더링
   const noticeTbody = document.getElementById('noticeTableBody');
   if (noticeTbody) {
-    const list = getStored(STORE_KEYS.NOTICE, []);
-    const sortedList = list.slice().sort((a, b) => parseCustomDate(b.date, b.id) - parseCustomDate(a.date, a.id));
-    noticeTbody.innerHTML = '';
-    if (sortedList.length === 0) { noticeTbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 40px; color: #475569;">등록된 공지사항이 없습니다.</td></tr>'; }
-    else {
-      sortedList.forEach((item, idx) => {
-        const tr = document.createElement('tr'); tr.className = 'notice-row clickable-row';
-        tr.innerHTML = `<td style="text-align:center;">${sortedList.length - idx}</td><td class="notice-title-cell"><span class="board-link">${escapeHtml(item.title)}</span></td><td style="text-align:center;">${escapeHtml(item.date)}</td>`;
-        tr.addEventListener('click', () => { location.href = `view.html?type=notice&id=${item.id !== undefined ? item.id : idx}`; });
+    (async () => {
+      const { data: list, error } = await supabaseClient
+        .from('notices')
+        .select('*')
+        .order('id', { ascending: false });
+
+      noticeTbody.innerHTML = '';
+      if (error || !list || list.length === 0) {
+        noticeTbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 40px; color: #475569;">등록된 공지사항이 없습니다.</td></tr>';
+        return;
+      }
+
+      list.forEach((item, idx) => {
+        const tr = document.createElement('tr'); 
+        tr.className = 'notice-row clickable-row';
+        tr.innerHTML = `<td style="text-align:center;">${list.length - idx}</td><td class="notice-title-cell"><span class="board-link">${escapeHtml(item.title)}</span></td><td style="text-align:center;">${escapeHtml(item.date)}</td>`;
+        tr.addEventListener('click', () => { location.href = `view.html?type=notice&id=${item.id}`; });
         noticeTbody.appendChild(tr);
       });
-    }
+    })();
   }
 
   // News 렌더링
@@ -1523,39 +1600,83 @@ function syncPublicPagesInternal() {
     }
   }
 
-  // View 상세 렌더링
+  // [SUPABASE 연동] View 상세 페이지 렌더링
   const viewTitle = document.getElementById('viewTitle');
   if (viewTitle) {
     const params = new URLSearchParams(location.search);
     const type = params.get('type');
     const id = params.get('id');
-    let storeKey = STORE_KEYS.NOTICE, catName = 'NOTICE';
-    if (type === 'news') { storeKey = STORE_KEYS.NEWS; catName = 'NEWS'; }
-    if (type === 'lablife') { storeKey = STORE_KEYS.LABLIFE; catName = 'LAB LIFE'; }
-    let list = getStored(storeKey, []);
-    let itemIndex = list.findIndex(x => (x.id !== undefined && x.id.toString() === id));
-    if (itemIndex === -1) itemIndex = parseInt(id, 10);
-    const item = list[itemIndex];
-    if (item) {
-      item.views = (item.views || 0) + 1; setStored(storeKey, list);
-      document.getElementById('viewPageCategory').textContent = catName;
-      document.getElementById('viewBadge').textContent = item.category || catName;
-      document.getElementById('viewTitle').textContent = item.title;
-      document.getElementById('viewDate').textContent = item.date;
-      document.getElementById('viewViews').textContent = item.views;
-      document.getElementById('viewContent').innerHTML = formatDesc(item.desc || '');
-      const galleryBox = document.getElementById('viewImagesGallery');
-      const allImgs = [];
-      if (item.images && item.images.length > 0) allImgs.push(...item.images);
-      else if (item.image) allImgs.push(item.image);
-      if (allImgs.length > 0 && galleryBox) {
-        galleryBox.innerHTML = '';
-        allImgs.forEach(src => { let wrapper = document.createElement('div'); wrapper.className = 'view-single-img-wrap'; wrapper.innerHTML = `<img src="${src}" alt="이미지" />`; galleryBox.appendChild(wrapper); });
-        galleryBox.style.display = 'block';
-      }
+
+    if (type === 'notice') {
+      (async () => {
+        const { data: item, error } = await supabaseClient
+          .from('notices')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error || !item) {
+          viewTitle.textContent = '해당 게시물을 찾을 수 없습니다.';
+          const c = document.getElementById('viewContent'); if(c) c.textContent = '삭제되었거나 잘못된 접근입니다.';
+          return;
+        }
+
+        const newViews = (item.views || 0) + 1;
+        await supabaseClient
+          .from('notices')
+          .update({ views: newViews })
+          .eq('id', id);
+
+        document.getElementById('viewPageCategory').textContent = 'NOTICE';
+        document.getElementById('viewBadge').textContent = 'Notice';
+        document.getElementById('viewTitle').textContent = item.title;
+        document.getElementById('viewDate').textContent = item.date;
+        document.getElementById('viewViews').textContent = newViews;
+        document.getElementById('viewContent').innerHTML = formatDesc(item.desc || '');
+
+        const galleryBox = document.getElementById('viewImagesGallery');
+        const allImgs = [];
+        if (item.images && item.images.length > 0) allImgs.push(...item.images);
+        else if (item.image) allImgs.push(item.image);
+        if (allImgs.length > 0 && galleryBox) {
+          galleryBox.innerHTML = '';
+          allImgs.forEach(src => { 
+            let wrapper = document.createElement('div'); 
+            wrapper.className = 'view-single-img-wrap'; 
+            wrapper.innerHTML = `<img src="${src}" alt="이미지" />`; 
+            galleryBox.appendChild(wrapper); 
+          });
+          galleryBox.style.display = 'block';
+        }
+      })();
     } else {
-      viewTitle.textContent = '해당 게시물을 찾을 수 없습니다.';
-      const c = document.getElementById('viewContent'); if(c) c.textContent = '삭제되었거나 잘못된 접근입니다.';
+      let storeKey = STORE_KEYS.NEWS, catName = 'NEWS';
+      if (type === 'lablife') { storeKey = STORE_KEYS.LABLIFE; catName = 'LAB LIFE'; }
+      let list = getStored(storeKey, []);
+      let itemIndex = list.findIndex(x => (x.id !== undefined && x.id.toString() === id));
+      if (itemIndex === -1) itemIndex = parseInt(id, 10);
+      const item = list[itemIndex];
+      if (item) {
+        item.views = (item.views || 0) + 1; setStored(storeKey, list);
+        document.getElementById('viewPageCategory').textContent = catName;
+        document.getElementById('viewBadge').textContent = item.category || catName;
+        document.getElementById('viewTitle').textContent = item.title;
+        document.getElementById('viewDate').textContent = item.date;
+        document.getElementById('viewViews').textContent = item.views;
+        document.getElementById('viewContent').innerHTML = formatDesc(item.desc || '');
+        const galleryBox = document.getElementById('viewImagesGallery');
+        const allImgs = [];
+        if (item.images && item.images.length > 0) allImgs.push(...item.images);
+        else if (item.image) allImgs.push(item.image);
+        if (allImgs.length > 0 && galleryBox) {
+          galleryBox.innerHTML = '';
+          allImgs.forEach(src => { let wrapper = document.createElement('div'); wrapper.className = 'view-single-img-wrap'; wrapper.innerHTML = `<img src="${src}" alt="이미지" />`; galleryBox.appendChild(wrapper); });
+          galleryBox.style.display = 'block';
+        }
+      } else {
+        viewTitle.textContent = '해당 게시물을 찾을 수 없습니다.';
+        const c = document.getElementById('viewContent'); if(c) c.textContent = '삭제되었거나 잘못된 접근입니다.';
+      }
     }
   }
 }
@@ -1734,7 +1855,6 @@ document.addEventListener('DOMContentLoaded', () => {
     new GenericListController({ containerId: 'lablifeListContainer', itemSelector: '.lablife-card', titleSelector: '.lablife-title', descSelector: '.lablife-desc', selectId: 'searchSelectValue', searchInputId: 'lablifeSearchInput', searchBtnId: 'lablifeSearchBtn', paginationId: 'lablifePagination', itemsPerPage: 6 });
   }
   if (document.getElementById('noticeTableBody')) {
-    new GenericListController({ containerId: 'noticeTableBody', itemSelector: '.notice-row', titleSelector: '.board-link', descSelector: '.board-link', selectId: 'searchSelectValue', searchInputId: 'noticeSearchInput', searchBtnId: 'noticeSearchBtn', paginationId: 'noticePagination', itemsPerPage: 10 });
   }
   if (document.getElementById('newsListContainer')) {
     new GenericListController({ containerId: 'newsListContainer', itemSelector: '.lablife-card', titleSelector: '.lablife-title', descSelector: '.lablife-desc', selectId: 'searchSelectValue', searchInputId: 'newsSearchInput', searchBtnId: 'newsSearchBtn', paginationId: 'newsPagination', itemsPerPage: 6 });
