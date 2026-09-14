@@ -32,7 +32,6 @@ body {
   width: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  animation: fadeIn 0.2s ease-in-out;
 }
 
 main.page-body {
