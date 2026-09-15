@@ -266,7 +266,7 @@ class UnifiedAdminApp {
 
     if (this.logoutBtn) this.logoutBtn.addEventListener('click', handleLogout);
     
-    // 모바일 햄버거 메뉴 내 로그아웃 버튼 이벤트 바인딩 추가
+    // 모바일 햄버거 메뉴 내 로그아웃 버튼 이벤트 바인딩
     const mobileAuthLink = document.getElementById('adminAuthLinkMobile');
     if (mobileAuthLink) {
       mobileAuthLink.addEventListener('click', async (e) => {
@@ -736,11 +736,11 @@ class UnifiedAdminApp {
     }
   }
 
+  // 관리자 학력 목록 (최신순 내림차순)
   async renderEdu() {
     const tbody = document.getElementById('tableBodyEdu');
     if (!tbody) return;
-    // [수정 완료] ascending: true -> false (최신순)
-    const { data: list } = await supabaseClient.from('director_education').select('*').order('id', { ascending: false }); [cite: 3]
+    const { data: list } = await supabaseClient.from('director_education').select('*').order('id', { ascending: false });
     tbody.innerHTML = '';
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:#94a3b8;">등록된 학력이 없습니다.</td></tr>';
@@ -779,11 +779,11 @@ class UnifiedAdminApp {
     this.attachSupabaseDelete(tbody, 'director_education', () => this.renderEdu());
   }
 
+  // 관리자 경력 목록 (최신순 내림차순)
   async renderExp() {
     const tbody = document.getElementById('tableBodyExp');
     if (!tbody) return;
-    // [수정 완료] ascending: true -> false (최신순)
-    const { data: list } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: false }); [cite: 3]
+    const { data: list } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: false });
     tbody.innerHTML = '';
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#94a3b8;">등록된 경력 및 활동이 없습니다.</td></tr>';
@@ -1035,7 +1035,7 @@ class UnifiedAdminApp {
   async renderNews() {
     const tbody = document.getElementById('tableBodyNews');
     if (!tbody) return;
-    const { data: list } = await supabaseClient.from('news').select('*').order('id', { ascending: false }); [cite: 3]
+    const { data: list } = await supabaseClient.from('news').select('*').order('id', { ascending: false });
     tbody.innerHTML = '';
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">등록된 뉴스가 없습니다.</td></tr>';
@@ -1254,8 +1254,8 @@ async function syncPublicPagesInternal() {
         const titleText = titleEl.textContent.trim();
 
         if (titleText.includes('Education')) {
-          // [수정 완료] ascending: true -> false (최신순)
-          const { data: eduList } = await supabaseClient.from('director_education').select('*').order('id', { ascending: false }); [cite: 3]
+          // 사용자 프로필 학력 타임라인 (최신순 내림차순)
+          const { data: eduList } = await supabaseClient.from('director_education').select('*').order('id', { ascending: false });
           wrap.innerHTML = '';
           if (!eduList || eduList.length === 0) {
             wrap.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 학력 정보가 없습니다.</p></div>';
@@ -1267,8 +1267,8 @@ async function syncPublicPagesInternal() {
             });
           }
         } else if (titleText.includes('Experience') || titleText.includes('Professional')) {
-          // [수정 완료] ascending: true -> false (최신순)
-          const { data: expList } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: false }); [cite: 3]
+          // 사용자 프로필 경력 타임라인 (최신순 내림차순)
+          const { data: expList } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: false });
           wrap.innerHTML = '';
           if (!expList || expList.length === 0) {
             wrap.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 경력 및 활동 정보가 없습니다.</p></div>';
@@ -1416,8 +1416,8 @@ class DedicatedGenericViewer {
       safeList = safeList.filter(item => (item.type || 'paper') === this.targetType);
     }
 
-    // [수정 완료] a - b (과거순) -> b - a (최신순) 정렬로 변경 [cite: 3]
-    this.baseList = safeList.sort((a, b) => parseCustomDate(b.year || b.date, b.id) - parseCustomDate(a.year || a.date, a.id)); [cite: 3]
+    // 최신순 내림차순 정렬 (b - a)
+    this.baseList = safeList.sort((a, b) => parseCustomDate(b.year || b.date, b.id) - parseCustomDate(a.year || a.date, a.id));
     this.filteredList = [...this.baseList];
 
     this.initEvents();
