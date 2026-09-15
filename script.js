@@ -78,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileMenuLinks = document.querySelectorAll('.main-menu a');
   mobileMenuLinks.forEach(link => {
     link.addEventListener('click', (e) => {
-      // 모바일 메뉴에서 Logout 버튼 클릭 시 기본 링크 이동을 막고 이벤트 차단
       if (link.id === 'adminAuthLinkMobile' && link.textContent.trim() === 'Logout') {
         e.preventDefault();
         return; 
@@ -235,6 +234,67 @@ class UnifiedAdminApp {
     this.initAuth();
     this.initTabs();
     this.initForms();
+    this.initImgDeleteHandlers();
+  }
+
+  // 사진 삭제 기능 바인딩 (Director, Current, Alumni, LabLife, Notice, News)
+  initImgDeleteHandlers() {
+    const bindSingleImg = (btnId, tableName, idGetter, renderFn) => {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        const id = idGetter();
+        if (!id) {
+          alert('수정 대상을 먼저 선택(수정 버튼 클릭)해주세요.');
+          return;
+        }
+        if (!confirm('사진을 삭제하시겠습니까?')) return;
+        const { error } = await supabaseClient.from(tableName).update({ image: null }).eq('id', id);
+        if (error) {
+          alert('사진 삭제 실패: ' + error.message);
+        } else {
+          alert('사진이 삭제되었습니다.');
+          renderFn.call(this);
+        }
+      });
+    };
+
+    const bindMultiImg = (btnId, tableName, idGetter, renderFn) => {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        const id = idGetter();
+        if (!id) {
+          alert('수정 대상을 먼저 선택(수정 버튼 클릭)해주세요.');
+          return;
+        }
+        if (!confirm('모든 사진을 삭제하시겠습니까?')) return;
+        const { error } = await supabaseClient.from(tableName).update({ images: [] }).eq('id', id);
+        if (error) {
+          alert('사진 삭제 실패: ' + error.message);
+        } else {
+          alert('사진들이 삭제되었습니다.');
+          renderFn.call(this);
+        }
+      });
+    };
+
+    // Director (id=1 고정)
+    const btnDelDir = document.getElementById('btnDelDirImg');
+    if (btnDelDir) {
+      btnDelDir.addEventListener('click', async () => {
+        if (!confirm('Director 프로필 사진을 삭제하시겠습니까?')) return;
+        const { error } = await supabaseClient.from('director_info').update({ image: null }).eq('id', 1);
+        if (error) alert('삭제 실패: ' + error.message);
+        else { alert('삭제되었습니다.'); this.renderDirectorForm(); }
+      });
+    }
+
+    bindSingleImg('btnDelCurImg', 'current_members', () => this.editCurrentId, this.renderCurrent);
+    bindSingleImg('btnDelAlumImg', 'alumni_members', () => this.editAlumniId, this.renderAlumni);
+    bindMultiImg('btnDelLifeImg', 'lab_life', () => this.editLabLifeId, this.renderLabLife);
+    bindMultiImg('btnDelNotImg', 'notices', () => this.editNoticeId, this.renderNotice);
+    bindMultiImg('btnDelNewsImg', 'news', () => this.editNewsId, this.renderNews);
   }
 
   initAuth() {
@@ -276,7 +336,6 @@ class UnifiedAdminApp {
 
     if (this.logoutBtn) this.logoutBtn.addEventListener('click', handleLogout);
     
-    // 모바일 햄버거 메뉴 내 로그아웃 버튼 이벤트 바인딩
     const mobileAuthLink = document.getElementById('adminAuthLinkMobile');
     if (mobileAuthLink) {
       mobileAuthLink.addEventListener('click', async (e) => {
@@ -916,7 +975,6 @@ class UnifiedAdminApp {
     this.attachSupabaseDelete(tbody, 'alumni_members', () => this.renderAlumni());
   }
 
-  // 관리자 Publications (10개 페이징 적용)
   async renderPub() {
     const tbody = document.getElementById('tableBodyPub');
     if (!tbody) return;
@@ -987,7 +1045,6 @@ class UnifiedAdminApp {
     }
   }
 
-  // 관리자 Lab Life (10개 페이징 적용)
   async renderLabLife() {
     const tbody = document.getElementById('tableBodyLabLife');
     if (!tbody) return;
@@ -1052,7 +1109,6 @@ class UnifiedAdminApp {
     }
   }
 
-  // 관리자 Notice (10개 페이징 적용)
   async renderNotice() {
     const tbody = document.getElementById('tableBodyNotice');
     if (!tbody) return;
@@ -1117,7 +1173,6 @@ class UnifiedAdminApp {
     }
   }
 
-  // 관리자 News (날짜순 내림차순 정렬 + 10개 페이징 적용)
   async renderNews() {
     const tbody = document.getElementById('tableBodyNews');
     if (!tbody) return;
@@ -1505,7 +1560,6 @@ class DedicatedGenericViewer {
     this.searchBtn = document.getElementById(searchBtnId);
     this.renderCardCallback = renderCardCallback;
     
-    // Publications, Patents, Notice는 한 페이지당 10개, Lab Life와 News는 6개 설정
     if (this.tableName === 'publications' || this.tableName === 'notices') {
       this.itemsPerPage = 10;
     } else {
@@ -1583,7 +1637,7 @@ class DedicatedGenericViewer {
       if (isTbody) {
         this.container.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 40px; color: #475569;">검색 조건과 일치하는 항목이 없습니다.</td></tr>`;
       } else {
-        this.container.innerHTML = '<div class="empty-state-card" style="grid-column:1/-1;<p>검색 조건과 일치하는 항목이 없습니다.</p></div>'; 
+        this.container.innerHTML = '<div class="empty-state-card" style="grid-column:1/-1;"><p>검색 조건과 일치하는 항목이 없습니다.</p></div>'; 
       }
       if (this.paginationContainer) this.paginationContainer.innerHTML = ''; 
       return; 
@@ -1609,7 +1663,6 @@ class DedicatedGenericViewer {
     
     this.paginationContainer.innerHTML = '';
 
-    // 1. [이전] 버튼 생성
     const prevBtn = document.createElement('button');
     prevBtn.className = `page-btn prev-btn ${this.currentPage === 1 ? 'disabled' : ''}`;
     prevBtn.innerHTML = `&lsaquo;`;
@@ -1626,7 +1679,6 @@ class DedicatedGenericViewer {
     }
     this.paginationContainer.appendChild(prevBtn);
 
-    // 2. 숫자 페이지 버튼들 생성
     for (let i = 1; i <= totalPages; i++) {
       const pageBtn = document.createElement('button');
       pageBtn.className = `page-btn num-btn ${this.currentPage === i ? 'active' : ''}`;
@@ -1639,7 +1691,6 @@ class DedicatedGenericViewer {
       this.paginationContainer.appendChild(pageBtn);
     }
 
-    // 3. [다음] 버튼 생성
     const nextBtn = document.createElement('button');
     nextBtn.className = `page-btn next-btn ${this.currentPage === totalPages ? 'disabled' : ''}`;
     nextBtn.innerHTML = `&rsaquo;`;
