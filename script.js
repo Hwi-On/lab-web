@@ -220,6 +220,16 @@ class UnifiedAdminApp {
     this.editPubId = null;
     this.editLabLifeId = null;
 
+    // 관리자 테이블 페이징 상태 초기화 (각각 10개씩)
+    this.pubPage = 1;
+    this.pubPerPage = 10;
+    this.labLifePage = 1;
+    this.labLifePerPage = 10;
+    this.noticePage = 1;
+    this.noticePerPage = 10;
+    this.newsPage = 1;
+    this.newsPerPage = 10;
+
     if (!this.authBox) return;
 
     this.initAuth();
@@ -736,7 +746,6 @@ class UnifiedAdminApp {
     }
   }
 
-  // 관리자 학력 목록 (최신순 내림차순)
   async renderEdu() {
     const tbody = document.getElementById('tableBodyEdu');
     if (!tbody) return;
@@ -779,7 +788,6 @@ class UnifiedAdminApp {
     this.attachSupabaseDelete(tbody, 'director_education', () => this.renderEdu());
   }
 
-  // 관리자 경력 목록 (최신순 내림차순)
   async renderExp() {
     const tbody = document.getElementById('tableBodyExp');
     if (!tbody) return;
@@ -908,18 +916,29 @@ class UnifiedAdminApp {
     this.attachSupabaseDelete(tbody, 'alumni_members', () => this.renderAlumni());
   }
 
+  // 관리자 Publications (10개 페이징 적용)
   async renderPub() {
     const tbody = document.getElementById('tableBodyPub');
     if (!tbody) return;
     const { data: list } = await supabaseClient.from('publications').select('*');
     tbody.innerHTML = '';
+    
+    const cardEl = tbody.closest('.admin-table-card');
+    const oldPagination = cardEl?.querySelector('.admin-pagination');
+    if (oldPagination) oldPagination.remove();
+
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">등록된 항목이 없습니다.</td></tr>';
       return;
     }
     const sortedList = list.slice().sort((a, b) => parseCustomDate(b.year, b.id) - parseCustomDate(a.year, a.id));
 
-    sortedList.forEach((item) => {
+    const totalPages = Math.ceil(sortedList.length / this.pubPerPage);
+    if (this.pubPage > totalPages) this.pubPage = Math.max(1, totalPages);
+    const start = (this.pubPage - 1) * this.pubPerPage;
+    const pagedList = sortedList.slice(start, start + this.pubPerPage);
+
+    pagedList.forEach((item) => {
       const typeLabel = item.type === 'patent' ? 'Patent' : 'Paper';
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -936,7 +955,7 @@ class UnifiedAdminApp {
     tbody.querySelectorAll('.btn-edit-item').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
-        const item = list.find(x => x.id === id);
+        const item = sortedList.find(x => x.id === id);
         if (item) {
           this.editPubId = id;
           const tEl = document.getElementById('admPubType'); if (tEl) tEl.value = item.type || 'paper';
@@ -952,18 +971,44 @@ class UnifiedAdminApp {
       });
     });
     this.attachSupabaseDelete(tbody, 'publications', () => this.renderPub());
+
+    if (totalPages > 1 && cardEl) {
+      const pageWrap = document.createElement('div');
+      pageWrap.className = 'admin-pagination';
+      pageWrap.style.cssText = 'display:flex; justify-content:center; gap:6px; margin-top:16px;';
+      for (let i = 1; i <= totalPages; i++) {
+        const pBtn = document.createElement('button');
+        pBtn.textContent = i;
+        pBtn.style.cssText = `padding:6px 12px; border-radius:4px; border:1px solid #cbd5e1; background:${this.pubPage === i ? '#0ea5e9' : '#fff'}; color:${this.pubPage === i ? '#fff' : '#334155'}; cursor:pointer; font-weight:700;`;
+        pBtn.addEventListener('click', () => { this.pubPage = i; this.renderPub(); });
+        pageWrap.appendChild(pBtn);
+      }
+      cardEl.appendChild(pageWrap);
+    }
   }
 
+  // 관리자 Lab Life (10개 페이징 적용)
   async renderLabLife() {
     const tbody = document.getElementById('tableBodyLabLife');
     if (!tbody) return;
     const { data: list } = await supabaseClient.from('lab_life').select('*').order('id', { ascending: false });
     tbody.innerHTML = '';
+
+    const cardEl = tbody.closest('.admin-table-card');
+    const oldPagination = cardEl?.querySelector('.admin-pagination');
+    if (oldPagination) oldPagination.remove();
+
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">등록된 활동이 없습니다.</td></tr>';
       return;
     }
-    list.forEach((item) => {
+
+    const totalPages = Math.ceil(list.length / this.labLifePerPage);
+    if (this.labLifePage > totalPages) this.labLifePage = Math.max(1, totalPages);
+    const start = (this.labLifePage - 1) * this.labLifePerPage;
+    const pagedList = list.slice(start, start + this.labLifePerPage);
+
+    pagedList.forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="text-align:center;">${escapeHtml(item.date)}</td>
@@ -991,18 +1036,44 @@ class UnifiedAdminApp {
       });
     });
     this.attachSupabaseDelete(tbody, 'lab_life', () => this.renderLabLife());
+
+    if (totalPages > 1 && cardEl) {
+      const pageWrap = document.createElement('div');
+      pageWrap.className = 'admin-pagination';
+      pageWrap.style.cssText = 'display:flex; justify-content:center; gap:6px; margin-top:16px;';
+      for (let i = 1; i <= totalPages; i++) {
+        const pBtn = document.createElement('button');
+        pBtn.textContent = i;
+        pBtn.style.cssText = `padding:6px 12px; border-radius:4px; border:1px solid #cbd5e1; background:${this.labLifePage === i ? '#0ea5e9' : '#fff'}; color:${this.labLifePage === i ? '#fff' : '#334155'}; cursor:pointer; font-weight:700;`;
+        pBtn.addEventListener('click', () => { this.labLifePage = i; this.renderLabLife(); });
+        pageWrap.appendChild(pBtn);
+      }
+      cardEl.appendChild(pageWrap);
+    }
   }
 
+  // 관리자 Notice (10개 페이징 적용)
   async renderNotice() {
     const tbody = document.getElementById('tableBodyNotice');
     if (!tbody) return;
     const { data: list } = await supabaseClient.from('notices').select('*').order('id', { ascending: false });
     tbody.innerHTML = '';
+
+    const cardEl = tbody.closest('.admin-table-card');
+    const oldPagination = cardEl?.querySelector('.admin-pagination');
+    if (oldPagination) oldPagination.remove();
+
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">등록된 공지사항이 없습니다.</td></tr>';
       return;
     }
-    list.forEach((item) => {
+
+    const totalPages = Math.ceil(list.length / this.noticePerPage);
+    if (this.noticePage > totalPages) this.noticePage = Math.max(1, totalPages);
+    const start = (this.noticePage - 1) * this.noticePerPage;
+    const pagedList = list.slice(start, start + this.noticePerPage);
+
+    pagedList.forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="text-align:center;">${escapeHtml(item.date)}</td>
@@ -1030,18 +1101,45 @@ class UnifiedAdminApp {
       });
     });
     this.attachSupabaseDelete(tbody, 'notices', () => this.renderNotice());
+
+    if (totalPages > 1 && cardEl) {
+      const pageWrap = document.createElement('div');
+      pageWrap.className = 'admin-pagination';
+      pageWrap.style.cssText = 'display:flex; justify-content:center; gap:6px; margin-top:16px;';
+      for (let i = 1; i <= totalPages; i++) {
+        const pBtn = document.createElement('button');
+        pBtn.textContent = i;
+        pBtn.style.cssText = `padding:6px 12px; border-radius:4px; border:1px solid #cbd5e1; background:${this.noticePage === i ? '#0ea5e9' : '#fff'}; color:${this.noticePage === i ? '#fff' : '#334155'}; cursor:pointer; font-weight:700;`;
+        pBtn.addEventListener('click', () => { this.noticePage = i; this.renderNotice(); });
+        pageWrap.appendChild(pBtn);
+      }
+      cardEl.appendChild(pageWrap);
+    }
   }
 
+  // 관리자 News (날짜순 내림차순 정렬 + 10개 페이징 적용)
   async renderNews() {
     const tbody = document.getElementById('tableBodyNews');
     if (!tbody) return;
-    const { data: list } = await supabaseClient.from('news').select('*').order('id', { ascending: false });
+    const { data: rawList } = await supabaseClient.from('news').select('*');
+    const list = (rawList || []).sort((a, b) => parseCustomDate(b.date, b.id) - parseCustomDate(a.date, a.id));
     tbody.innerHTML = '';
+
+    const cardEl = tbody.closest('.admin-table-card');
+    const oldPagination = cardEl?.querySelector('.admin-pagination');
+    if (oldPagination) oldPagination.remove();
+
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">등록된 뉴스가 없습니다.</td></tr>';
       return;
     }
-    list.forEach((item) => {
+
+    const totalPages = Math.ceil(list.length / this.newsPerPage);
+    if (this.newsPage > totalPages) this.newsPage = Math.max(1, totalPages);
+    const start = (this.newsPage - 1) * this.newsPerPage;
+    const pagedList = list.slice(start, start + this.newsPerPage);
+
+    pagedList.forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="text-align:center;">${escapeHtml(item.date)}</td>
@@ -1069,6 +1167,20 @@ class UnifiedAdminApp {
       });
     });
     this.attachSupabaseDelete(tbody, 'news', () => this.renderNews());
+
+    if (totalPages > 1 && cardEl) {
+      const pageWrap = document.createElement('div');
+      pageWrap.className = 'admin-pagination';
+      pageWrap.style.cssText = 'display:flex; justify-content:center; gap:6px; margin-top:16px;';
+      for (let i = 1; i <= totalPages; i++) {
+        const pBtn = document.createElement('button');
+        pBtn.textContent = i;
+        pBtn.style.cssText = `padding:6px 12px; border-radius:4px; border:1px solid #cbd5e1; background:${this.newsPage === i ? '#0ea5e9' : '#fff'}; color:${this.newsPage === i ? '#fff' : '#334155'}; cursor:pointer; font-weight:700;`;
+        pBtn.addEventListener('click', () => { this.newsPage = i; this.renderNews(); });
+        pageWrap.appendChild(pBtn);
+      }
+      cardEl.appendChild(pageWrap);
+    }
   }
 
   attachSupabaseDelete(tbody, tableName, callback) {
@@ -1254,7 +1366,6 @@ async function syncPublicPagesInternal() {
         const titleText = titleEl.textContent.trim();
 
         if (titleText.includes('Education')) {
-          // 사용자 프로필 학력 타임라인 (최신순 내림차순)
           const { data: eduList } = await supabaseClient.from('director_education').select('*').order('id', { ascending: false });
           wrap.innerHTML = '';
           if (!eduList || eduList.length === 0) {
@@ -1267,7 +1378,6 @@ async function syncPublicPagesInternal() {
             });
           }
         } else if (titleText.includes('Experience') || titleText.includes('Professional')) {
-          // 사용자 프로필 경력 타임라인 (최신순 내림차순)
           const { data: expList } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: false });
           wrap.innerHTML = '';
           if (!expList || expList.length === 0) {
@@ -1416,7 +1526,6 @@ class DedicatedGenericViewer {
       safeList = safeList.filter(item => (item.type || 'paper') === this.targetType);
     }
 
-    // 최신순 내림차순 정렬 (b - a)
     this.baseList = safeList.sort((a, b) => parseCustomDate(b.year || b.date, b.id) - parseCustomDate(a.year || a.date, a.id));
     this.filteredList = [...this.baseList];
 
@@ -1474,7 +1583,7 @@ class DedicatedGenericViewer {
       if (isTbody) {
         this.container.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 40px; color: #475569;">검색 조건과 일치하는 항목이 없습니다.</td></tr>`;
       } else {
-        this.container.innerHTML = '<div class="empty-state-card" style="grid-column:1/-1;"><p>검색 조건과 일치하는 항목이 없습니다.</p></div>'; 
+        this.container.innerHTML = '<div class="empty-state-card" style="grid-column:1/-1;<p>검색 조건과 일치하는 항목이 없습니다.</p></div>'; 
       }
       if (this.paginationContainer) this.paginationContainer.innerHTML = ''; 
       return; 
