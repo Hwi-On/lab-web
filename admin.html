@@ -222,6 +222,42 @@
             </table>
           </div>
         </div>
+
+        <div class="admin-form-card" style="margin-top:30px;">
+          <h3 id="dirPubFormTitle" class="admin-card-title">+ 디렉터 개인 논문 및 특허 등록</h3>
+          <form id="formAdminDirPub">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>구분</label>
+                <select id="admDirPubType" class="admin-select">
+                  <option value="paper">논문 (Paper)</option>
+                  <option value="patent">특허 (Patent)</option>
+                </select>
+              </div>
+              <div class="form-group"><label>발행 연도 / 날짜</label><input type="date" id="admDirPubYear" required /></div>
+            </div>
+            <div class="form-group"><label>제목 (Title)</label><input type="text" id="admDirPubTitle" required /></div>
+            <div class="form-group"><label>저자 (Authors)</label><input type="text" id="admDirPubAuthors" required /></div>
+            <div class="form-row-2">
+              <div class="form-group"><label>저널명 / 학회명 (Journal)</label><input type="text" id="admDirPubJournal" required /></div>
+              <div class="form-group"><label>링크 (Link URL)</label><input type="text" id="admDirPubLink" /></div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">디렉터 논문 등록하기</button>
+              <button type="button" id="btnCancelDirPub" style="display:none; padding:10px 20px; background:#64748b; color:#fff; border:none; border-radius:6px; cursor:pointer;">취소</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-table-card" style="margin-top:20px;">
+          <h3 class="admin-card-title">등록된 디렉터 논문 및 특허 목록</h3>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <thead><tr><th>구분</th><th>제목 및 저자 정보</th><th>연도</th><th style="text-align:center;">관리</th></tr></thead>
+              <tbody id="tableBodyDirPub"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- [Tab 3] Members 관리 -->
@@ -275,6 +311,49 @@
             <table class="board-table">
               <thead><tr><th>역할</th><th>이름</th><th>태그</th><th style="text-align:center;">관리</th></tr></thead>
               <tbody id="tableBodyCurrent"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- [추가] 연구원 개인 논문 및 특허 등록/관리 폼 및 테이블 -->
+        <div class="admin-form-card" style="margin-top:40px;">
+          <h3 id="memberPubFormTitle" class="admin-card-title">+ 연구원 개인 논문 및 특허 등록</h3>
+          <form id="formAdminMemberPub">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>대상 연구원 이름 (member_name)</label>
+                <input type="text" id="admMemPubName" required />
+              </div>
+              <div class="form-group">
+                <label>구분</label>
+                <select id="admMemPubType" class="admin-select">
+                  <option value="paper">논문 (Paper)</option>
+                  <option value="patent">특허 (Patent)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group"><label>발행 연도 / 날짜</label><input type="date" id="admMemPubYear" required /></div>
+              <div class="form-group"><label>제목 (Title)</label><input type="text" id="admMemPubTitle" required /></div>
+            </div>
+            <div class="form-group"><label>저자 (Authors)</label><input type="text" id="admMemPubAuthors" required /></div>
+            <div class="form-row-2">
+              <div class="form-group"><label>저널명 / 학회명 (Journal)</label><input type="text" id="admMemPubJournal" required /></div>
+              <div class="form-group"><label>링크 (Link URL)</label><input type="text" id="admMemPubLink" /></div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-submit" style="padding: 10px 20px;">연구원 논문 등록하기</button>
+              <button type="button" id="btnCancelMemPub" style="display:none; padding:10px 20px; background:#64748b; color:#fff; border:none; border-radius:6px; cursor:pointer;">취소</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-table-card" style="margin-top:20px;">
+          <h3 class="admin-card-title">등록된 연구원 개인 논문 및 특허 목록</h3>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <thead><tr><th>연구원</th><th>구분</th><th>제목 및 저자 정보</th><th>연도</th><th style="text-align:center;">관리</th></tr></thead>
+              <tbody id="tableBodyMemberPub"></tbody>
             </table>
           </div>
         </div>
@@ -383,6 +462,9 @@
                 <label>이미지 여러 장 첨부</label>
                 <div style="display: flex; gap: 10px; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; background: #fff; height: 40px; box-sizing: border-box;">
                   <input type="file" id="admLifeImgs" accept="image/*" multiple style="flex: 1; border: none; padding: 0; height: auto;" />
+                  <label style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #dc2626; cursor: pointer; white-space: nowrap; margin: 0;">
+                    <input type="checkbox" id="admLifeImgsDelete" style="width: auto; height: auto;" /> 사진 전체 삭제
+                  </label>
                 </div>
               </div>
             </div>
@@ -416,6 +498,9 @@
                 <label>이미지 첨부 (선택)</label>
                 <div style="display: flex; gap: 10px; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; background: #fff; height: 40px; box-sizing: border-box;">
                   <input type="file" id="admNotImgs" accept="image/*" multiple style="flex: 1; border: none; padding: 0; height: auto;" />
+                  <label style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #dc2626; cursor: pointer; white-space: nowrap; margin: 0;">
+                    <input type="checkbox" id="admNotImgsDelete" style="width: auto; height: auto;" /> 사진 전체 삭제
+                  </label>
                 </div>
               </div>
             </div>
@@ -449,6 +534,9 @@
                 <label>이미지 첨부 (선택)</label>
                 <div style="display: flex; gap: 10px; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; background: #fff; height: 40px; box-sizing: border-box;">
                   <input type="file" id="admNewsImgs" accept="image/*" multiple style="flex: 1; border: none; padding: 0; height: auto;" />
+                  <label style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #dc2626; cursor: pointer; white-space: nowrap; margin: 0;">
+                    <input type="checkbox" id="admNewsImgsDelete" style="width: auto; height: auto;" /> 사진 전체 삭제
+                  </label>
                 </div>
               </div>
             </div>

@@ -526,7 +526,7 @@ main.page-body > .subpage-header:first-child {
 }
 
 /* ============================================================
-   4. 엠티 스테이트
+   4. 엠티 스테이트 (데이터 없을 때 뜨는 빈 상태 박스 + 호버 효과 추가)
    ============================================================ */
 .empty-state-card {
   width: 100%;
@@ -540,6 +540,13 @@ main.page-body > .subpage-header:first-child {
   font-size: 1rem;
   font-weight: 600;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.015);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.empty-state-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.15) !important;
 }
 
 /* ============================================================
@@ -761,7 +768,13 @@ main.page-body > .subpage-header:first-child {
   gap: 24px;
   align-items: flex-start;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.profile-h-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.15) !important;
 }
 
 .profile-photo-square {
@@ -852,10 +865,16 @@ main.page-body > .subpage-header:first-child {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.015);
   flex-wrap: wrap;
   margin-bottom: 18px !important;
+}
+
+.pub-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.15) !important;
 }
 
 .pub-info {
@@ -1010,6 +1029,7 @@ main.page-body > .subpage-header:first-child {
   border-collapse: collapse;
   text-align: left;
   min-width: 500px;
+  table-layout: fixed;
 }
 
 .board-table th {
@@ -1026,6 +1046,21 @@ main.page-body > .subpage-header:first-child {
   font-size: 0.9rem;
   color: #334155;
   border-bottom: 1px solid #f1f5f9;
+}
+
+.board-table td.notice-title-cell, 
+.board-table td:nth-child(2) {
+  max-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.board-link {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .board-view-container {
@@ -1056,8 +1091,8 @@ main.page-body > .subpage-header:first-child {
   line-height: 1.8;
   min-height: 180px;
   white-space: pre-wrap;
-  word-break: keep-all !important;      /* 한글은 어절 단위로 자연스럽게 줄바꿈 */
-  overflow-wrap: break-word !important; /* 긴 영문 단어도 박스를 안 뚫고 단어 단위로 안전하게 줄바꿈 */
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
   margin-bottom: 40px;
 }
 
@@ -1400,7 +1435,7 @@ input[type="file"]::file-selector-button:hover {
 .btn-delete-item:hover { background: #dc2626; color: #ffffff; }
 
 /* ============================================================
-   12. Education 및 Experience 카드 전용 모던 스타일
+   12. Education 및 Experience 카드 전용 모던 스타일 (마우스 호버 시 움직임 및 파란 테두리 효과 추가)
    ============================================================ */
 .edu-timeline-wrap {
   display: flex;
@@ -1420,9 +1455,15 @@ input[type="file"]::file-selector-button:hover {
   background: #ffffff !important;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
   width: 100% !important;
   box-sizing: border-box !important;
+}
+
+.edu-row:hover {
+  transform: translateY(-4px) !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.15) !important;
 }
 
 .edu-period {

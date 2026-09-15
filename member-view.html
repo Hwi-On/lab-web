@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title></title>
+  <title>Publications & Patents - NCB-LAB</title>
   
   <!-- 공통 스타일시트 연결 -->
   <link rel="stylesheet" href="style.css" />
@@ -78,82 +78,69 @@
   <div class="mobile-backdrop"></div>
 
   <!-- ============================================================
-       [2] 메인 본문 컨텐츠 영역 (Director 프로필 및 CV 소개)
+       [2] 메인 본문 컨텐츠 영역 (검색 툴바 및 연구원 개인 논문/특허 리스트)
        ============================================================ -->
   <main class="page-body">
     
-    <!-- 서브페이지 상단 타이틀 배너 -->
+    <!-- 서브페이지 상단 타이틀 배너 (이름 없이 고정) -->
     <div class="subpage-header">
-      <h1 class="subpage-title">Director</h1>
+      <h1 class="subpage-title" id="memberPubViewTitle">Publications &amp; Patents</h1>
     </div>
 
     <!-- 하위 페이지 이동을 위한 스티키 서브바 -->
     <nav class="sticky-subbar" id="stickySubbar">
       <div class="sticky-subbar-inner">
         <div class="subbar-left">
-          <span class="subbar-category-tag">ABOUT</span>
+          <span class="subbar-category-tag">MEMBERS</span>
           <span class="subbar-divider-arrow">&rsaquo;</span>
           <div class="subbar-menu-tabs">
-            <a href="director.html" class="subbar-tab-link active">Director</a>
+            <a href="members-current.html" class="subbar-tab-link active">Publications &amp; Patents</a>
           </div>
         </div>
-        <button type="button" class="subbar-top-btn" id="scrollTopBtn" title="최상단으로 이동">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-          <span>TOP</span>
-        </button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <a href="members-current.html" class="btn-secondary" style="padding: 5px 12px; font-size: 0.78rem; text-decoration: none; border-radius: 6px; color: #fff; background: #1e293b; border: 1px solid #334155;">&larr; Members로 돌아가기</a>
+          <button type="button" class="subbar-top-btn" id="scrollTopBtn" title="최상단으로 이동">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+            <span>TOP</span>
+          </button>
+        </div>
       </div>
     </nav>
 
-    <!-- 디렉터 상세 프로필 그리드 영역 (script.js에서 동적 데이터 바인딩) -->
+    <!-- 일반 Publications 페이지와 완전히 동일한 section-container 폭 적용 (제한 폭 제거) -->
     <div class="section-container">
-      <div class="director-profile-grid">
-        
-        <!-- 좌측: 프로필 아바타 및 연락처 정보 카드 -->
-        <div class="director-left-col">
-          <div class="director-avatar-card">
-            <div class="avatar-placeholder">Photo</div>
-            <h3 class="pi-name"></h3>
-            <p class="pi-eng-name"></p>
-            <span class="pi-position"></span>
-
-            <div class="contact-pill-list" style="display: none;">
-              <div class="pill-row"><strong>E-mail</strong> <span></span></div>
-              <div class="pill-row"><strong>Tel</strong> <span></span></div>
-              <div class="pill-row"><strong>Office</strong> <span></span></div>
-            </div>
+      
+      <!-- 검색 툴바 영역 (일반 Publications 페이지와 동일한 구조 및 정렬) -->
+      <div class="toolbar-box">
+        <div class="search-bar-combo">
+          <div class="custom-select-wrap">
+            <button type="button" class="custom-select-toggle" id="customSelectToggle">
+              <span id="customSelectedLabel">제목</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="custom-select-options" id="customSelectOptions" style="display: none;">
+              <li data-value="title" class="selected">제목</li>
+              <li data-value="author">저자</li>
+              <li data-value="journal">저널명</li>
+            </ul>
           </div>
+          <input type="text" id="memberPubSearchInput" class="search-input" placeholder="논문 검색어를 입력하세요." />
+          <input type="hidden" id="searchSelectValue" value="title" />
+          <button type="button" class="search-btn" id="memberPubSearchBtn" aria-label="검색">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
         </div>
-
-        <!-- 우측: 인사말, 교육, 경력 세부 CV 섹션 -->
-        <div class="director-right-col">
-          <section class="cv-section">
-            <h3 class="cv-title">Greeting &amp; Research Vision</h3>
-            <p class="cv-text"></p>
-          </section>
-
-          <section class="cv-section">
-            <h3 class="cv-title">Education</h3>
-            <div class="edu-timeline-wrap"></div>
-          </section>
-
-          <section class="cv-section">
-            <h3 class="cv-title">Professional Experience</h3>
-            <div class="edu-timeline-wrap"></div>
-          </section>
-
-          <section class="cv-section">
-            <h3 class="cv-title">Publications</h3>
-            <div id="directorPubContainer" style="display: flex; flex-direction: column; gap: 14px;"></div>
-            <div id="directorPubPagination" class="pagination-wrap" style="margin-top: 24px;"></div>
-          </section>
-        </div>
-
       </div>
+
+      <!-- 연구원 개인 논문/특허 리스트 출력 및 페이징 영역 -->
+      <div id="memberPubListContainer" style="display: flex; flex-direction: column; gap: 14px;"></div>
+      <div id="memberPubPagination" class="pagination-wrap" style="margin-top: 30px;"></div>
+      
     </div>
   </main>
 
   <!-- ============================================================
-       [3] 하단 푸터 영역 (연락처, 사이트맵, 태그 클라우드 및 저작권)
+       [3] 하단 푸터 영역
        ============================================================ -->
   <footer class="custom-lab-footer">
     <div class="footer-wrap">

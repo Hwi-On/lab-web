@@ -218,8 +218,9 @@ class UnifiedAdminApp {
     this.editAlumniId = null;
     this.editPubId = null;
     this.editLabLifeId = null;
+    this.editDirPubId = null;
+    this.editMemPubId = null;
 
-    // 관리자 테이블 페이징 상태 초기화 (각각 10개씩)
     this.pubPage = 1;
     this.pubPerPage = 10;
     this.labLifePage = 1;
@@ -228,73 +229,16 @@ class UnifiedAdminApp {
     this.noticePerPage = 10;
     this.newsPage = 1;
     this.newsPerPage = 10;
+    this.dirPubPage = 1;         
+    this.dirPubPerPage = 10;     
+    this.memPubPage = 1;         
+    this.memPubPerPage = 10;     
 
     if (!this.authBox) return;
 
     this.initAuth();
     this.initTabs();
     this.initForms();
-    this.initImgDeleteHandlers();
-  }
-
-  // 사진 삭제 기능 바인딩 (Director, Current, Alumni, LabLife, Notice, News)
-  initImgDeleteHandlers() {
-    const bindSingleImg = (btnId, tableName, idGetter, renderFn) => {
-      const btn = document.getElementById(btnId);
-      if (!btn) return;
-      btn.addEventListener('click', async () => {
-        const id = idGetter();
-        if (!id) {
-          alert('수정 대상을 먼저 선택(수정 버튼 클릭)해주세요.');
-          return;
-        }
-        if (!confirm('사진을 삭제하시겠습니까?')) return;
-        const { error } = await supabaseClient.from(tableName).update({ image: null }).eq('id', id);
-        if (error) {
-          alert('사진 삭제 실패: ' + error.message);
-        } else {
-          alert('사진이 삭제되었습니다.');
-          renderFn.call(this);
-        }
-      });
-    };
-
-    const bindMultiImg = (btnId, tableName, idGetter, renderFn) => {
-      const btn = document.getElementById(btnId);
-      if (!btn) return;
-      btn.addEventListener('click', async () => {
-        const id = idGetter();
-        if (!id) {
-          alert('수정 대상을 먼저 선택(수정 버튼 클릭)해주세요.');
-          return;
-        }
-        if (!confirm('모든 사진을 삭제하시겠습니까?')) return;
-        const { error } = await supabaseClient.from(tableName).update({ images: [] }).eq('id', id);
-        if (error) {
-          alert('사진 삭제 실패: ' + error.message);
-        } else {
-          alert('사진들이 삭제되었습니다.');
-          renderFn.call(this);
-        }
-      });
-    };
-
-    // Director (id=1 고정)
-    const btnDelDir = document.getElementById('btnDelDirImg');
-    if (btnDelDir) {
-      btnDelDir.addEventListener('click', async () => {
-        if (!confirm('Director 프로필 사진을 삭제하시겠습니까?')) return;
-        const { error } = await supabaseClient.from('director_info').update({ image: null }).eq('id', 1);
-        if (error) alert('삭제 실패: ' + error.message);
-        else { alert('삭제되었습니다.'); this.renderDirectorForm(); }
-      });
-    }
-
-    bindSingleImg('btnDelCurImg', 'current_members', () => this.editCurrentId, this.renderCurrent);
-    bindSingleImg('btnDelAlumImg', 'alumni_members', () => this.editAlumniId, this.renderAlumni);
-    bindMultiImg('btnDelLifeImg', 'lab_life', () => this.editLabLifeId, this.renderLabLife);
-    bindMultiImg('btnDelNotImg', 'notices', () => this.editNoticeId, this.renderNotice);
-    bindMultiImg('btnDelNewsImg', 'news', () => this.editNewsId, this.renderNews);
   }
 
   initAuth() {
@@ -455,6 +399,7 @@ class UnifiedAdminApp {
       dirForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgBase64 = await convertFileToBase64('admDirImg');
+        const deleteChecked = document.getElementById('admDirImgDelete')?.checked;
         const payload = {
           name_ko: document.getElementById('admDirNameKo')?.value.trim() || '',
           name_en: document.getElementById('admDirNameEn')?.value.trim() || '',
@@ -464,11 +409,21 @@ class UnifiedAdminApp {
           office: document.getElementById('admDirOffice')?.value.trim() || '',
           greeting: document.getElementById('admDirGreeting')?.value.trim() || ''
         };
-        if (imgBase64) payload.image = imgBase64;
+        if (imgBase64) {
+          payload.image = imgBase64;
+        } else if (deleteChecked) {
+          payload.image = null;
+        }
 
         const { error } = await supabaseClient.from('director_info').upsert({ id: 1, ...payload });
         if (error) { alert('저장 실패: ' + error.message); return; }
+        
+        if (deleteChecked) {
+          const delBox = document.getElementById('admDirImgDelete');
+          if (delBox) delBox.checked = false;
+        }
         alert('Director 기본 정보가 저장되었습니다.');
+        await this.renderDirectorForm();
       });
     }
 
@@ -543,11 +498,103 @@ class UnifiedAdminApp {
       }
     }
 
+    const dirPubForm = document.getElementById('formAdminDirPub');
+    const btnCancelDirPub = document.getElementById('btnCancelDirPub');
+    const dirPubFormTitle = document.getElementById('dirPubFormTitle');
+    if (dirPubForm) {
+      dirPubForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const rawDate = document.getElementById('admDirPubYear')?.value.trim() || '';
+        const formattedDate = rawDate ? rawDate.replace(/-/g, '.') : new Date().toISOString().substring(0, 10).replace(/-/g, '.');
+        const payload = {
+          type: document.getElementById('admDirPubType')?.value || 'paper',
+          title: document.getElementById('admDirPubTitle')?.value.trim() || '',
+          authors: document.getElementById('admDirPubAuthors')?.value.trim() || '',
+          journal: document.getElementById('admDirPubJournal')?.value.trim() || '',
+          year: formattedDate,
+          link: document.getElementById('admDirPubLink')?.value.trim() || '#'
+        };
+
+        if (this.editDirPubId) {
+          const { error } = await supabaseClient.from('director_publications').update(payload).eq('id', this.editDirPubId);
+          if (error) { alert('수정 실패: ' + error.message); return; }
+          this.editDirPubId = null;
+          dirPubForm.querySelector('button[type="submit"]').textContent = '디렉터 논문 등록하기';
+          if (dirPubFormTitle) dirPubFormTitle.textContent = '+ 디렉터 개인 논문 및 특허 등록';
+          if (btnCancelDirPub) btnCancelDirPub.style.display = 'none';
+          alert('디렉터 논문 항목이 수정되었습니다.');
+        } else {
+          const { error } = await supabaseClient.from('director_publications').insert([payload]);
+          if (error) { alert('등록 실패: ' + error.message); return; }
+          alert('디렉터 논문 항목이 등록되었습니다.');
+        }
+        dirPubForm.reset();
+        await this.renderDirPubAdmin();
+      });
+
+      if (btnCancelDirPub) {
+        btnCancelDirPub.addEventListener('click', () => {
+          this.editDirPubId = null;
+          dirPubForm.reset();
+          dirPubForm.querySelector('button[type="submit"]').textContent = '디렉터 논문 등록하기';
+          if (dirPubFormTitle) dirPubFormTitle.textContent = '+ 디렉터 개인 논문 및 특허 등록';
+          btnCancelDirPub.style.display = 'none';
+        });
+      }
+    }
+
+    const memberPubForm = document.getElementById('formAdminMemberPub');
+    const btnCancelMemPub = document.getElementById('btnCancelMemPub');
+    const memberPubFormTitle = document.getElementById('memberPubFormTitle');
+    if (memberPubForm) {
+      memberPubForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const rawDate = document.getElementById('admMemPubYear')?.value.trim() || '';
+        const formattedDate = rawDate ? rawDate.replace(/-/g, '.') : new Date().toISOString().substring(0, 10).replace(/-/g, '.');
+        const payload = {
+          member_name: document.getElementById('admMemPubName')?.value.trim() || '',
+          type: document.getElementById('admMemPubType')?.value || 'paper',
+          title: document.getElementById('admMemPubTitle')?.value.trim() || '',
+          authors: document.getElementById('admMemPubAuthors')?.value.trim() || '',
+          journal: document.getElementById('admMemPubJournal')?.value.trim() || '',
+          year: formattedDate,
+          link: document.getElementById('admMemPubLink')?.value.trim() || '#'
+        };
+
+        if (this.editMemPubId) {
+          const { error } = await supabaseClient.from('members_publications').update(payload).eq('id', this.editMemPubId);
+          if (error) { alert('수정 실패: ' + error.message); return; }
+          this.editMemPubId = null;
+          memberPubForm.querySelector('button[type="submit"]').textContent = '연구원 논문 등록하기';
+          if (memberPubFormTitle) memberPubFormTitle.textContent = '+ 연구원 개인 논문 및 특허 등록';
+          if (btnCancelMemPub) btnCancelMemPub.style.display = 'none';
+          alert('연구원 논문 항목이 수정되었습니다.');
+        } else {
+          const { error } = await supabaseClient.from('members_publications').insert([payload]);
+          if (error) { alert('등록 실패: ' + error.message); return; }
+          alert('연구원 논문 항목이 등록되었습니다.');
+        }
+        memberPubForm.reset();
+        await this.renderMemberPubAdmin();
+      });
+
+      if (btnCancelMemPub) {
+        btnCancelMemPub.addEventListener('click', () => {
+          this.editMemPubId = null;
+          memberPubForm.reset();
+          memberPubForm.querySelector('button[type="submit"]').textContent = '연구원 논문 등록하기';
+          if (memberPubFormTitle) memberPubFormTitle.textContent = '+ 연구원 개인 논문 및 특허 등록';
+          btnCancelMemPub.style.display = 'none';
+        });
+      }
+    }
+
     const curForm = document.getElementById('formAdminCurrent');
     if (curForm) {
       curForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgBase64 = await convertFileToBase64('admCurImg');
+        const deleteChecked = document.getElementById('admCurImgDelete')?.checked;
         const roleHidden = document.getElementById('admCurRole');
         const roleVal = roleHidden ? roleHidden.value : 'Postdoctoral Researcher';
         const payload = {
@@ -556,7 +603,11 @@ class UnifiedAdminApp {
           tags: document.getElementById('admCurTags')?.value.trim() || '',
           email: document.getElementById('admCurEmail')?.value.trim() || ''
         };
-        if (imgBase64) payload.image = imgBase64;
+        if (imgBase64) {
+          payload.image = imgBase64;
+        } else if (deleteChecked) {
+          payload.image = null;
+        }
 
         if (this.editCurrentId) {
           const { error } = await supabaseClient.from('current_members').update(payload).eq('id', this.editCurrentId);
@@ -569,6 +620,11 @@ class UnifiedAdminApp {
           if (error) { alert('등록 실패: ' + error.message); return; }
           alert('연구원이 추가되었습니다.');
         }
+        
+        if (deleteChecked) {
+          const delBox = document.getElementById('admCurImgDelete');
+          if (delBox) delBox.checked = false;
+        }
         curForm.reset();
         await this.renderCurrent();
       });
@@ -579,6 +635,7 @@ class UnifiedAdminApp {
       alumForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgBase64 = await convertFileToBase64('admAlumImg');
+        const deleteChecked = document.getElementById('admAlumImgDelete')?.checked;
         const payload = {
           year: document.getElementById('admAlumYear')?.value.trim() || '',
           name: document.getElementById('admAlumName')?.value.trim() || '',
@@ -586,7 +643,11 @@ class UnifiedAdminApp {
           tags: document.getElementById('admAlumTags')?.value.trim() || '',
           email: document.getElementById('admAlumEmail')?.value.trim() || ''
         };
-        if (imgBase64) payload.image = imgBase64;
+        if (imgBase64) {
+          payload.image = imgBase64;
+        } else if (deleteChecked) {
+          payload.image = null;
+        }
 
         if (this.editAlumniId) {
           const { error } = await supabaseClient.from('alumni_members').update(payload).eq('id', this.editAlumniId);
@@ -598,6 +659,11 @@ class UnifiedAdminApp {
           const { error } = await supabaseClient.from('alumni_members').insert([payload]);
           if (error) { alert('등록 실패: ' + error.message); return; }
           alert('졸업생이 추가되었습니다.');
+        }
+        
+        if (deleteChecked) {
+          const delBox = document.getElementById('admAlumImgDelete');
+          if (delBox) delBox.checked = false;
         }
         alumForm.reset();
         await this.renderAlumni();
@@ -640,12 +706,17 @@ class UnifiedAdminApp {
       lifeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgsArray = await convertFilesToMultipleBase64('admLifeImgs');
+        const deleteChecked = document.getElementById('admLifeImgsDelete')?.checked;
         const payload = {
           date: document.getElementById('admLifeDate')?.value.replace(/-/g, '.') || '',
           title: document.getElementById('admLifeTitle')?.value.trim() || '',
           desc: document.getElementById('admLifeDesc')?.value.trim() || ''
         };
-        if (imgsArray.length > 0) payload.images = imgsArray;
+        if (imgsArray.length > 0) {
+          payload.images = imgsArray;
+        } else if (deleteChecked) {
+          payload.images = [];
+        }
 
         if (this.editLabLifeId) {
           const { error } = await supabaseClient.from('lab_life').update(payload).eq('id', this.editLabLifeId);
@@ -659,6 +730,11 @@ class UnifiedAdminApp {
           if (error) { alert('등록 실패: ' + error.message); return; }
           alert('Lab Life 활동이 등록되었습니다.');
         }
+
+        if (deleteChecked) {
+          const delBox = document.getElementById('admLifeImgsDelete');
+          if (delBox) delBox.checked = false;
+        }
         lifeForm.reset();
         await this.renderLabLife();
       });
@@ -669,12 +745,17 @@ class UnifiedAdminApp {
       notForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgsArray = await convertFilesToMultipleBase64('admNotImgs');
+        const deleteChecked = document.getElementById('admNotImgsDelete')?.checked;
         const payload = {
           date: document.getElementById('admNotDate')?.value.replace(/-/g, '.') || '',
           title: document.getElementById('admNotTitle')?.value.trim() || '',
           desc: document.getElementById('admNotDesc')?.value.trim() || ''
         };
-        if (imgsArray.length > 0) payload.images = imgsArray;
+        if (imgsArray.length > 0) {
+          payload.images = imgsArray;
+        } else if (deleteChecked) {
+          payload.images = [];
+        }
 
         if (this.editNoticeId) {
           const { error } = await supabaseClient.from('notices').update(payload).eq('id', this.editNoticeId);
@@ -688,6 +769,11 @@ class UnifiedAdminApp {
           if (error) { alert('등록 실패: ' + error.message); return; }
           alert('공지사항이 등록되었습니다.');
         }
+
+        if (deleteChecked) {
+          const delBox = document.getElementById('admNotImgsDelete');
+          if (delBox) delBox.checked = false;
+        }
         notForm.reset();
         await this.renderNotice();
       });
@@ -698,12 +784,17 @@ class UnifiedAdminApp {
       newsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imgsArray = await convertFilesToMultipleBase64('admNewsImgs');
+        const deleteChecked = document.getElementById('admNewsImgsDelete')?.checked;
         const payload = {
           date: document.getElementById('admNewsDate')?.value.replace(/-/g, '.') || '',
           title: document.getElementById('admNewsTitle')?.value.trim() || '',
           desc: document.getElementById('admNewsDesc')?.value.trim() || ''
         };
-        if (imgsArray.length > 0) payload.images = imgsArray;
+        if (imgsArray.length > 0) {
+          payload.images = imgsArray;
+        } else if (deleteChecked) {
+          payload.images = [];
+        }
 
         if (this.editNewsId) {
           const { error } = await supabaseClient.from('news').update(payload).eq('id', this.editNewsId);
@@ -717,6 +808,11 @@ class UnifiedAdminApp {
           if (error) { alert('등록 실패: ' + error.message); return; }
           alert('뉴스가 등록되었습니다.');
         }
+
+        if (deleteChecked) {
+          const delBox = document.getElementById('admNewsImgsDelete');
+          if (delBox) delBox.checked = false;
+        }
         newsForm.reset();
         await this.renderNews();
       });
@@ -729,7 +825,9 @@ class UnifiedAdminApp {
     this.renderDirectorForm();
     this.renderEdu();
     this.renderExp();
+    this.renderDirPubAdmin();
     this.renderCurrent();
+    this.renderMemberPubAdmin();
     this.renderAlumni();
     this.renderPub();
     this.renderLabLife();
@@ -808,13 +906,13 @@ class UnifiedAdminApp {
   async renderEdu() {
     const tbody = document.getElementById('tableBodyEdu');
     if (!tbody) return;
-    const { data: list } = await supabaseClient.from('director_education').select('*').order('id', { ascending: false });
+    const { data: list } = await supabaseClient.from('director_education').select('*').order('id', { ascending: true });
     tbody.innerHTML = '';
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:#94a3b8;">등록된 학력이 없습니다.</td></tr>';
       return;
     }
-    list.forEach((item) => {
+    list.slice().reverse().forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${escapeHtml(item.period)}</td>
@@ -850,13 +948,13 @@ class UnifiedAdminApp {
   async renderExp() {
     const tbody = document.getElementById('tableBodyExp');
     if (!tbody) return;
-    const { data: list } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: false });
+    const { data: list } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: true });
     tbody.innerHTML = '';
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#94a3b8;">등록된 경력 및 활동이 없습니다.</td></tr>';
       return;
     }
-    list.forEach((item) => {
+    list.slice().reverse().forEach((item) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><span class="tag-chip">${escapeHtml(item.category || '경력 (Experience)')}</span></td>
@@ -889,6 +987,158 @@ class UnifiedAdminApp {
       });
     });
     this.attachSupabaseDelete(tbody, 'director_experience', () => this.renderExp());
+  }
+
+  async renderDirPubAdmin() {
+    const tbody = document.getElementById('tableBodyDirPub');
+    if (!tbody) return;
+    const { data: list } = await supabaseClient.from('director_publications').select('*');
+    tbody.innerHTML = '';
+
+    const cardEl = tbody.closest('.admin-table-card');
+    const oldPagination = cardEl?.querySelector('.admin-pagination');
+    if (oldPagination) oldPagination.remove();
+
+    if (!list || list.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">등록된 디렉터 논문이 없습니다.</td></tr>';
+      return;
+    }
+    const sortedList = list.slice().sort((a, b) => parseCustomDate(b.year, b.id) - parseCustomDate(a.year, a.id));
+
+    const totalPages = Math.ceil(sortedList.length / this.dirPubPerPage);
+    if (this.dirPubPage > totalPages) this.dirPubPage = Math.max(1, totalPages);
+    const start = (this.dirPubPage - 1) * this.dirPubPerPage;
+    const pagedList = sortedList.slice(start, start + this.dirPubPerPage);
+
+    pagedList.forEach((item) => {
+      const typeLabel = item.type === 'patent' ? 'Patent' : 'Paper';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="text-align:center;"><span class="pub-type-badge ${item.type || 'paper'}">${typeLabel}</span></td>
+        <td><strong>${formatTitle(item.title)}</strong><br><span style="font-size:0.82rem; color:#64748b;">${formatTitle(item.authors)} &bull; <em>${escapeHtml(item.journal)}</em></span></td>
+        <td style="text-align:center;">${escapeHtml(item.year)}</td>
+        <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
+          <button class="btn-edit-dirpub" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
+          <button class="btn-delete-item" data-table="director_publications" data-id="${item.id}">삭제</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('.btn-edit-dirpub').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
+        const item = sortedList.find(x => x.id === id);
+        if (item) {
+          this.editDirPubId = id;
+          const tEl = document.getElementById('admDirPubType'); if (tEl) tEl.value = item.type || 'paper';
+          const yEl = document.getElementById('admDirPubYear'); if (yEl) yEl.value = (item.year || '').replace(/\./g, '-');
+          const titleEl = document.getElementById('admDirPubTitle'); if (titleEl) titleEl.value = item.title;
+          const authEl = document.getElementById('admDirPubAuthors'); if (authEl) authEl.value = item.authors;
+          const jEl = document.getElementById('admDirPubJournal'); if (jEl) jEl.value = item.journal;
+          const lEl = document.getElementById('admDirPubLink'); if (lEl) lEl.value = item.link !== '#' ? item.link : '';
+          
+          const submitBtn = document.querySelector('#formAdminDirPub button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = '디렉터 논문 수정 완료';
+          const formTitleEl = document.getElementById('dirPubFormTitle');
+          if (formTitleEl) formTitleEl.textContent = '디렉터 개인 논문 수정하기';
+          const btnCancel = document.getElementById('btnCancelDirPub');
+          if (btnCancel) btnCancel.style.display = 'inline-block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+    });
+    this.attachSupabaseDelete(tbody, 'director_publications', () => this.renderDirPubAdmin());
+
+    if (totalPages > 1 && cardEl) {
+      const pageWrap = document.createElement('div');
+      pageWrap.className = 'admin-pagination';
+      pageWrap.style.cssText = 'display:flex; justify-content:center; gap:6px; margin-top:16px;';
+      for (let i = 1; i <= totalPages; i++) {
+        const pBtn = document.createElement('button');
+        pBtn.textContent = i;
+        pBtn.style.cssText = `padding:6px 12px; border-radius:4px; border:1px solid #cbd5e1; background:${this.dirPubPage === i ? '#0ea5e9' : '#fff'}; color:${this.dirPubPage === i ? '#fff' : '#334155'}; cursor:pointer; font-weight:700;`;
+        pBtn.addEventListener('click', () => { this.dirPubPage = i; this.renderDirPubAdmin(); });
+        pageWrap.appendChild(pBtn);
+      }
+      cardEl.appendChild(pageWrap);
+    }
+  }
+
+  async renderMemberPubAdmin() {
+    const tbody = document.getElementById('tableBodyMemberPub');
+    if (!tbody) return;
+    const { data: list } = await supabaseClient.from('members_publications').select('*');
+    tbody.innerHTML = '';
+
+    const cardEl = tbody.closest('.admin-table-card');
+    const oldPagination = cardEl?.querySelector('.admin-pagination');
+    if (oldPagination) oldPagination.remove();
+
+    if (!list || list.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">등록된 연구원 논문이 없습니다.</td></tr>';
+      return;
+    }
+    const sortedList = list.slice().sort((a, b) => parseCustomDate(b.year, b.id) - parseCustomDate(a.year, a.id));
+
+    const totalPages = Math.ceil(sortedList.length / this.memPubPerPage);
+    if (this.memPubPage > totalPages) this.memPubPage = Math.max(1, totalPages);
+    const start = (this.memPubPage - 1) * this.memPubPerPage;
+    const pagedList = sortedList.slice(start, start + this.memPubPerPage);
+
+    pagedList.forEach((item) => {
+      const typeLabel = item.type === 'patent' ? 'Patent' : 'Paper';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:700; color:#0284c7;">${escapeHtml(item.member_name)}</td>
+        <td style="text-align:center;"><span class="pub-type-badge ${item.type || 'paper'}">${typeLabel}</span></td>
+        <td><strong>${formatTitle(item.title)}</strong><br><span style="font-size:0.82rem; color:#64748b;">${formatTitle(item.authors)} &bull; <em>${escapeHtml(item.journal)}</em></span></td>
+        <td style="text-align:center;">${escapeHtml(item.year)}</td>
+        <td style="text-align:center; display:flex; gap:6px; justify-content:center;">
+          <button class="btn-edit-mempub" data-id="${item.id}" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:5px 10px; border-radius:4px; font-size:0.78rem; font-weight:700; cursor:pointer;">수정</button>
+          <button class="btn-delete-item" data-table="members_publications" data-id="${item.id}">삭제</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('.btn-edit-mempub').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
+        const item = sortedList.find(x => x.id === id);
+        if (item) {
+          this.editMemPubId = id;
+          const nameEl = document.getElementById('admMemPubName'); if (nameEl) nameEl.value = item.member_name || '';
+          const tEl = document.getElementById('admMemPubType'); if (tEl) tEl.value = item.type || 'paper';
+          const yEl = document.getElementById('admMemPubYear'); if (yEl) yEl.value = (item.year || '').replace(/\./g, '-');
+          const titleEl = document.getElementById('admMemPubTitle'); if (titleEl) titleEl.value = item.title;
+          const authEl = document.getElementById('admMemPubAuthors'); if (authEl) authEl.value = item.authors;
+          const jEl = document.getElementById('admMemPubJournal'); if (jEl) jEl.value = item.journal;
+          const lEl = document.getElementById('admMemPubLink'); if (lEl) lEl.value = item.link !== '#' ? item.link : '';
+          
+          const submitBtn = document.querySelector('#formAdminMemberPub button[type="submit"]');
+          if (submitBtn) submitBtn.textContent = '연구원 논문 수정 완료';
+          const formTitleEl = document.getElementById('memberPubFormTitle');
+          if (formTitleEl) formTitleEl.textContent = '연구원 개인 논문 수정하기';
+          const btnCancel = document.getElementById('btnCancelMemPub');
+          if (btnCancel) btnCancel.style.display = 'inline-block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+    });
+    this.attachSupabaseDelete(tbody, 'members_publications', () => this.renderMemberPubAdmin());
+
+    if (totalPages > 1 && cardEl) {
+      const pageWrap = document.createElement('div');
+      pageWrap.className = 'admin-pagination';
+      pageWrap.style.cssText = 'display:flex; justify-content:center; gap:6px; margin-top:16px;';
+      for (let i = 1; i <= totalPages; i++) {
+        const pBtn = document.createElement('button');
+        pBtn.textContent = i;
+        pBtn.style.cssText = `padding:6px 12px; border-radius:4px; border:1px solid #cbd5e1; background:${this.memPubPage === i ? '#0ea5e9' : '#fff'}; color:${this.memPubPage === i ? '#fff' : '#334155'}; cursor:pointer; font-weight:700;`;
+        pBtn.addEventListener('click', () => { this.memPubPage = i; this.renderMemberPubAdmin(); });
+        pageWrap.appendChild(pBtn);
+      }
+      cardEl.appendChild(pageWrap);
+    }
   }
 
   async renderCurrent() {
@@ -975,6 +1225,7 @@ class UnifiedAdminApp {
     this.attachSupabaseDelete(tbody, 'alumni_members', () => this.renderAlumni());
   }
 
+  // 관리자 Publications (10개 페이징 적용)
   async renderPub() {
     const tbody = document.getElementById('tableBodyPub');
     if (!tbody) return;
@@ -1045,6 +1296,7 @@ class UnifiedAdminApp {
     }
   }
 
+  // 관리자 Lab Life (10개 페이징 적용)
   async renderLabLife() {
     const tbody = document.getElementById('tableBodyLabLife');
     if (!tbody) return;
@@ -1109,6 +1361,7 @@ class UnifiedAdminApp {
     }
   }
 
+  // 관리자 Notice (10개 페이징 적용)
   async renderNotice() {
     const tbody = document.getElementById('tableBodyNotice');
     if (!tbody) return;
@@ -1173,6 +1426,7 @@ class UnifiedAdminApp {
     }
   }
 
+  // 관리자 News (날짜순 내림차순 정렬 + 10개 페이징 적용)
   async renderNews() {
     const tbody = document.getElementById('tableBodyNews');
     if (!tbody) return;
@@ -1417,28 +1671,28 @@ async function syncPublicPagesInternal() {
       for (const section of cvSections) {
         const titleEl = section.querySelector('.cv-title');
         const wrap = section.querySelector('.edu-timeline-wrap');
-        if (!titleEl || !wrap) continue;
+        if (!titleEl) continue;
         const titleText = titleEl.textContent.trim();
 
-        if (titleText.includes('Education')) {
-          const { data: eduList } = await supabaseClient.from('director_education').select('*').order('id', { ascending: false });
+        if (titleText.includes('Education') && wrap) {
+          const { data: eduList } = await supabaseClient.from('director_education').select('*').order('id', { ascending: true });
           wrap.innerHTML = '';
           if (!eduList || eduList.length === 0) {
             wrap.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 학력 정보가 없습니다.</p></div>';
           } else {
-            eduList.forEach(item => {
+            eduList.slice().reverse().forEach(item => {
               const row = document.createElement('div'); row.className = 'edu-row';
               row.innerHTML = `<div class="edu-period"><span class="edu-badge">${escapeHtml(item.period)}</span></div><div class="edu-details"><span class="edu-degree">${escapeHtml(item.degree)}</span><span class="edu-sep">/</span><span class="edu-institution">${escapeHtml(item.inst)}</span></div>`;
               wrap.appendChild(row);
             });
           }
-        } else if (titleText.includes('Experience') || titleText.includes('Professional')) {
-          const { data: expList } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: false });
+        } else if ((titleText.includes('Experience') || titleText.includes('Professional')) && wrap) {
+          const { data: expList } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: true });
           wrap.innerHTML = '';
           if (!expList || expList.length === 0) {
             wrap.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 경력 및 활동 정보가 없습니다.</p></div>';
           } else {
-            expList.forEach(item => {
+            expList.slice().reverse().forEach(item => {
               const row = document.createElement('div'); row.className = 'edu-row';
               row.innerHTML = `<div class="edu-period"><span class="edu-badge">${escapeHtml(item.period)}</span></div><div class="edu-details"><span class="edu-degree" style="font-weight: 600 !important;">${escapeHtml(item.degree)}</span><span class="edu-sep">/</span><span class="edu-institution">${escapeHtml(item.inst)}</span></div>`;
               wrap.appendChild(row);
@@ -1446,6 +1700,66 @@ async function syncPublicPagesInternal() {
           }
         }
       }
+    }
+
+    const dirPubContainer = document.getElementById('directorPubContainer');
+    if (dirPubContainer) {
+      const { data: dirPubs } = await supabaseClient.from('director_publications').select('*');
+      const sortedDirPubs = (dirPubs || []).sort((a, b) => parseCustomDate(b.year, b.id) - parseCustomDate(a.year, a.id));
+      
+      let currentDirPubPage = 1;
+      const perPage = 5;
+
+      const renderDirPubPage = () => {
+        dirPubContainer.innerHTML = '';
+        const paginationBox = document.getElementById('directorPubPagination');
+        if (paginationBox) paginationBox.innerHTML = '';
+
+        if (sortedDirPubs.length === 0) {
+          dirPubContainer.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 논문이 없습니다.</p></div>';
+          return;
+        }
+
+        const totalPages = Math.ceil(sortedDirPubs.length / perPage);
+        if (currentDirPubPage > totalPages) currentDirPubPage = Math.max(1, totalPages);
+        const start = (currentDirPubPage - 1) * perPage;
+        const pagedList = sortedDirPubs.slice(start, start + perPage);
+
+        pagedList.forEach(pub => {
+          const card = document.createElement('article');
+          card.className = 'pub-card';
+          card.style.cssText = 'margin-bottom: 0 !important; padding: 18px 22px;';
+          card.innerHTML = `
+            <div class="pub-info">
+              <h3 class="pub-title" style="font-size: 1rem; margin-bottom: 6px;">${formatTitle(pub.title)}</h3>
+              <div class="pub-meta" style="font-size: 0.82rem;">
+                <span class="pub-authors">${formatTitle(pub.authors)}</span>
+                <span class="pub-journal">${escapeHtml(pub.journal)}</span>
+                <span class="pub-year">${escapeHtml(pub.year)}</span>
+              </div>
+            </div>
+            <a href="${escapeHtml(pub.link || '#')}" class="pub-link-icon" style="width:36px; height:36px;" target="_blank" rel="noopener noreferrer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>`;
+          dirPubContainer.appendChild(card);
+        });
+
+        if (totalPages > 1 && paginationBox) {
+          for (let i = 1; i <= totalPages; i++) {
+            const pBtn = document.createElement('button');
+            pBtn.textContent = i;
+            pBtn.className = `page-btn num-btn ${currentDirPubPage === i ? 'active' : ''}`;
+            pBtn.style.cssText = `min-width: 32px; height: 32px; font-size: 0.85rem;`;
+            pBtn.addEventListener('click', () => {
+              currentDirPubPage = i;
+              renderDirPubPage();
+            });
+            paginationBox.appendChild(pBtn);
+          }
+        }
+      };
+
+      renderDirPubPage();
     }
   }
 
@@ -1461,13 +1775,29 @@ async function syncPublicPagesInternal() {
 
     const renderGroup = (arr, container) => {
       if (!container) return;
-      if (arr.length === 0) { container.innerHTML = '<div class="empty-state-card" style="grid-column:1/-1;"><p>등록된 멤버가 없습니다.</p></div>'; return; }
+      if (arr.length === 0) { 
+        container.innerHTML = '<div class="empty-state-card" style="grid-column:1/-1;"><p>등록된 멤버가 없습니다.</p></div>'; 
+        return; 
+      }
       arr.forEach((m) => {
         const tagsArray = (m.tags || '').split(',').map(t => t.trim()).filter(t => t.length > 0);
         const tagsHtml = tagsArray.map(t => `<span class="tag-chip">${escapeHtml(t)}</span>`).join('');
         const photoHtml = m.image ? `<img src="${m.image}" alt="프로필 사진" style="width:100%; height:100%; object-fit:cover; border-radius:8px;" />` : `<span>Photo</span>`;
         const card = document.createElement('article'); card.className = 'profile-h-card';
-        card.innerHTML = `<div class="profile-photo-square">${photoHtml}</div><div class="profile-info-side"><span class="profile-role-tag">${escapeHtml(m.role)}</span><h4 class="profile-name">${escapeHtml(m.name)}</h4><div class="profile-tags">${tagsHtml}</div><div class="profile-contact"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span>${escapeHtml(m.email)}</span></div></div>`;
+        card.innerHTML = `
+          <div class="profile-photo-square">${photoHtml}</div>
+          <div class="profile-info-side">
+            <span class="profile-role-tag">${escapeHtml(m.role)}</span>
+            <h4 class="profile-name">${escapeHtml(m.name)}</h4>
+            <div class="profile-tags">${tagsHtml}</div>
+            <div class="profile-contact" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>${escapeHtml(m.email)}</span>
+              </div>
+              <a href="member-view.html?name=${encodeURIComponent(m.name)}" style="font-size:0.82rem; font-weight:700; color:#0284c7; text-decoration:none; display:inline-flex; align-items:center; gap:3px;">Publications &rarr;</a>
+            </div>
+          </div>`;
         container.appendChild(card);
       });
     };
@@ -1479,7 +1809,10 @@ async function syncPublicPagesInternal() {
   if (alumniMainContainer) {
     const { data: list } = await supabaseClient.from('alumni_members').select('*').order('year', { ascending: false });
     alumniMainContainer.innerHTML = '';
-    if (!list || list.length === 0) { alumniMainContainer.innerHTML = '<div class="empty-state-card"><p>등록된 졸업생이 없습니다.</p></div>'; return; }
+    if (!list || list.length === 0) { 
+      alumniMainContainer.innerHTML = '<div class="empty-state-card"><p>등록된 졸업생이 없습니다.</p></div>'; 
+      return; 
+    }
     const groupedByYear = {};
     list.forEach((a) => { const yr = a.year || 'Unknown'; if (!groupedByYear[yr]) groupedByYear[yr] = []; groupedByYear[yr].push(a); });
     const sortedYears = Object.keys(groupedByYear).sort((a, b) => b - a);
@@ -1497,6 +1830,53 @@ async function syncPublicPagesInternal() {
       });
       section.appendChild(grid); alumniMainContainer.appendChild(section);
     });
+  }
+
+  const memberPubViewTitle = document.getElementById('memberPubViewTitle');
+  if (memberPubViewTitle) {
+    const params = new URLSearchParams(location.search);
+    const memberName = params.get('name') || '';
+    
+    memberPubViewTitle.textContent = 'Publications & Patents';
+
+    if (document.getElementById('memberPubListContainer')) {
+      const memberViewer = new DedicatedGenericViewer({
+        tableName: 'members_publications',
+        containerId: 'memberPubListContainer', 
+        paginationId: 'memberPubPagination',
+        selectId: 'searchSelectValue', 
+        searchInputId: 'memberPubSearchInput', 
+        searchBtnId: 'memberPubSearchBtn',
+        renderCardCallback: (container, pub) => {
+          const typeLabel = pub.type === 'patent' ? 'Patent' : 'Paper';
+          const article = document.createElement('article');
+          article.className = 'pub-card';
+          article.innerHTML = `
+            <div class="pub-info">
+              <span class="pub-type-badge ${pub.type || 'paper'}">${typeLabel}</span>
+              <h3 class="pub-title">${formatTitle(pub.title)}</h3>
+              <div class="pub-meta">
+                <span class="pub-authors">${formatTitle(pub.authors)}</span>
+                <span class="pub-journal">${escapeHtml(pub.journal)}</span>
+                <span class="pub-year">${escapeHtml(pub.year)}</span>
+              </div>
+            </div>
+            <a href="${escapeHtml(pub.link || '#')}" class="pub-link-icon" target="_blank" rel="noopener noreferrer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>`;
+          container.appendChild(article);
+        }
+      });
+
+      supabaseClient.from('members_publications').select('*').eq('member_name', memberName).then(({ data: memPubs }) => {
+        if (memberViewer) {
+          memberViewer.baseList = (memPubs || []).sort((a, b) => parseCustomDate(b.year, b.id) - parseCustomDate(a.year, a.id));
+          memberViewer.filteredList = [...memberViewer.baseList];
+          memberViewer.currentPage = 1;
+          memberViewer.render();
+        }
+      });
+    }
   }
 
   const viewTitle = document.getElementById('viewTitle');
@@ -1560,7 +1940,7 @@ class DedicatedGenericViewer {
     this.searchBtn = document.getElementById(searchBtnId);
     this.renderCardCallback = renderCardCallback;
     
-    if (this.tableName === 'publications' || this.tableName === 'notices') {
+    if (this.tableName === 'publications' || this.tableName === 'notices' || this.tableName === 'members_publications') {
       this.itemsPerPage = 10;
     } else {
       this.itemsPerPage = 6;
@@ -1620,7 +2000,18 @@ class DedicatedGenericViewer {
 
   render() {
     this.container.innerHTML = '';
-    const emptyMsg = this.tableName === 'publications' ? (this.targetType === 'patent' ? '등록된 특허가 없습니다.' : '등록된 논문이 없습니다.') : '등록된 게시물이 없습니다.';
+    
+    // 빈 상태 안내 문구 설정 (논문 및 특허 통합 문구)
+    let emptyMsg = '등록된 게시물이 없습니다.';
+    if (this.tableName === 'publications' || this.tableName === 'members_publications') {
+      emptyMsg = '등록된 논문 및 특허가 없습니다.';
+    } else if (this.tableName === 'lab_life') {
+      emptyMsg = '등록된 활동이 없습니다.';
+    } else if (this.tableName === 'news') {
+      emptyMsg = '등록된 뉴스가 없습니다.';
+    } else if (this.tableName === 'notices') {
+      emptyMsg = '등록된 공지사항이 없습니다.';
+    }
     
     const isTbody = this.container.tagName === 'TBODY';
 
