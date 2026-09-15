@@ -739,7 +739,8 @@ class UnifiedAdminApp {
   async renderEdu() {
     const tbody = document.getElementById('tableBodyEdu');
     if (!tbody) return;
-    const { data: list } = await supabaseClient.from('director_education').select('*').order('id', { ascending: true });
+    // [수정 완료] ascending: true -> false (최신순)
+    const { data: list } = await supabaseClient.from('director_education').select('*').order('id', { ascending: false }); [cite: 3]
     tbody.innerHTML = '';
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:#94a3b8;">등록된 학력이 없습니다.</td></tr>';
@@ -781,7 +782,8 @@ class UnifiedAdminApp {
   async renderExp() {
     const tbody = document.getElementById('tableBodyExp');
     if (!tbody) return;
-    const { data: list } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: true });
+    // [수정 완료] ascending: true -> false (최신순)
+    const { data: list } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: false }); [cite: 3]
     tbody.innerHTML = '';
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#94a3b8;">등록된 경력 및 활동이 없습니다.</td></tr>';
@@ -1033,7 +1035,7 @@ class UnifiedAdminApp {
   async renderNews() {
     const tbody = document.getElementById('tableBodyNews');
     if (!tbody) return;
-    const { data: list } = await supabaseClient.from('news').select('*').order('id', { ascending: true });
+    const { data: list } = await supabaseClient.from('news').select('*').order('id', { ascending: false }); [cite: 3]
     tbody.innerHTML = '';
     if (!list || list.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">등록된 뉴스가 없습니다.</td></tr>';
@@ -1252,7 +1254,8 @@ async function syncPublicPagesInternal() {
         const titleText = titleEl.textContent.trim();
 
         if (titleText.includes('Education')) {
-          const { data: eduList } = await supabaseClient.from('director_education').select('*').order('id', { ascending: true });
+          // [수정 완료] ascending: true -> false (최신순)
+          const { data: eduList } = await supabaseClient.from('director_education').select('*').order('id', { ascending: false }); [cite: 3]
           wrap.innerHTML = '';
           if (!eduList || eduList.length === 0) {
             wrap.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 학력 정보가 없습니다.</p></div>';
@@ -1264,7 +1267,8 @@ async function syncPublicPagesInternal() {
             });
           }
         } else if (titleText.includes('Experience') || titleText.includes('Professional')) {
-          const { data: expList } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: true });
+          // [수정 완료] ascending: true -> false (최신순)
+          const { data: expList } = await supabaseClient.from('director_experience').select('*').order('id', { ascending: false }); [cite: 3]
           wrap.innerHTML = '';
           if (!expList || expList.length === 0) {
             wrap.innerHTML = '<div class="empty-state-card" style="padding:20px; font-size:0.9rem;"><p>등록된 경력 및 활동 정보가 없습니다.</p></div>';
@@ -1412,7 +1416,8 @@ class DedicatedGenericViewer {
       safeList = safeList.filter(item => (item.type || 'paper') === this.targetType);
     }
 
-    this.baseList = safeList.sort((a, b) => parseCustomDate(a.year || a.date, a.id) - parseCustomDate(b.year || b.date, b.id));
+    // [수정 완료] a - b (과거순) -> b - a (최신순) 정렬로 변경 [cite: 3]
+    this.baseList = safeList.sort((a, b) => parseCustomDate(b.year || b.date, b.id) - parseCustomDate(a.year || a.date, a.id)); [cite: 3]
     this.filteredList = [...this.baseList];
 
     this.initEvents();
